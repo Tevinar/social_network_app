@@ -12,9 +12,9 @@ Future<void> initDependencies() async {
   _initBlog();
 
   //Hive initialization
-  Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path;
+  // Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path; TODO to remove
 
-  serviceLocator.registerLazySingleton(() => Hive.box(name: 'blogs'));
+  //serviceLocator.registerLazySingleton(() => Hive.box(name: 'blogs'));TODO to remove
 
   // core
   serviceLocator.registerLazySingleton(() => AppUserCubit());
@@ -45,9 +45,11 @@ void _initAuth() {
     ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))
     ..registerLazySingleton(() => UserSignIn(authRepositoy: serviceLocator()))
     ..registerLazySingleton(() => CurrentUser(authRepository: serviceLocator()))
+    ..registerLazySingleton(() => UserSignOut(authRepository: serviceLocator()))
     // BLoC
     ..registerLazySingleton(
       () => AuthBloc(
+        userSignOut: serviceLocator(),
         userSignUp: serviceLocator(),
         userSignIn: serviceLocator(),
         currentUser: serviceLocator(),
@@ -62,14 +64,14 @@ void _initBlog() {
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerLazySingleton<BlogLocalDataSource>(
-      () => BlogLocalDataSourceImpl(serviceLocator()),
-    )
+    // ..registerLazySingleton<BlogLocalDataSource>(//TODO to remove
+    //   () => BlogLocalDataSourceImpl(serviceLocator()),
+    // )
     // Repositories
     ..registerLazySingleton<BlogRepository>(
       () => BlogRepositoryImpl(
         blogRemoteDataSource: serviceLocator(),
-        blogLocalDataSource: serviceLocator(),
+        // blogLocalDataSource: serviceLocator(),
         connectionChecker: serviceLocator(),
       ),
     )

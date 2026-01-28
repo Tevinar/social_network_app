@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
 import 'package:bloc_app/core/common/entities/user.dart';
@@ -6,6 +5,7 @@ import 'package:bloc_app/core/common/entities/user.dart';
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -45,7 +45,9 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  Future<Either<Failure, User>> _getUser(Future<User> Function() fn) async {
+  Future<Either<Failure, User>> _getUser(
+    Future<UserModel> Function() fn,
+  ) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(Failure(ErrorMessages.noConnection));
@@ -65,18 +67,34 @@ class AuthRepositoryImpl implements AuthRepository {
         final session = authRemoteDataSource.currentUserSession;
 
         if (session == null) {
-          return left(Failure('User not logged in!'));
+          return left(Failure('User not signed in!'));
         }
         return right(
-          User(id: session.user.id, email: session.user.email ?? '', name: ''),
+          UserModel(
+            id: session.user.id,
+            email: session.user.email ?? '',
+            name: '',
+          ),
         );
       }
 
-      User? user = await authRemoteDataSource.getCurrentUserData();
+      UserModel? user = await authRemoteDataSource.getCurrentUserData();
       if (user == null) {
         return left(Failure('User is not signed in.'));
       }
       return right(user);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> signOut() async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(Failure(ErrorMessages.noConnection));
+      }
+      return right(authRemoteDataSource.signOut());
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }

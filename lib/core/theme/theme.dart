@@ -29,5 +29,8 @@ class AppTheme {
     navigationBarTheme: const NavigationBarThemeData(
       backgroundColor: AppPallete.backgroundColor,
     ),
+    textTheme: const TextTheme().copyWith(
+      titleMedium: const TextStyle(overflow: TextOverflow.ellipsis),
+    ),
   );
 }

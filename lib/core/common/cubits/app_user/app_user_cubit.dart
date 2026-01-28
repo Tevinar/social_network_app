@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'app_user_state.dart';
 
+/// Stores the current authenticated user information
+/// And make it available throughout the app
 class AppUserCubit extends Cubit<AppUserState> {
-  AppUserCubit() : super(AppUserInitial());
+  AppUserCubit() : super(AppUserLoading());
 
   void updateUser(User? user) {
     if (user == null) {
@@ -13,5 +15,13 @@ class AppUserCubit extends Cubit<AppUserState> {
     } else {
       emit(AppUserSignedIn(user));
     }
+  }
+
+  void userLoading() {
+    emit(AppUserLoading());
+  }
+
+  void userFailure(String error) {
+    emit(AppUserFailure(error));
   }
 }

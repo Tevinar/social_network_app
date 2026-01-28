@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
-import 'package:bloc_app/features/blog/data/data_sources/blog_local_data_source.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,11 +15,11 @@ import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart'
 
 class BlogRepositoryImpl implements BlogRepository {
   final BlogRemoteDataSource blogRemoteDataSource;
-  final BlogLocalDataSource blogLocalDataSource;
+  // final BlogLocalDataSource blogLocalDataSource;
   final ConnectionChecker connectionChecker;
   BlogRepositoryImpl({
     required this.blogRemoteDataSource,
-    required this.blogLocalDataSource,
+    // required this.blogLocalDataSource,
     required this.connectionChecker,
   });
 
@@ -65,13 +64,13 @@ class BlogRepositoryImpl implements BlogRepository {
   @override
   Future<Either<Failure, List<Blog>>> getAllBlogs() async {
     try {
-      if (!await (connectionChecker.isConnected)) {
-        final blogs = blogLocalDataSource.loadBlogs();
-        return right(blogs);
-      }
+      // if (!await (connectionChecker.isConnected)) {//TODO: Enable offline support later
+      //   final blogs = blogLocalDataSource.loadBlogs();
+      //   return right(blogs);
+      // }
 
       final List<BlogModel> blogs = await blogRemoteDataSource.getAllBlogs();
-      blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
+      // blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
       return right(blogs);
     } on ServerException catch (e) {
       return left(Failure(e.message));

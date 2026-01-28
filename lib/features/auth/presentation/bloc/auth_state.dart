@@ -5,14 +5,14 @@ sealed class AuthState {
   const AuthState();
 }
 
-final class AuthInitial extends AuthState {}
+final class AuthSignedOut extends AuthState {}
 
 final class AuthLoading extends AuthState {}
 
-final class AuthSuccess extends AuthState {
+final class AuthSignedIn extends AuthState {
   final User user;
 
-  const AuthSuccess(this.user);
+  const AuthSignedIn(this.user);
 }
 
 final class AuthFailure extends AuthState {

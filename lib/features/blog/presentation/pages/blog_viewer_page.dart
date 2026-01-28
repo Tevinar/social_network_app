@@ -6,9 +6,6 @@ import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:flutter/material.dart';
 
 class BlogViewerPage extends StatelessWidget {
-  static PageRoute route(Blog blog) =>
-      MaterialPageRoute(builder: (context) => BlogViewerPage(blog: blog));
-
   final Blog blog;
   const BlogViewerPage({super.key, required this.blog});
 

@@ -1,6 +1,6 @@
 import 'package:bloc_app/core/utils/calculate_reading_time.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
-import 'package:bloc_app/features/blog/presentation/pages/blog_viewer_page.dart';
+import 'package:bloc_app/routing/router_config.dart';
 import 'package:flutter/material.dart';
 
 class BlogCard extends StatelessWidget {
@@ -11,7 +11,7 @@ class BlogCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, BlogViewerPage.route(blog)),
+      onTap: () => BlogViewerPageRoute($extra: blog).go(context),
       child: Container(
         height: 200,
         margin: const EdgeInsets.all(16).copyWith(bottom: 0),

@@ -1,17 +1,16 @@
+import 'package:bloc_app/app_navigation_bar.dart';
+import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
+import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/pages/add_new_blog_page.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_card.dart';
+import 'package:bloc_app/routing/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BlogPage extends StatefulWidget {
-  static PageRoute route() {
-    return MaterialPageRoute(builder: (context) => const BlogPage());
-  }
-
   const BlogPage({super.key});
 
   @override
@@ -23,17 +22,36 @@ class _BlogPageState extends State<BlogPage> {
   void initState() {
     super.initState();
     context.read<BlogBloc>().add(BlogGetAll());
+    BlocProvider.of<AppUserCubit>(context).state;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: BlocConsumer<AppUserCubit, AppUserState>(
+          builder: (context, state) {
+            if (state is AppUserLoading) {
+              return const Loader(size: 20);
+            }
+            return IconButton(
+              onPressed: () {
+                BlocProvider.of<AuthBloc>(context).add(AuthSignOut());
+              },
+              icon: const Icon(Icons.logout, size: 20),
+            );
+          },
+          listener: (context, state) {
+            if (state is AppUserFailure) {
+              showSnackBar(context, state.error);
+            }
+          },
+        ),
         title: const Text('Blog App'),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(AddNewBlogPage.route());
+              const AddNewBlogPageRoute().go(context);
             },
             icon: const Icon(Icons.add_circle_outline),
           ),

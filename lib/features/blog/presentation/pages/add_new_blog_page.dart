@@ -7,16 +7,13 @@ import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/pick_image.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/pages/blog_page.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_editor.dart';
+import 'package:bloc_app/routing/router_config.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddNewBlogPage extends StatefulWidget {
-  static PageRoute route() =>
-      MaterialPageRoute(builder: (_) => const AddNewBlogPage());
-
   const AddNewBlogPage({super.key});
 
   @override
@@ -82,11 +79,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
             if (state is BlogFailure) {
               showSnackBar(context, state.error);
             } else if (state is BlogUploadSuccess) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                BlogPage.route(),
-                (route) => false,
-              );
+              const BlogPageRoute().go(context);
             }
           },
           builder: (context, state) {

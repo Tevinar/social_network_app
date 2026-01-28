@@ -1,5 +1,8 @@
+import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthGradientButton extends StatelessWidget {
   final String buttonText;
@@ -21,18 +24,27 @@ class AuthGradientButton extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: ElevatedButton(
-        onPressed: onPressed,
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          return ElevatedButton(
+            onPressed: state is AuthLoading ? null : onPressed,
 
-        style: ElevatedButton.styleFrom(
-          fixedSize: const Size(395, 55),
-          backgroundColor: AppPallete.transparentColor,
-          shadowColor: AppPallete.transparentColor,
-        ),
-        child: Text(
-          buttonText,
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-        ),
+            style: ElevatedButton.styleFrom(
+              fixedSize: const Size(395, 55),
+              backgroundColor: AppPallete.transparentColor,
+              shadowColor: AppPallete.transparentColor,
+            ),
+            child: state is AuthLoading
+                ? const Loader(size: 20)
+                : Text(
+                    buttonText,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          );
+        },
       ),
     );
   }

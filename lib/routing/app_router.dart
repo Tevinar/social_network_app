@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 class AppRouter {
   static final router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: const BlogPageRoute().location,
+    initialLocation: const LoadingPageRoute().location,
     routes: $appRoutes,
 
     // Changes on the listenable will cause the router to refresh it's route
@@ -19,15 +19,6 @@ class AppRouter {
     //The top-level callback allows the app to redirect to a new location.
     redirect: (context, state) {
       final AppUserState appUserState = context.read<AppUserCubit>().state;
-
-      print('******************************************');
-      print(appUserState);
-      print('state.matchedLocation.is ${state.matchedLocation}');
-      print('******************************************');
-
-      if (appUserState is AppUserLoading) {
-        return const LoadingPageRoute().location;
-      }
 
       // If signed out and not on sign in page, redirect to sign in
       if (appUserState is AppUserSignedOut &&

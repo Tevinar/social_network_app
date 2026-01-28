@@ -5,6 +5,12 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.amber);
+    return Center(
+      child: Image.asset(
+        'assets/images/flutter_logo.png',
+        height: 150,
+        width: 150,
+      ),
+    );
   }
 }

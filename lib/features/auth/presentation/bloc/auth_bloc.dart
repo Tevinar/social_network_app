@@ -29,6 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _appUserCubit = appUserCubit,
        _userSignOut = userSignOut,
        super(AuthLoading()) {
+    on<AuthEvent>(_onAuthLoading);
     on<AuthSignup>(_onAuthSignUp);
     on<AuthSignIn>(_onAuthSignIn);
     on<AuthSignOut>(_onAuthSignOut);
@@ -36,7 +37,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onAuthSignOut(AuthSignOut event, Emitter<AuthState> emit) async {
-    _emitAuthLoading(emit);
     final res = await _userSignOut(NoParams());
     res.fold(
       (l) => _emitAuthFailure(l.message, emit),
@@ -45,7 +45,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
-    _emitAuthLoading(emit);
     final res = await _userSignUp(
       UserSignUpParams(
         name: event.name,
@@ -61,7 +60,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
-    _emitAuthLoading(emit);
     final res = await _userSignIn(
       UserSignInParams(email: event.email, password: event.password),
     );
@@ -76,9 +74,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthCurrentUser event,
     Emitter<AuthState> emit,
   ) async {
-    _emitAuthLoading(emit);
     final res = await _currentUser(NoParams());
-    // await Future.delayed(const Duration(milliseconds: 2000));
     res.fold(
       (_) => _emitAuthSignedOut(emit),
       (user) => _emitAuthSignedIn(user, emit),
@@ -98,7 +94,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   // A helper method to emit AuthLoading state and update AppUserCubit to loading
-  void _emitAuthLoading(Emitter<AuthState> emit) {
+  void _onAuthLoading(AuthEvent event, Emitter<AuthState> emit) {
     emit(AuthLoading());
     _appUserCubit.userLoading();
   }

@@ -64,7 +64,7 @@ void _initBlog() {
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    // ..registerLazySingleton<BlogLocalDataSource>(//TODO to remove
+    // ..registerLazySingleton<BlogLocalDataSource>(//
     //   () => BlogLocalDataSourceImpl(serviceLocator()),
     // )
     // Repositories

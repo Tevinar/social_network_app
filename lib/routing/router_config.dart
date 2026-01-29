@@ -1,10 +1,9 @@
 import 'package:bloc_app/core/common/pages/loading_page.dart';
-import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signup_page.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/presentation/pages/add_new_blog_page.dart';
-import 'package:bloc_app/features/blog/presentation/pages/blog_page.dart';
+import 'package:bloc_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:bloc_app/features/blog/presentation/pages/blog_viewer_page.dart';
 import 'package:bloc_app/features/chat/presentation/pages/chats_page.dart';
 import 'package:bloc_app/features/chat/presentation/pages/new_chat_page.dart';
@@ -43,7 +42,7 @@ class BlogPageRoute extends GoRouteData with $BlogPageRoute {
   const BlogPageRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const BlogPage();
+  Widget build(BuildContext context, GoRouterState state) => const BlogsPage();
 }
 
 class AddNewBlogPageRoute extends GoRouteData with $AddNewBlogPageRoute {

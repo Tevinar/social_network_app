@@ -1,4 +1,3 @@
-import 'package:bloc_app/app_navigation_bar.dart';
 import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
@@ -10,14 +9,14 @@ import 'package:bloc_app/routing/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class BlogPage extends StatefulWidget {
-  const BlogPage({super.key});
+class BlogsPage extends StatefulWidget {
+  const BlogsPage({super.key});
 
   @override
-  State<BlogPage> createState() => _BlogPageState();
+  State<BlogsPage> createState() => _BlogsPageState();
 }
 
-class _BlogPageState extends State<BlogPage> {
+class _BlogsPageState extends State<BlogsPage> {
   @override
   void initState() {
     super.initState();

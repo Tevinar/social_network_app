@@ -10,7 +10,7 @@ Future<void> initDependencies() async {
   serviceLocator.registerLazySingleton(() => supabase.client);
   _initAuth();
   _initBlog();
-
+  _initChat();
   //Hive initialization
   // Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path; TODO to remove
 
@@ -82,5 +82,33 @@ void _initBlog() {
     ..registerLazySingleton(
       () =>
           BlogBloc(uploadBlog: serviceLocator(), getAllBlogs: serviceLocator()),
+    );
+}
+
+void _initChat() {
+  serviceLocator
+    // Datasources
+    ..registerLazySingleton<ChatRemoteDataSource>(
+      () => ChatRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    ..registerLazySingleton<UserListRemoteDataSource>(
+      () => UserListRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    // Repositories
+    ..registerLazySingleton<ChatRepository>(
+      () => ChatRepositoryImpl(chatRemoteDataSource: serviceLocator()),
+    )
+    ..registerLazySingleton<UserListRepository>(
+      () => UserListRepositoryImpl(userListRemoteDataSource: serviceLocator()),
+    )
+    // Usecases
+    ..registerLazySingleton(() => CreateChat(chatRepository: serviceLocator()))
+    ..registerLazySingleton(
+      () => GetUsersByPage(userListRepository: serviceLocator()),
+    )
+    // BLoC
+    ..registerLazySingleton(() => ChatBloc(createChat: serviceLocator()))
+    ..registerLazySingleton(
+      () => UserListBloc(getUsersByPage: serviceLocator()),
     );
 }

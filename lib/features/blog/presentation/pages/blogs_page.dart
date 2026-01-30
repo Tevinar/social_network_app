@@ -1,5 +1,5 @@
-import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
-import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/core/common/presentation/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';

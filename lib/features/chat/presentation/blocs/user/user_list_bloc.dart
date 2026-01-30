@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:bloc_app/core/common/entities/user.dart';
+import 'package:bloc_app/core/common/domain/entities/user.dart';
+import 'package:bloc_app/features/chat/domain/usecases/get_users_by_page.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -10,47 +11,57 @@ part 'user_list_event.dart';
 part 'user_list_state.dart';
 
 class UserListBloc extends Bloc<UserListEvent, UserListState> {
-  final ScrollController scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
+  final GetUsersByPage _getUsersByPage;
 
-  UserListBloc() : super(UserListState.initial()) {
+  UserListBloc({required GetUsersByPage getUsersByPage})
+    : _getUsersByPage = getUsersByPage,
+      super(UserListState.initial()) {
     addListenerToScrollController();
-    on<UserListEvent>(_getDataForPage);
+    on<ByPageGetUsers>(_onByPageGetUsers);
   }
 
   // Add a listener to scrollController events
   // and fetch more users when reaching the bottom
   void addListenerToScrollController() {
-    scrollController.addListener(() {
-      if (scrollController.offset >=
-              scrollController.position.maxScrollExtent &&
-          !scrollController.position.outOfRange) {
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
         state.fetchUsersState = RequestState.init;
         add(ByPageGetUsers(nextPage: null));
       }
-      if (scrollController.offset <=
-              scrollController.position.minScrollExtent &&
-          !scrollController.position.outOfRange) {}
+      if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {}
     });
   }
 
-  FutureOr<void> _getDataForPage(
-      ByPageGetUsers event, Emitter<UserListState> emit) {
-        try {
-          if(event.nextPage!=null){
-            emit(state.copyWith(fetchUsersState: RequestState.loading));
-          }
-          final result = await getUsersByPage(event.nextPage??state.pageNumber);
-          result.fold((l) {
-            emit(state.copyWith(fetchUsersState: RequestState.error));
-          }, (result) {
-            emit(state.copyWith(
-              fetchUsersState: RequestState.success , 
-              users: [ ...state.users , ...result ] , 
-              pageNumber: state.pageNumber+1
-              ));
-          });
-        } catch (e) {
-          emit(state.copyWith(fetchUsersState: RequestState.error));
-        }
+  Future<void> _onByPageGetUsers(
+    ByPageGetUsers event,
+    Emitter<UserListState> emit,
+  ) async {
+    try {
+      if (event.nextPage != null) {
+        emit(state.copyWith(fetchUsersState: RequestState.loading));
       }
+      final result = await _getUsersByPage(event.nextPage ?? state.pageNumber);
+      result.fold(
+        (l) {
+          emit(state.copyWith(fetchUsersState: RequestState.error));
+        },
+        (result) {
+          emit(
+            state.copyWith(
+              fetchUsersState: RequestState.success,
+              users: [...state.users, ...result],
+              pageNumber: state.pageNumber + 1,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      emit(state.copyWith(fetchUsersState: RequestState.error));
+    }
+  }
 }

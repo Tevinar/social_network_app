@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/core/secrets/app_secrets.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -15,6 +15,16 @@ import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart'
 import 'package:bloc_app/features/blog/domain/usecases/get_all_blogs.dart';
 import 'package:bloc_app/features/blog/domain/usecases/upload_blog.dart';
 import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:bloc_app/features/chat/data/data_sources/chat_remote_data_source.dart';
+import 'package:bloc_app/features/chat/data/data_sources/user_list_remote_data_source.dart';
+import 'package:bloc_app/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:bloc_app/features/chat/data/repositories/user_list_repository_impl.dart';
+import 'package:bloc_app/features/chat/domain/repositories/chat_repository.dart';
+import 'package:bloc_app/features/chat/domain/repositories/user_list_repository.dart';
+import 'package:bloc_app/features/chat/domain/usecases/create_chat.dart';
+import 'package:bloc_app/features/chat/domain/usecases/get_users_by_page.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/chat/chat_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/user/user_list_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/entities/user.dart';
+import 'package:bloc_app/core/common/domain/entities/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

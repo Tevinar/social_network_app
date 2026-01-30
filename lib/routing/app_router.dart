@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/utils/stream_to_listenable.dart';
 import 'package:bloc_app/dependencies/init_dependencies.dart';
 import 'package:bloc_app/routing/router_config.dart';

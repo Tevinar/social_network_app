@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fpdart/fpdart.dart';
-import 'package:bloc_app/core/common/entities/user.dart';
+import 'package:bloc_app/core/common/domain/entities/user.dart';
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/core/usecase/usecase.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';

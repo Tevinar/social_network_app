@@ -1,6 +1,6 @@
-import 'package:bloc_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/usecase/usecase.dart';
-import 'package:bloc_app/core/common/entities/user.dart';
+import 'package:bloc_app/core/common/domain/entities/user.dart';
 import 'package:bloc_app/features/auth/domain/usecases/current_user.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_out.dart';

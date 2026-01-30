@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/pages/loading_page.dart';
+import 'package:bloc_app/core/common/presentation/pages/loading_page.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signup_page.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';

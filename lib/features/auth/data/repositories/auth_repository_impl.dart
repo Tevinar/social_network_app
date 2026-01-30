@@ -1,11 +1,11 @@
 import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
-import 'package:bloc_app/core/common/entities/user.dart';
+import 'package:bloc_app/core/common/domain/entities/user.dart';
 
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:bloc_app/features/auth/data/models/user_model.dart';
+import 'package:bloc_app/core/common/data/models/user_model.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 

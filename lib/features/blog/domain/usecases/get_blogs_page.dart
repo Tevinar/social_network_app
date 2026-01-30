@@ -4,12 +4,12 @@ import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
-class GetAllBlogs implements UseCase<List<Blog>, NoParams> {
+class GetBlogsPage implements UseCase<List<Blog>, int> {
   BlogRepository blogRepository;
-  GetAllBlogs({required this.blogRepository});
+  GetBlogsPage({required this.blogRepository});
 
   @override
-  Future<Either<Failure, List<Blog>>> call(NoParams params) {
-    return blogRepository.getAllBlogs();
+  Future<Either<Failure, List<Blog>>> call(int pageNumber) {
+    return blogRepository.getBlogsPage(pageNumber);
   }
 }

@@ -1,18 +1,16 @@
-part of 'blog_bloc.dart';
-
-// Note : naming convention for an event is 'NounVerb' or 'NounVerbAction'
+part of 'blog_editor_bloc.dart';
 
 @immutable
-sealed class BlogEvent {}
+sealed class BlogEditorEvent {}
 
-final class BlogUpload extends BlogEvent {
+final class AddBlog extends BlogEditorEvent {
   final String posterId;
   final String title;
   final String content;
   final File image;
   final List<String> topics;
 
-  BlogUpload({
+  AddBlog({
     required this.posterId,
     required this.title,
     required this.content,
@@ -20,5 +18,3 @@ final class BlogUpload extends BlogEvent {
     required this.topics,
   });
 }
-
-final class BlogGetAll extends BlogEvent {}

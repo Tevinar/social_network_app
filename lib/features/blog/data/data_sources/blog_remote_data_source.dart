@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/constants/supabase_schema/buckets.dart';
+import 'package:bloc_app/core/constants/supabase_schema/fields/blog_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
@@ -8,9 +10,12 @@ import 'package:bloc_app/features/blog/data/models/blog_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class BlogRemoteDataSource {
-  Future<BlogModel> uploadBlog(BlogModel blog);
+  Future<BlogModel> postBlog(BlogModel blog);
   Future<String> uploadBlogImage({required File image, required String blogId});
-  Future<List<BlogModel>> getAllBlogs();
+  Future<List<BlogModel>> getBlogsPage(int page);
+
+  // Returns the total number of blogs in the database
+  Future<int> getBlogsCount();
 }
 
 class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
@@ -19,7 +24,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   BlogRemoteDataSourceImpl({required this.supabaseClient});
 
   @override
-  Future<BlogModel> uploadBlog(BlogModel blog) async {
+  Future<BlogModel> postBlog(BlogModel blog) async {
     try {
       final List<Map<String, dynamic>> blogData = await supabaseClient
           .from(Tables.blogs)
@@ -54,11 +59,21 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   }
 
   @override
-  Future<List<BlogModel>> getAllBlogs() async {
+  Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
     try {
+      if (pageNumber < 1) {
+        throw ArgumentError(ErrorMessages.pageNumberInvalid);
+      }
+
+      const int pageSize = 20;
+      final int from = (pageNumber - 1) * pageSize;
+      final int to = from + pageSize - 1;
+
       final List<Map<String, dynamic>> rawBlogs = await supabaseClient
           .from(Tables.blogs)
-          .select('*, profiles (name)');
+          .select('*, ${Tables.profiles} (${ProfileFields.name})')
+          .range(from, to)
+          .order(BlogFields.updatedAt, ascending: false);
 
       return rawBlogs
           .map(
@@ -67,6 +82,17 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
             ),
           )
           .toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<int> getBlogsCount() async {
+    try {
+      return await supabaseClient.from(Tables.blogs).count();
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

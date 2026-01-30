@@ -24,7 +24,7 @@ class BlogRepositoryImpl implements BlogRepository {
   });
 
   @override
-  Future<Either<Failure, Blog>> uploadBlog({
+  Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
     required String content,
@@ -51,7 +51,7 @@ class BlogRepositoryImpl implements BlogRepository {
         updatedAt: DateTime.now(),
       );
 
-      final BlogModel savedBlog = await blogRemoteDataSource.uploadBlog(
+      final BlogModel savedBlog = await blogRemoteDataSource.postBlog(
         blogModel,
       );
 
@@ -62,16 +62,30 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
-  Future<Either<Failure, List<Blog>>> getAllBlogs() async {
+  Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber) async {
     try {
       // if (!await (connectionChecker.isConnected)) {//TODO: Enable offline support later
       //   final blogs = blogLocalDataSource.loadBlogs();
       //   return right(blogs);
       // }
 
-      final List<BlogModel> blogs = await blogRemoteDataSource.getAllBlogs();
+      final List<BlogModel> blogs = await blogRemoteDataSource.getBlogsPage(
+        pageNumber,
+      );
       // blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
       return right(blogs);
+    } on ArgumentError catch (e) {
+      return left(Failure(e.message));
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> getBlogsCount() async {
+    try {
+      final int blogsCount = await blogRemoteDataSource.getBlogsCount();
+      return right(blogsCount);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }

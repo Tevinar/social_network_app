@@ -1,25 +1,26 @@
 import 'package:bloc_app/core/common/data/models/user_model.dart';
+import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
-import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-abstract interface class UserListRemoteDataSource {
-  Future<List<UserModel>> getUsersByPage(int pageNumber);
+abstract interface class UsersRemoteDataSource {
+  Future<List<UserModel>> getUsersPage(int pageNumber);
+  Future<int> getUsersCount();
 }
 
-class UserListRemoteDataSourceImpl implements UserListRemoteDataSource {
+class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   final SupabaseClient _supabaseClient;
 
-  UserListRemoteDataSourceImpl({required SupabaseClient supabaseClient})
+  UsersRemoteDataSourceImpl({required SupabaseClient supabaseClient})
     : _supabaseClient = supabaseClient;
 
   @override
-  Future<List<UserModel>> getUsersByPage(int pageNumber) async {
+  Future<List<UserModel>> getUsersPage(int pageNumber) async {
     try {
       if (pageNumber < 1) {
-        throw ArgumentError('pageNumber must be >= 1');
+        throw ArgumentError(ErrorMessages.pageNumberInvalid);
       }
       const int pageSize = 20;
       final int from = (pageNumber - 1) * pageSize;
@@ -34,6 +35,17 @@ class UserListRemoteDataSourceImpl implements UserListRemoteDataSource {
       return response
           .map((Map<String, dynamic> json) => UserModel.fromJson(json))
           .toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<int> getUsersCount() async {
+    try {
+      return await _supabaseClient.from(Tables.profiles).count();
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

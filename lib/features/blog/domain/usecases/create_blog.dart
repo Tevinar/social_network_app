@@ -7,15 +7,13 @@ import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
-// Note : naming convention for a usecase is 'VerbNoun'
-
-class UploadBlog implements UseCase<Blog, UploadBlogParams> {
+class CreateBlog implements UseCase<Blog, CreateBlogParams> {
   BlogRepository blogRepository;
-  UploadBlog({required this.blogRepository});
+  CreateBlog({required this.blogRepository});
 
   @override
-  Future<Either<Failure, Blog>> call(UploadBlogParams params) {
-    return blogRepository.uploadBlog(
+  Future<Either<Failure, Blog>> call(CreateBlogParams params) {
+    return blogRepository.createBlog(
       image: params.image,
       title: params.title,
       content: params.content,
@@ -25,14 +23,14 @@ class UploadBlog implements UseCase<Blog, UploadBlogParams> {
   }
 }
 
-class UploadBlogParams {
+class CreateBlogParams {
   final String posterId;
   final String title;
   final String content;
   final File image;
   final List<String> topics;
 
-  UploadBlogParams({
+  CreateBlogParams({
     required this.posterId,
     required this.title,
     required this.content,

@@ -3,26 +3,15 @@ import 'package:bloc_app/core/common/presentation/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_card.dart';
+import 'package:bloc_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
 import 'package:bloc_app/routing/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class BlogsPage extends StatefulWidget {
+class BlogsPage extends StatelessWidget {
   const BlogsPage({super.key});
-
-  @override
-  State<BlogsPage> createState() => _BlogsPageState();
-}
-
-class _BlogsPageState extends State<BlogsPage> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<BlogBloc>().add(BlogGetAll());
-    BlocProvider.of<AppUserCubit>(context).state;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,30 +45,44 @@ class _BlogsPageState extends State<BlogsPage> {
           ),
         ],
       ),
-      body: BlocConsumer<BlogBloc, BlogState>(
-        listener: (context, state) {
-          if (state is BlogFailure) {
-            showSnackBar(context, state.error);
-          }
-        },
+      body: BlocBuilder<BlogsBloc, BlogsState>(
         builder: (context, state) {
-          if (state is BlogLoading) {
-            return const Loader();
-          } else if (state is BlogsDisplaySuccess) {
-            return ListView.builder(
-              itemCount: state.blogs.length,
-              itemBuilder: (context, index) {
-                final blog = state.blogs[index];
-                return BlogCard(
-                  blog: blog,
-                  color: index % 2 == 0
-                      ? AppPallete.gradient1
-                      : AppPallete.gradient2,
-                );
-              },
+          if (state is BlogsFailure) {
+            return const Center(child: Text(('Error loading blogs')));
+          }
+          // Show loading placeholders when blogs are being fetched for the first time
+          else if (state is BlogsLoading && state.blogs.isEmpty) {
+            return SingleChildScrollView(
+              child: Column(
+                children: List.generate(
+                  4,
+                  (index) => BlogCardPlaceholder(
+                    color: index % 2 == 0
+                        ? AppPallete.gradient1
+                        : AppPallete.gradient2,
+                  ),
+                ),
+              ),
             );
           } else {
-            return const SizedBox();
+            return ListView.builder(
+              controller: context.read<BlogsBloc>().scrollController,
+              itemCount: state.blogs.length == state.totalBlogsInDatabase
+                  ? state.blogs.length
+                  : state.blogs.length + 1,
+              itemBuilder: (context, index) {
+                if (index == state.blogs.length) {
+                  return const Loader(size: 30);
+                } else {
+                  return BlogCard(
+                    blog: state.blogs[index],
+                    color: index % 2 == 0
+                        ? AppPallete.gradient1
+                        : AppPallete.gradient2,
+                  );
+                }
+              },
+            );
           }
         },
       ),

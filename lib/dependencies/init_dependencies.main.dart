@@ -76,12 +76,20 @@ void _initBlog() {
       ),
     )
     // Usecases
-    ..registerLazySingleton(() => UploadBlog(blogRepository: serviceLocator()))
-    ..registerLazySingleton(() => GetAllBlogs(blogRepository: serviceLocator()))
-    // BLoC
+    ..registerLazySingleton(() => CreateBlog(blogRepository: serviceLocator()))
     ..registerLazySingleton(
-      () =>
-          BlogBloc(uploadBlog: serviceLocator(), getAllBlogs: serviceLocator()),
+      () => GetBlogsPage(blogRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => GetBlogsCount(blogRepository: serviceLocator()),
+    )
+    // BLoC
+    ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
+    ..registerLazySingleton(
+      () => BlogsBloc(
+        getBlogsPage: serviceLocator(),
+        getBlogsCount: serviceLocator(),
+      ),
     );
 }
 
@@ -91,24 +99,30 @@ void _initChat() {
     ..registerLazySingleton<ChatRemoteDataSource>(
       () => ChatRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerLazySingleton<UserListRemoteDataSource>(
-      () => UserListRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    ..registerLazySingleton<UsersRemoteDataSource>(
+      () => UsersRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
     // Repositories
     ..registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(chatRemoteDataSource: serviceLocator()),
     )
-    ..registerLazySingleton<UserListRepository>(
-      () => UserListRepositoryImpl(userListRemoteDataSource: serviceLocator()),
+    ..registerLazySingleton<UsersRepository>(
+      () => UsersRepositoryImpl(usersRemoteDataSource: serviceLocator()),
     )
     // Usecases
     ..registerLazySingleton(() => CreateChat(chatRepository: serviceLocator()))
     ..registerLazySingleton(
-      () => GetUsersByPage(userListRepository: serviceLocator()),
+      () => GetUsersPage(usersRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => GetUsersCount(usersRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(() => ChatBloc(createChat: serviceLocator()))
     ..registerLazySingleton(
-      () => UserListBloc(getUsersByPage: serviceLocator()),
+      () => UsersBloc(
+        getUsersPage: serviceLocator(),
+        getUsersCount: serviceLocator(),
+      ),
     );
 }

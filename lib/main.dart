@@ -1,10 +1,11 @@
 import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
 import 'package:bloc_app/core/theme/theme.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
 import 'package:bloc_app/dependencies/init_dependencies.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat/chat_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/user/user_list_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:bloc_app/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,9 +29,10 @@ void main() async {
       providers: [
         BlocProvider(create: (context) => serviceLocator<AppUserCubit>()),
         BlocProvider(create: (context) => serviceLocator<AuthBloc>()),
-        BlocProvider(create: (context) => serviceLocator<BlogBloc>()),
+        BlocProvider(create: (context) => serviceLocator<BlogEditorBloc>()),
+        BlocProvider(create: (context) => serviceLocator<BlogsBloc>()),
         BlocProvider(create: (context) => serviceLocator<ChatBloc>()),
-        BlocProvider(create: (context) => serviceLocator<UserListBloc>()),
+        BlocProvider(create: (context) => serviceLocator<UsersBloc>()),
       ],
       child: const MyApp(),
     ),

@@ -5,7 +5,7 @@ import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class BlogRepository {
-  Future<Either<Failure, Blog>> uploadBlog({
+  Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
     required String content,
@@ -13,5 +13,7 @@ abstract interface class BlogRepository {
     required List<String> topics,
   });
 
-  Future<Either<Failure, List<Blog>>> getAllBlogs();
+  Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber);
+
+  Future<Either<Failure, int>> getBlogsCount();
 }

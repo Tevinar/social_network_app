@@ -6,7 +6,7 @@ import 'package:bloc_app/core/constants/config/blog_config.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/pick_image.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
-import 'package:bloc_app/features/blog/presentation/bloc/blog_bloc.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_editor.dart';
 import 'package:bloc_app/routing/router_config.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -42,8 +42,8 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         image != null) {
       String userId =
           (context.read<AppUserCubit>().state as AppUserSignedIn).user.id;
-      context.read<BlogBloc>().add(
-        BlogUpload(
+      context.read<BlogEditorBloc>().add(
+        AddBlog(
           title: titleController.text.trim(),
           content: contentController.text.trim(),
           topics: selectedTopics,
@@ -74,7 +74,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocConsumer<BlogBloc, BlogState>(
+        child: BlocConsumer<BlogEditorBloc, BlogState>(
           listener: (context, state) {
             if (state is BlogFailure) {
               showSnackBar(context, state.error);

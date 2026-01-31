@@ -38,9 +38,19 @@ class BlogsPage extends StatelessWidget {
         title: const Text('Blog App'),
         actions: [
           IconButton(
-            onPressed: () {
-              const AddNewBlogPageRoute().go(context);
+            onPressed: () async {
+              final blogsBloc = context.read<BlogsBloc>();
+
+              final created = await const AddNewBlogPageRoute().push(context);
+
+              if (created == true) {
+                blogsBloc.scrollToTop();
+                blogsBloc.add(
+                  RefreshBlogsView(),
+                ); // Usefull for keeping the itemCount of the listview updated after adding a new blog
+              }
             },
+
             icon: const Icon(Icons.add_circle_outline),
           ),
         ],

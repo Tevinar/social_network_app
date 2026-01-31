@@ -68,7 +68,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         throw ArgumentError(ErrorMessages.pageNumberInvalid);
       }
 
-      const int pageSize = 4;
+      const int pageSize = 20;
       final int from = (pageNumber - 1) * pageSize;
       final int to = from + pageSize - 1;
 

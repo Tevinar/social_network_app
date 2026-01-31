@@ -10,7 +10,7 @@ import 'package:fpdart/fpdart.dart';
 part 'blog_editor_event.dart';
 part 'blog_editor_state.dart';
 
-class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogState> {
+class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   final CreateBlog _uploadBlog;
   BlogEditorBloc({required CreateBlog uploadBlog})
     : _uploadBlog = uploadBlog,
@@ -19,7 +19,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogState> {
     on<AddBlog>(_onAddBlog);
   }
 
-  void _onAddBlog(AddBlog event, Emitter<BlogState> emit) async {
+  void _onAddBlog(AddBlog event, Emitter<BlogEditorState> emit) async {
     Either<Failure, Blog> res = await _uploadBlog.call(
       CreateBlogParams(
         posterId: event.posterId,

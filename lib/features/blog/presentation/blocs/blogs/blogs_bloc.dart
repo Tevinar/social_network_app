@@ -51,6 +51,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
        super(const BlogsLoading(blogs: [], pageNumber: 1)) {
     on<LoadBlogsNextPage>(_onLoadBlogsNextPage);
     on<BlogChangeReceived>(onBlogChangeReceived);
+    on<RefreshBlogsView>(onRefreshBlogsView);
 
     _addListenerToScrollController();
     _addListenerToSubscription();
@@ -63,6 +64,11 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     _blogChangeSub.cancel();
     _scrollController.dispose();
     return super.close();
+  }
+
+  // Re-emit the current state to trigger rebuild
+  void onRefreshBlogsView(RefreshBlogsView event, Emitter<BlogsState> emit) {
+    emit(state.copyWith());
   }
 
   // Triggers pagination when the user scrolls close to the bottom of the list.
@@ -203,6 +209,14 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   }
 
   ScrollController get scrollController => _scrollController;
+
+  void scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
 
   /// Lazily initializes the total number of blogs in the database.
   ///

@@ -9,3 +9,5 @@ final class BlogChangeReceived extends BlogsEvent {
   final Either<Failure, BlogChange> blogChange;
   BlogChangeReceived(this.blogChange);
 }
+
+class RefreshBlogsView extends BlogsEvent {}

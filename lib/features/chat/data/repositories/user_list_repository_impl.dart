@@ -1,6 +1,6 @@
-import 'package:bloc_app/core/common/domain/entities/user.dart';
-import 'package:bloc_app/core/error/exceptions.dart';
-import 'package:bloc_app/core/error/failures.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
+import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:bloc_app/core/errors/failure.dart';
 import 'package:bloc_app/features/chat/data/data_sources/users_remote_data_source.dart';
 import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:fpdart/fpdart.dart';

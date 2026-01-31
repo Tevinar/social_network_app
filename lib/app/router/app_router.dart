@@ -1,7 +1,7 @@
-import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/utils/stream_to_listenable.dart';
-import 'package:bloc_app/dependencies/init_dependencies.dart';
-import 'package:bloc_app/routing/router_config.dart';
+import 'package:bloc_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:bloc_app/app/router/router_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 

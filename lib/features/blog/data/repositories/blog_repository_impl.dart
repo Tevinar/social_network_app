@@ -3,13 +3,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_app/core/constants/error_messages.dart';
-import 'package:bloc_app/core/error/exceptions.dart';
+import 'package:bloc_app/core/errors/exceptions.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:bloc_app/core/error/failures.dart';
+import 'package:bloc_app/core/errors/failure.dart';
 import 'package:bloc_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:bloc_app/features/blog/data/models/blog_model.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';

@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
+import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/core/secrets/app_secrets.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';

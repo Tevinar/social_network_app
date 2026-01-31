@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/domain/entities/user.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
 
 class UserModel extends User {
   UserModel({required super.id, required super.name, required super.email});

@@ -1,8 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
-import 'package:bloc_app/core/error/failures.dart';
-import 'package:bloc_app/core/usecase/usecase.dart';
+import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:bloc_app/core/common/domain/entities/user.dart';
-import 'package:bloc_app/core/error/failures.dart';
-import 'package:bloc_app/core/usecase/usecase.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
+import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_users_page.dart';
 import 'package:flutter/widgets.dart';

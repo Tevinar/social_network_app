@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/error/failures.dart';
+import 'package:bloc_app/core/errors/failure.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:fpdart/fpdart.dart';
 

@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/presentation/widgets/loader.dart';
+import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

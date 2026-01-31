@@ -6,7 +6,7 @@ import 'package:bloc_app/core/constants/supabase_schema/buckets.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/blog_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
-import 'package:bloc_app/core/error/exceptions.dart';
+import 'package:bloc_app/core/errors/exceptions.dart';
 import 'package:bloc_app/features/blog/data/models/blog_model.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

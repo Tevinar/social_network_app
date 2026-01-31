@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/error/failures.dart';
+import 'package:bloc_app/core/errors/failure.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:flutter/foundation.dart';

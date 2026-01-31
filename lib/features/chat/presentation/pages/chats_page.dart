@@ -1,6 +1,6 @@
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/features/chat/presentation/widgets/chat_card.dart';
-import 'package:bloc_app/routing/router_config.dart';
+import 'package:bloc_app/app/router/router_config.dart';
 import 'package:flutter/material.dart';
 
 class ChatsPage extends StatelessWidget {

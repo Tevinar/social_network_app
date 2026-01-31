@@ -1,12 +1,12 @@
-import 'package:bloc_app/core/common/presentation/cubits/app_user/app_user_cubit.dart';
-import 'package:bloc_app/core/common/presentation/widgets/loader.dart';
+import 'package:bloc_app/app/session/app_user_cubit.dart';
+import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
-import 'package:bloc_app/routing/router_config.dart';
+import 'package:bloc_app/app/router/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

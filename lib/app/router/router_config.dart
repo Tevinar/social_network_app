@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/presentation/pages/loading_page.dart';
+import 'package:bloc_app/app/bootstrap/initial_loading_page.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:bloc_app/features/auth/presentation/pages/signup_page.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
@@ -7,7 +7,7 @@ import 'package:bloc_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:bloc_app/features/blog/presentation/pages/blog_viewer_page.dart';
 import 'package:bloc_app/features/chat/presentation/pages/chats_page.dart';
 import 'package:bloc_app/features/chat/presentation/pages/new_chat_page.dart';
-import 'package:bloc_app/app_navigation_bar.dart';
+import 'package:bloc_app/app/router/app_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,7 +35,7 @@ class LoadingPageRoute extends GoRouteData with $LoadingPageRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const LoadingPage();
+      const InitialLoadingPage();
 }
 
 class BlogPageRoute extends GoRouteData with $BlogPageRoute {

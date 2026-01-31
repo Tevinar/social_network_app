@@ -2,8 +2,8 @@
 import 'package:bloc_app/features/chat/data/models/chat_model.dart';
 import 'package:fpdart/fpdart.dart';
 
-import 'package:bloc_app/core/error/exceptions.dart';
-import 'package:bloc_app/core/error/failures.dart';
+import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:bloc_app/core/errors/failure.dart';
 import 'package:bloc_app/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:bloc_app/features/chat/domain/repositories/chat_repository.dart';

@@ -1,5 +1,5 @@
-import 'package:bloc_app/core/error/failures.dart';
-import 'package:bloc_app/core/common/domain/entities/user.dart';
+import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class AuthRepository {

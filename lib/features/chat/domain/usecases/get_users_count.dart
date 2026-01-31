@@ -1,5 +1,5 @@
-import 'package:bloc_app/core/error/failures.dart';
-import 'package:bloc_app/core/usecase/usecase.dart';
+import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:fpdart/fpdart.dart';
 

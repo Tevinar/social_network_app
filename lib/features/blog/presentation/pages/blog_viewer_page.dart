@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/presentation/widgets/loader.dart';
+import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/calculate_reading_time.dart';
 import 'package:bloc_app/core/utils/format_date.dart';

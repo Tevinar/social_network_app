@@ -8,7 +8,6 @@ import 'package:bloc_app/core/utils/pick_image.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_editor.dart';
-import 'package:bloc_app/routing/router_config.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

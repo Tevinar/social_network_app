@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_app/core/constants/error_messages.dart';
@@ -67,7 +68,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         throw ArgumentError(ErrorMessages.pageNumberInvalid);
       }
 
-      const int pageSize = 20;
+      const int pageSize = 4;
       final int from = (pageNumber - 1) * pageSize;
       final int to = from + pageSize - 1;
 
@@ -102,64 +103,55 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     }
   }
 
-  // Supabase streams emit full snapshots, so we diff locally to derive events.
   @override
   Stream<BlogChange> watchBlogChanges() {
-    final Map<String, BlogModel> previousBlogs = {};
+    late final StreamController<BlogChange> controller;
+    late final RealtimeChannel channel;
 
-    return supabaseClient
-        .from(Tables.blogs)
-        .stream(primaryKey: [BlogFields.id])
-        .order(BlogFields.updatedAt)
-        /// puting order is crucial for detecting updates of existing rows. Because Supabase will emit snapshots only if at least
-        /// one of these conditions change :
-        /// - row identity (primary key)
-        /// - row ordering
-        /// - row presence in the result set
-        .asyncExpand<BlogChange>((List<Map<String, dynamic>> rows) {
-          try {
-            final List<BlogChange> changes = [];
+    controller = StreamController<BlogChange>(
+      onListen: () {
+        channel = supabaseClient.realtime.channel('public:${Tables.blogs}');
 
-            final Map<String, BlogModel> currentBlogs = {
-              for (final Map<String, dynamic> row in rows)
-                row[BlogFields.id]: BlogModel.fromJson(row),
-            };
+        channel.onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: Tables.blogs,
+          callback: (payload) {
+            try {
+              switch (payload.eventType) {
+                case PostgresChangeEvent.insert:
+                  controller.add(
+                    BlogInserted(BlogModel.fromJson(payload.newRecord)),
+                  );
+                  break;
 
-            // INSERTS & UPDATES
-            for (final entry in currentBlogs.entries) {
-              final id = entry.key;
-              final blog = entry.value;
-              final previous = previousBlogs[id];
+                case PostgresChangeEvent.update:
+                  controller.add(
+                    BlogUpdated(BlogModel.fromJson(payload.newRecord)),
+                  );
+                  break;
 
-              if (previous == null) {
-                changes.add(BlogInserted(blog));
-              } else if (previous.updatedAt != blog.updatedAt) {
-                changes.add(BlogUpdated(blog));
+                case PostgresChangeEvent.delete:
+                  controller.add(BlogDeleted(payload.oldRecord[BlogFields.id]));
+                  break;
+
+                case PostgresChangeEvent.all:
+                  // Not emitted as a payload event, but required for exhaustiveness
+                  break;
               }
+            } catch (e, stack) {
+              controller.addError(ServerException(e.toString()), stack);
             }
+          },
+        );
 
-            // DELETES
-            for (final id in previousBlogs.keys) {
-              if (!currentBlogs.containsKey(id)) {
-                changes.add(BlogDeleted(id));
-              }
-            }
+        channel.subscribe();
+      },
+      onCancel: () async {
+        await channel.unsubscribe();
+      },
+    );
 
-            previousBlogs
-              ..clear()
-              ..addAll(currentBlogs);
-
-            return Stream<BlogChange>.fromIterable(changes);
-          } catch (e, stack) {
-            // Forward error, but keep stream typed
-            return Stream<BlogChange>.error(
-              ServerException(e.toString()),
-              stack,
-            );
-          }
-        })
-        .handleError((error, stack) {
-          throw ServerException(error.toString());
-        });
+    return controller.stream;
   }
 }

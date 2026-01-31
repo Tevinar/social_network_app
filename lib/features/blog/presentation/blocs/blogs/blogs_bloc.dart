@@ -110,7 +110,12 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       },
       (blogChange) {
         if (blogChange is BlogInserted) {
-          emit(state.copyWith(blogs: [blogChange.blog, ...state.blogs]));
+          emit(
+            state.copyWith(
+              blogs: [blogChange.blog, ...state.blogs],
+              totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 0) + 1,
+            ),
+          );
         }
 
         if (blogChange is BlogUpdated) {
@@ -132,6 +137,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
               blogs: state.blogs
                   .where((blog) => blog.id != blogChange.blogId)
                   .toList(),
+              totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 1) - 1,
             ),
           );
         }

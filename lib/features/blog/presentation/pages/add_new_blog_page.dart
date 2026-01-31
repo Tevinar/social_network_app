@@ -12,6 +12,7 @@ import 'package:bloc_app/routing/router_config.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class AddNewBlogPage extends StatefulWidget {
   const AddNewBlogPage({super.key});
@@ -79,7 +80,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
             if (state is BlogFailure) {
               showSnackBar(context, state.error);
             } else if (state is BlogUploadSuccess) {
-              const BlogPageRoute().go(context);
+              context.pop();
             }
           },
           builder: (context, state) {

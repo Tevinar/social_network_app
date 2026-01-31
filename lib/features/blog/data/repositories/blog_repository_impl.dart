@@ -1,9 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/error/exceptions.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
+import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -64,15 +66,9 @@ class BlogRepositoryImpl implements BlogRepository {
   @override
   Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber) async {
     try {
-      // if (!await (connectionChecker.isConnected)) {//TODO: Enable offline support later
-      //   final blogs = blogLocalDataSource.loadBlogs();
-      //   return right(blogs);
-      // }
-
       final List<BlogModel> blogs = await blogRemoteDataSource.getBlogsPage(
         pageNumber,
       );
-      // blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
       return right(blogs);
     } on ArgumentError catch (e) {
       return left(Failure(e.message));
@@ -89,5 +85,20 @@ class BlogRepositoryImpl implements BlogRepository {
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
+  }
+
+  @override
+  Stream<Either<Failure, BlogChange>> watchBlogChanges() {
+    return blogRemoteDataSource.watchBlogChanges().transform(
+      StreamTransformer.fromHandlers(
+        handleData: (blogChange, sink) {
+          sink.add(right(blogChange));
+        },
+        handleError: (error, stack, sink) {
+          // DO NOT close the sink -> stream continues
+          sink.add(left(Failure(error.toString())));
+        },
+      ),
+    );
   }
 }

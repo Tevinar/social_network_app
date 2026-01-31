@@ -11,6 +11,33 @@ sealed class BlogsState {
     required this.pageNumber,
     this.totalBlogsInDatabase,
   });
+
+  BlogsState copyWith({
+    List<Blog>? blogs,
+    int? pageNumber,
+    int? totalBlogsInDatabase,
+  }) {
+    return switch (this) {
+      BlogsLoading() => BlogsLoading(
+        blogs: blogs ?? this.blogs,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalBlogsInDatabase: totalBlogsInDatabase ?? this.totalBlogsInDatabase,
+      ),
+
+      BlogsSuccess() => BlogsSuccess(
+        blogs: blogs ?? this.blogs,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalBlogsInDatabase: totalBlogsInDatabase ?? this.totalBlogsInDatabase,
+      ),
+
+      BlogsFailure(:final error) => BlogsFailure(
+        error: error,
+        blogs: blogs ?? this.blogs,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalBlogsInDatabase: totalBlogsInDatabase ?? this.totalBlogsInDatabase,
+      ),
+    };
+  }
 }
 
 final class BlogsLoading extends BlogsState {

@@ -11,10 +11,6 @@ Future<void> initDependencies() async {
   _initAuth();
   _initBlog();
   _initChat();
-  //Hive initialization
-  // Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path; TODO to remove
-
-  //serviceLocator.registerLazySingleton(() => Hive.box(name: 'blogs'));TODO to remove
 
   // core
   serviceLocator.registerLazySingleton(() => AppUserCubit());
@@ -89,6 +85,7 @@ void _initBlog() {
       () => BlogsBloc(
         getBlogsPage: serviceLocator(),
         getBlogsCount: serviceLocator(),
+        repository: serviceLocator(),
       ),
     );
 }

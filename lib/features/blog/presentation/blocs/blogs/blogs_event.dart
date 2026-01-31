@@ -4,3 +4,8 @@ part of 'blogs_bloc.dart';
 sealed class BlogsEvent {}
 
 final class LoadBlogsNextPage extends BlogsEvent {}
+
+final class BlogChangeReceived extends BlogsEvent {
+  final Either<Failure, BlogChange> blogChange;
+  BlogChangeReceived(this.blogChange);
+}

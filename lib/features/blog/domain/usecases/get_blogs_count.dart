@@ -1,7 +1,7 @@
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/core/usecase/usecase.dart';
 import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 
 class GetBlogsCount implements UseCase<int, NoParams> {
   final BlogRepository _blogRepository;

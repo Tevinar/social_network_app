@@ -21,7 +21,7 @@ class NewChatPage extends StatelessWidget {
               child: Column(
                 children: List.generate(
                   4,
-                  (index) => Text(' Loading user...'),
+                  (index) => const Text(' Loading user...'),
                 ), // TODO Replace with proper placeholder
               ),
             );

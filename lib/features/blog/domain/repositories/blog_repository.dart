@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
+import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class BlogRepository {
@@ -16,4 +17,11 @@ abstract interface class BlogRepository {
   Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber);
 
   Future<Either<Failure, int>> getBlogsCount();
+
+  /// Emits domain-level blog change events (insert/update/delete).
+  ///
+  /// This is a passive, reactive data stream (not a user-triggered action),
+  /// so it is exposed directly from the repository instead of via a use case.
+  /// Pagination and other command-based operations remain handled by use cases.
+  Stream<Either<Failure, BlogChange>> watchBlogChanges();
 }

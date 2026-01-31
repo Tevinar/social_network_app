@@ -3,7 +3,7 @@ import 'package:bloc_app/core/error/exceptions.dart';
 import 'package:bloc_app/core/error/failures.dart';
 import 'package:bloc_app/features/chat/data/data_sources/users_remote_data_source.dart';
 import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 
 class UsersRepositoryImpl implements UsersRepository {
   UsersRemoteDataSource usersRemoteDataSource;

@@ -72,7 +72,10 @@ class BlogsPage extends StatelessWidget {
                   : state.blogs.length + 1,
               itemBuilder: (context, index) {
                 if (index == state.blogs.length) {
-                  return const Loader(size: 30);
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Loader(size: 30),
+                  );
                 } else {
                   return BlogCard(
                     blog: state.blogs[index],

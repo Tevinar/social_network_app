@@ -45,6 +45,7 @@ class BlogPageRoute extends GoRouteData with $BlogPageRoute {
   Widget build(BuildContext context, GoRouterState state) => const BlogsPage();
 }
 
+@TypedGoRoute<AddNewBlogPageRoute>(path: '/addNewBlogPage')
 class AddNewBlogPageRoute extends GoRouteData with $AddNewBlogPageRoute {
   const AddNewBlogPageRoute();
 
@@ -53,6 +54,7 @@ class AddNewBlogPageRoute extends GoRouteData with $AddNewBlogPageRoute {
       const AddNewBlogPage();
 }
 
+@TypedGoRoute<BlogViewerPageRoute>(path: '/blogViewerPage')
 class BlogViewerPageRoute extends GoRouteData with $BlogViewerPageRoute {
   final Blog $extra;
   const BlogViewerPageRoute({required this.$extra});
@@ -69,6 +71,7 @@ class ChatsPageRoute extends GoRouteData with $ChatsPageRoute {
   Widget build(BuildContext context, GoRouterState state) => const ChatsPage();
 }
 
+@TypedGoRoute<NewChatPageRoute>(path: '/newChatPage')
 class NewChatPageRoute extends GoRouteData with $NewChatPageRoute {
   const NewChatPageRoute();
 
@@ -81,25 +84,12 @@ class NewChatPageRoute extends GoRouteData with $NewChatPageRoute {
   branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
     // Blogs Tab
     TypedStatefulShellBranch(
-      routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<BlogPageRoute>(
-          path: '/',
-          routes: <TypedGoRoute<GoRouteData>>[
-            TypedGoRoute<AddNewBlogPageRoute>(path: 'addNewBlogPage'),
-            TypedGoRoute<BlogViewerPageRoute>(path: 'blogViewerPage'),
-          ],
-        ),
-      ],
+      routes: <TypedRoute<RouteData>>[TypedGoRoute<BlogPageRoute>(path: '/')],
     ),
     // Chats Tab
     TypedStatefulShellBranch(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<ChatsPageRoute>(
-          path: '/chatsPage',
-          routes: <TypedGoRoute<GoRouteData>>[
-            TypedGoRoute<NewChatPageRoute>(path: 'newChatPage'),
-          ],
-        ),
+        TypedGoRoute<ChatsPageRoute>(path: '/chatsPage'),
       ],
     ),
   ],

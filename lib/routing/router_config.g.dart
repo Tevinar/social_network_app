@@ -10,6 +10,9 @@ List<RouteBase> get $appRoutes => [
   $signInPageRoute,
   $signUpPageRoute,
   $loadingPageRoute,
+  $addNewBlogPageRoute,
+  $blogViewerPageRoute,
+  $newChatPageRoute,
   $appShellRouteData,
 ];
 
@@ -91,25 +94,94 @@ mixin $LoadingPageRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $addNewBlogPageRoute => GoRouteData.$route(
+  path: '/addNewBlogPage',
+  factory: $AddNewBlogPageRoute._fromState,
+);
+
+mixin $AddNewBlogPageRoute on GoRouteData {
+  static AddNewBlogPageRoute _fromState(GoRouterState state) =>
+      const AddNewBlogPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/addNewBlogPage');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $blogViewerPageRoute => GoRouteData.$route(
+  path: '/blogViewerPage',
+  factory: $BlogViewerPageRoute._fromState,
+);
+
+mixin $BlogViewerPageRoute on GoRouteData {
+  static BlogViewerPageRoute _fromState(GoRouterState state) =>
+      BlogViewerPageRoute($extra: state.extra as Blog);
+
+  BlogViewerPageRoute get _self => this as BlogViewerPageRoute;
+
+  @override
+  String get location => GoRouteData.$location('/blogViewerPage');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
+RouteBase get $newChatPageRoute => GoRouteData.$route(
+  path: '/newChatPage',
+  factory: $NewChatPageRoute._fromState,
+);
+
+mixin $NewChatPageRoute on GoRouteData {
+  static NewChatPageRoute _fromState(GoRouterState state) =>
+      const NewChatPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/newChatPage');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
   factory: $AppShellRouteDataExtension._fromState,
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(
-          path: '/',
-          factory: $BlogPageRoute._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: 'addNewBlogPage',
-              factory: $AddNewBlogPageRoute._fromState,
-            ),
-            GoRouteData.$route(
-              path: 'blogViewerPage',
-              factory: $BlogViewerPageRoute._fromState,
-            ),
-          ],
-        ),
+        GoRouteData.$route(path: '/', factory: $BlogPageRoute._fromState),
       ],
     ),
     StatefulShellBranchData.$branch(
@@ -117,12 +189,6 @@ RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/chatsPage',
           factory: $ChatsPageRoute._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: 'newChatPage',
-              factory: $NewChatPageRoute._fromState,
-            ),
-          ],
         ),
       ],
     ),
@@ -154,79 +220,12 @@ mixin $BlogPageRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $AddNewBlogPageRoute on GoRouteData {
-  static AddNewBlogPageRoute _fromState(GoRouterState state) =>
-      const AddNewBlogPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/addNewBlogPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BlogViewerPageRoute on GoRouteData {
-  static BlogViewerPageRoute _fromState(GoRouterState state) =>
-      BlogViewerPageRoute($extra: state.extra as Blog);
-
-  BlogViewerPageRoute get _self => this as BlogViewerPageRoute;
-
-  @override
-  String get location => GoRouteData.$location('/blogViewerPage');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
 mixin $ChatsPageRoute on GoRouteData {
   static ChatsPageRoute _fromState(GoRouterState state) =>
       const ChatsPageRoute();
 
   @override
   String get location => GoRouteData.$location('/chatsPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $NewChatPageRoute on GoRouteData {
-  static NewChatPageRoute _fromState(GoRouterState state) =>
-      const NewChatPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/chatsPage/newChatPage');
 
   @override
   void go(BuildContext context) => context.go(location);

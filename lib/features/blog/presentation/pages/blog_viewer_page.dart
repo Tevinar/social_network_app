@@ -12,7 +12,12 @@ class BlogViewerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios),
+        ),
+      ),
       body: FutureBuilder(
         future: precacheImage(NetworkImage(blog.imageUrl), context),
         builder: (context, asyncSnapshot) {

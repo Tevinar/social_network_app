@@ -11,16 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
-  /**
-   * 
-   * WidgetsFlutterBinding is a Flutter framework component that acts as the glue between the 
-   * Flutter framework and the underlying platform. It's responsible for handling the 
-   * interaction between Flutter widgets and the native platform services.
-   * 
-   * This method ensures that the Flutter framework is properly initialized before 
-   * running any asynchronous operations in your main() function.
-   * 
-   */
+  /// WidgetsFlutterBinding is a Flutter framework component that acts as the glue between the
+  /// Flutter framework and the underlying platform. It's responsible for handling the
+  /// interaction between Flutter widgets and the native platform services.
+  ///
+  /// This method ensures that the Flutter framework is properly initialized before
+  /// running any asynchronous operations in your main() function.
   WidgetsFlutterBinding.ensureInitialized();
   await initDependencies();
 

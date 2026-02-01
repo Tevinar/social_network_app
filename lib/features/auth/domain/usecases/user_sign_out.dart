@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fpdart/fpdart.dart';
 
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
 
@@ -10,7 +10,7 @@ class UserSignOut implements UseCase<void, NoParams> {
   UserSignOut({required this.authRepository});
 
   @override
-  Future<Either<Failure, void>> call(NoParams params) {
+  Future<Either<ServerFailure, void>> call(NoParams params) {
     return authRepository.signOut();
   }
 }

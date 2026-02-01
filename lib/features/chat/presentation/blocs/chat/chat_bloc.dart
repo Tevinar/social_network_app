@@ -1,5 +1,5 @@
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:bloc_app/features/chat/domain/usecases/create_chat.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +20,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   Future<void> _onCreateChat(ChatCreate event, Emitter<ChatState> emit) async {
-    final Either<Failure, Chat> res = await _createChat.call(event.chatMembers);
+    final Either<ServerFailure, Chat> res = await _createChat.call(
+      event.chatMembers,
+    );
 
     res.fold(
       (l) => emit(ChatFailure(l.message)),

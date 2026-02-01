@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';
@@ -9,7 +9,7 @@ class GetBlogsCount implements UseCase<int, NoParams> {
     : _blogRepository = blogRepository;
 
   @override
-  Future<Either<Failure, int>> call(NoParams params) {
+  Future<Either<ServerFailure, int>> call(NoParams params) {
     return _blogRepository.getBlogsCount();
   }
 }

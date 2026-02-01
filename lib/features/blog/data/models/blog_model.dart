@@ -1,15 +1,24 @@
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 
-class BlogModel extends Blog {
+class BlogModel {
+  final String id;
+  final String posterId;
+  final String title;
+  final String content;
+  final String imageUrl;
+  final List<String> topics;
+  final DateTime updatedAt;
+  final String? posterName;
+
   BlogModel({
-    required super.id,
-    required super.posterId,
-    required super.title,
-    required super.content,
-    required super.imageUrl,
-    required super.topics,
-    required super.updatedAt,
-    super.posterName,
+    required this.id,
+    required this.posterId,
+    required this.title,
+    required this.content,
+    required this.imageUrl,
+    required this.topics,
+    required this.updatedAt,
+    this.posterName,
   });
 
   Map<String, dynamic> toJson() {
@@ -57,6 +66,19 @@ class BlogModel extends Blog {
       topics: topics ?? this.topics,
       updatedAt: updatedAt ?? this.updatedAt,
       posterName: posterName ?? this.posterName,
+    );
+  }
+
+  Blog toEntity() {
+    return Blog(
+      id: id,
+      posterId: posterId,
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+      topics: topics,
+      updatedAt: updatedAt,
+      posterName: posterName,
     );
   }
 }

@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:bloc_app/app/session/app_user_cubit.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
-import 'package:bloc_app/features/auth/domain/usecases/current_user.dart';
+import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -14,37 +18,49 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserSignUp _userSignUp;
   final UserSignIn _userSignIn;
-  final CurrentUser _currentUser;
-  final AppUserCubit _appUserCubit;
-  final UserSignOut _userSignOut;
+  final AuthRepository _authRepository;
+  late final StreamSubscription _authStateChangesSub;
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,
-    required CurrentUser currentUser,
-    required AppUserCubit appUserCubit,
-    required UserSignOut userSignOut,
-  }) : _userSignUp = userSignUp,
+    required AuthRepository authRepository,
+  }) : _authRepository = authRepository,
+       _userSignUp = userSignUp,
        _userSignIn = userSignIn,
-       _currentUser = currentUser,
-       _appUserCubit = appUserCubit,
-       _userSignOut = userSignOut,
        super(AuthLoading()) {
-    on<AuthEvent>(_onAuthLoading);
     on<AuthSignup>(_onAuthSignUp);
     on<AuthSignIn>(_onAuthSignIn);
-    on<AuthSignOut>(_onAuthSignOut);
-    on<AuthCurrentUser>(_onAuthCurrentUser);
+    on<AuthStateChanged>(onAuthStateChanged);
+
+    _subscribeToAuthStateChanges();
   }
 
-  void _onAuthSignOut(AuthSignOut event, Emitter<AuthState> emit) async {
-    final res = await _userSignOut(NoParams());
-    res.fold(
-      (l) => _emitAuthFailure(l.message, emit),
-      (r) => _emitAuthSignedOut(emit),
+  @override
+  Future<void> close() {
+    _authStateChangesSub.cancel();
+    return super.close();
+  }
+
+  void onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {
+    event.authState.fold((failure) => emit(AuthFailure(failure.message)), (
+      user,
+    ) {
+      if (user == null) {
+        emit(AuthSignedOut());
+      } else {
+        emit(AuthSignedIn(user));
+      }
+    });
+  }
+
+  void _subscribeToAuthStateChanges() {
+    _authStateChangesSub = _authRepository.authStateChanges().listen(
+      (event) => add(AuthStateChanged(event)),
     );
   }
 
   void _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
     final res = await _userSignUp(
       UserSignUpParams(
         name: event.name,
@@ -54,53 +70,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     res.fold(
-      (l) => _emitAuthFailure(l.message, emit),
-      (r) => _emitAuthSignedIn(r, emit),
+      (failure) => emit(AuthFailure(failure.message)),
+      (user) => emit(AuthSignedIn(user)),
     );
   }
 
   void _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
     final res = await _userSignIn(
       UserSignInParams(email: event.email, password: event.password),
     );
 
     res.fold(
-      (l) => _emitAuthFailure(l.message, emit),
-      (r) => _emitAuthSignedIn(r, emit),
+      (failure) => emit(AuthFailure(failure.message)),
+      (user) => emit(AuthSignedIn(user)),
     );
-  }
-
-  void _onAuthCurrentUser(
-    AuthCurrentUser event,
-    Emitter<AuthState> emit,
-  ) async {
-    final res = await _currentUser(NoParams());
-    res.fold(
-      (_) => _emitAuthSignedOut(emit),
-      (user) => _emitAuthSignedIn(user, emit),
-    );
-  }
-
-  // A helper method to emit AuthSignedIn state and update AppUserCubit with user
-  void _emitAuthSignedIn(User user, Emitter<AuthState> emit) {
-    _appUserCubit.updateUser(user);
-    emit(AuthSignedIn(user));
-  }
-
-  // A helper method to emit AuthFailure state and update AppUserCubit with failure
-  void _emitAuthFailure(String error, Emitter<AuthState> emit) {
-    emit(AuthFailure(error));
-    _appUserCubit.userFailure(error);
-  }
-
-  // A helper method to emit AuthLoading state and update AppUserCubit to loading
-  void _onAuthLoading(AuthEvent event, Emitter<AuthState> emit) {
-    emit(AuthLoading());
-    _appUserCubit.userLoading();
-  }
-
-  void _emitAuthSignedOut(Emitter<AuthState> emit) {
-    emit(AuthSignedOut());
-    _appUserCubit.updateUser(null);
   }
 }

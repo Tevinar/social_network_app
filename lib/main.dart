@@ -35,27 +35,14 @@ void main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    // Retrieve current user data if connected and save this data into current AuthBloc state and into AppUserCubit state
-    BlocProvider.of<AuthBloc>(context).add(AuthCurrentUser());
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Social Network App',
       theme: AppTheme.darkThemeMode,
       routerConfig: AppRouter.router,
     );

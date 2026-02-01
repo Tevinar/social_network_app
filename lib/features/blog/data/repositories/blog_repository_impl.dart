@@ -9,7 +9,7 @@ import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:bloc_app/features/blog/data/models/blog_model.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
@@ -26,7 +26,7 @@ class BlogRepositoryImpl implements BlogRepository {
   });
 
   @override
-  Future<Either<Failure, Blog>> createBlog({
+  Future<Either<ServerFailure, Blog>> createBlog({
     required File image,
     required String title,
     required String content,
@@ -35,7 +35,7 @@ class BlogRepositoryImpl implements BlogRepository {
   }) async {
     try {
       if (!await (connectionChecker.isConnected)) {
-        return left(Failure(ErrorMessages.noConnection));
+        return left(ServerFailure(ErrorMessages.noConnection));
       }
       String blogId = const Uuid().v1();
       String imageUrl = await blogRemoteDataSource.uploadBlogImage(
@@ -57,48 +57,45 @@ class BlogRepositoryImpl implements BlogRepository {
         blogModel,
       );
 
-      return right(savedBlog);
+      return right(savedBlog.toEntity());
     } on ServerException catch (e) {
-      return left(Failure(e.message));
+      return left(ServerFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber) async {
+  Future<Either<ServerFailure, List<Blog>>> getBlogsPage(int pageNumber) async {
     try {
       final List<BlogModel> blogs = await blogRemoteDataSource.getBlogsPage(
         pageNumber,
       );
-      return right(blogs);
+      return right(blogs.map((blogModel) => blogModel.toEntity()).toList());
     } on ArgumentError catch (e) {
-      return left(Failure(e.message));
+      return left(ServerFailure(e.message));
     } on ServerException catch (e) {
-      return left(Failure(e.message));
+      return left(ServerFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, int>> getBlogsCount() async {
+  Future<Either<ServerFailure, int>> getBlogsCount() async {
     try {
       final int blogsCount = await blogRemoteDataSource.getBlogsCount();
       return right(blogsCount);
     } on ServerException catch (e) {
-      return left(Failure(e.message));
+      return left(ServerFailure(e.message));
     }
   }
 
   @override
-  Stream<Either<Failure, BlogChange>> watchBlogChanges() {
-    return blogRemoteDataSource.watchBlogChanges().transform(
-      StreamTransformer.fromHandlers(
-        handleData: (blogChange, sink) {
-          sink.add(right(blogChange));
-        },
-        handleError: (error, stack, sink) {
-          // DO NOT close the sink -> stream continues
-          sink.add(left(Failure(error.toString())));
-        },
-      ),
-    );
+  Stream<Either<ServerFailure, BlogChange>> watchBlogChanges() async* {
+    try {
+      await for (final blogChange in blogRemoteDataSource.watchBlogChanges()) {
+        yield Right(blogChange);
+      }
+    } catch (error) {
+      // Any unexpected stream error is translated into a Failure
+      yield left(ServerFailure(error.toString()));
+    }
   }
 }

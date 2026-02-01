@@ -103,6 +103,53 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     }
   }
 
+  /// Watches real-time changes on the `blogs` table and emits domain-level
+  /// [BlogChange] events (insert / update / delete).
+  ///
+  /// ### Why a `StreamController` is used
+  /// Supabase Realtime exposes a **callback-based API**, not a Dart `Stream`.
+  /// This method acts as an **adapter** that converts imperative callbacks
+  /// (`onPostgresChanges`) into a composable Dart `Stream`.
+  ///
+  /// The `StreamController` is responsible for:
+  /// - manually emitting events (`add`)
+  /// - emitting errors (`addError`)
+  /// - managing the subscription lifecycle
+  ///
+  /// ### Emitted events
+  /// Each Postgres change is translated into a domain-specific event:
+  /// - INSERT  → [BlogInserted]
+  /// - UPDATE  → [BlogUpdated]
+  /// - DELETE  → [BlogDeleted]
+  ///
+  /// This keeps the domain and presentation layers independent from
+  /// Supabase-specific payloads.
+  ///
+  /// ### Stream lifecycle
+  /// - The Realtime channel is created and subscribed **when the first listener
+  ///   subscribes** to the stream (`onListen`).
+  /// - The channel is unsubscribed **when the last listener cancels** the
+  ///   subscription (`onCancel`).
+  ///
+  /// This ensures:
+  /// - no unnecessary open connections
+  /// - proper cleanup when the stream is no longer needed
+  ///
+  /// ### Error handling
+  /// - Errors thrown while parsing or mapping payloads are added to the stream
+  ///   via `addError`.
+  /// - The stream itself is **not closed** on error.
+  /// - Higher layers (repository) are responsible for translating errors into
+  ///   domain failures.
+  ///
+  /// ### Architectural note
+  /// This method belongs to the **data layer** and performs infrastructure
+  /// adaptation only. It must not:
+  /// - emit UI states
+  /// - apply business rules
+  /// - translate errors into domain failures
+  ///
+  /// Those responsibilities are intentionally handled in upper layers.
   @override
   Stream<BlogChange> watchBlogChanges() {
     late final StreamController<BlogChange> controller;
@@ -121,13 +168,17 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
               switch (payload.eventType) {
                 case PostgresChangeEvent.insert:
                   controller.add(
-                    BlogInserted(BlogModel.fromJson(payload.newRecord)),
+                    BlogInserted(
+                      BlogModel.fromJson(payload.newRecord).toEntity(),
+                    ),
                   );
                   break;
 
                 case PostgresChangeEvent.update:
                   controller.add(
-                    BlogUpdated(BlogModel.fromJson(payload.newRecord)),
+                    BlogUpdated(
+                      BlogModel.fromJson(payload.newRecord).toEntity(),
+                    ),
                   );
                   break;
 

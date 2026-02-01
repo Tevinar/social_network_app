@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // we later want to switch Supabase for, for example, Firebase, we can be creating a new class
 // that implement AuthRemoteDataSource
 abstract interface class AuthRemoteDataSource {
-  Future<UserModel?> getCurrentUserData();
   Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
@@ -23,37 +22,13 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> signOut();
 
-  Session? get currentUserSession;
+  Stream<UserModel?> authStateChanges();
 }
 
 class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
-  final SupabaseClient supabaseClient;
+  final SupabaseClient _supabaseClient;
 
-  const AuthRemoteDataSourceSupabaseImpl(this.supabaseClient);
-
-  /// Returns the user's session stored locally
-  @override
-  Session? get currentUserSession => supabaseClient.auth.currentSession;
-
-  @override
-  Future<UserModel?> getCurrentUserData() async {
-    try {
-      if (currentUserSession != null) {
-        final userData = await supabaseClient
-            .from(Tables.profiles)
-            .select()
-            .eq(ProfileFields.id, currentUserSession!.user.id);
-        return UserModel.fromJson(
-          userData.first,
-        ).copyWith(email: currentUserSession!.user.email);
-      }
-      return null;
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
-  }
+  const AuthRemoteDataSourceSupabaseImpl(this._supabaseClient);
 
   @override
   Future<UserModel> signInWithEmailPassword({
@@ -61,16 +36,14 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      final response = await supabaseClient.auth.signInWithPassword(
+      final response = await _supabaseClient.auth.signInWithPassword(
         password: password,
         email: email,
       );
       if (response.user == null) {
         throw const ServerException(ErrorMessages.userNull);
       }
-      return UserModel.fromJson(
-        response.user!.toJson(),
-      ).copyWith(email: currentUserSession!.user.email);
+      return UserModel.fromJson(response.user!.toJson());
     } on AuthException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -85,7 +58,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      final response = await supabaseClient.auth.signUp(
+      final response = await _supabaseClient.auth.signUp(
         password: password,
         email: email,
         data: {ProfileFields.name: name},
@@ -93,9 +66,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
       if (response.user == null) {
         throw const ServerException(ErrorMessages.userNull);
       }
-      return UserModel.fromJson(
-        response.user!.toJson(),
-      ).copyWith(email: currentUserSession!.user.email);
+      return UserModel.fromJson(response.user!.toJson());
     } on AuthException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -106,11 +77,53 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await supabaseClient.auth.signOut();
+      await _supabaseClient.auth.signOut();
     } on AuthException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  /// Emits authentication state changes as a stream of [UserModel].
+  ///
+  /// This method exposes Supabase Auth's real-time authentication stream and
+  /// adapts it to the application's data layer by mapping vendor payloads into
+  /// [UserModel].
+  ///
+  /// ### Execution boundary ownership (important)
+  /// Unlike Future-based remote methods, this method does **not own the execution
+  /// lifecycle** of the operation. Supabase Auth owns the stream and may emit
+  /// events or errors asynchronously, long after this method has returned.
+  ///
+  /// For this reason, this method **must not translate errors** into custom
+  /// infrastructure exceptions (e.g. `ServerException`), as doing so would
+  /// interfere with the upstream stream lifecycle.
+  ///
+  /// ### Emitted values
+  /// - Emits a non-null [UserModel] when a user is authenticated
+  /// - Emits `null` when the user signs out or when no active session exists
+  ///
+  /// `null` represents a **valid signed-out state**, not an error.
+  ///
+  /// ### Error handling responsibility
+  /// - Errors emitted by Supabase Auth are allowed to propagate as stream errors
+  /// - Translation of vendor errors into infrastructure exceptions or domain
+  ///   failures is handled by the **repository layer**
+  ///
+  /// This ensures:
+  /// - long-lived stream stability
+  /// - correct distinction between logout and error states
+  /// - proper ownership of error semantics
+  @override
+  Stream<UserModel?> authStateChanges() {
+    return _supabaseClient.auth.onAuthStateChange.map((data) {
+      final session = data.session;
+      final supabaseUser = session?.user;
+
+      return supabaseUser == null
+          ? null
+          : UserModel.fromJson(supabaseUser.toJson());
+    });
   }
 }

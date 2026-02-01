@@ -2,7 +2,7 @@ import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/errors/exceptions.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
@@ -10,20 +10,21 @@ import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart'
 import 'package:fpdart/fpdart.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource authRemoteDataSource;
-  final ConnectionChecker connectionChecker;
+  final AuthRemoteDataSource _authRemoteDataSource;
+  final ConnectionChecker _connectionChecker;
   const AuthRepositoryImpl({
-    required this.authRemoteDataSource,
-    required this.connectionChecker,
-  });
+    required AuthRemoteDataSource authRemoteDataSource,
+    required ConnectionChecker connectionChecker,
+  }) : _connectionChecker = connectionChecker,
+       _authRemoteDataSource = authRemoteDataSource;
 
   @override
-  Future<Either<Failure, User>> signInWithEmailPassword({
+  Future<Either<ServerFailure, User>> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
     return _getUser(
-      () async => await authRemoteDataSource.signInWithEmailPassword(
+      () async => await _authRemoteDataSource.signInWithEmailPassword(
         email: email,
         password: password,
       ),
@@ -31,13 +32,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUpWithEmailPassword({
+  Future<Either<ServerFailure, User>> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   }) async {
     return _getUser(
-      () async => await authRemoteDataSource.signUpWithEmailPassword(
+      () async => await _authRemoteDataSource.signUpWithEmailPassword(
         name: name,
         email: email,
         password: password,
@@ -45,58 +46,47 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  Future<Either<Failure, User>> _getUser(
+  Future<Either<ServerFailure, User>> _getUser(
     Future<UserModel> Function() fn,
   ) async {
     try {
-      if (!await connectionChecker.isConnected) {
-        return left(Failure(ErrorMessages.noConnection));
+      if (!await _connectionChecker.isConnected) {
+        return left(ServerFailure(ErrorMessages.noConnection));
       }
 
       final user = await fn();
-      return right(user);
+      return right(user.toEntity());
     } on ServerException catch (e) {
-      return left(Failure(e.message));
+      return left(ServerFailure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, User>> currentUser() async {
+  Future<Either<ServerFailure, void>> signOut() async {
     try {
-      if (!await connectionChecker.isConnected) {
-        final session = authRemoteDataSource.currentUserSession;
+      if (!await _connectionChecker.isConnected) {
+        return left(ServerFailure(ErrorMessages.noConnection));
+      }
+      return right(_authRemoteDataSource.signOut());
+    } on ServerException catch (e) {
+      return left(ServerFailure(e.message));
+    }
+  }
 
-        if (session == null) {
-          return left(Failure('User not signed in!'));
+  @override
+  Stream<Either<ServerFailure, User?>> authStateChanges() async* {
+    try {
+      await for (final userModel in _authRemoteDataSource.authStateChanges()) {
+        // userModel == null → signed out (valid state)
+        if (userModel == null) {
+          yield const Right(null);
+        } else {
+          yield Right(userModel.toEntity());
         }
-        return right(
-          UserModel(
-            id: session.user.id,
-            email: session.user.email ?? '',
-            name: '',
-          ),
-        );
       }
-
-      UserModel? user = await authRemoteDataSource.getCurrentUserData();
-      if (user == null) {
-        return left(Failure('User is not signed in.'));
-      }
-      return right(user);
-    } on ServerException catch (e) {
-      return left(Failure(e.message));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> signOut() async {
-    try {
-      if (!await connectionChecker.isConnected) {
-        return left(Failure(ErrorMessages.noConnection));
-      }
-      return right(authRemoteDataSource.signOut());
-    } on ServerException catch (e) {
-      return left(Failure(e.message));
+    } catch (e) {
+      // Any unexpected stream error is translated into a Failure
+      yield Left(ServerFailure(e.toString()));
     }
   }
 }

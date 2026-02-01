@@ -24,7 +24,7 @@ class BlogsPage extends StatelessWidget {
             }
             return IconButton(
               onPressed: () {
-                BlocProvider.of<AuthBloc>(context).add(AuthSignOut());
+                context.read<AppUserCubit>().signOut();
               },
               icon: const Icon(Icons.logout, size: 20),
             );

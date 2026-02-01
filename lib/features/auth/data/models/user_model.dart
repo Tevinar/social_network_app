@@ -1,7 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 
-class UserModel extends User {
-  UserModel({required super.id, required super.name, required super.email});
+class UserModel {
+  final String id;
+  final String name;
+  final String email;
+  UserModel({required this.id, required this.name, required this.email});
 
   /// UserModel.fromJson factory constructor initializes a final variable from a JSON object.
   factory UserModel.fromJson(Map<String, dynamic> map) {
@@ -18,5 +22,9 @@ class UserModel extends User {
       name: name ?? this.name,
       email: email ?? this.email,
     );
+  }
+
+  User toEntity() {
+    return User(id: id, name: name, email: email);
   }
 }

@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
@@ -10,7 +10,7 @@ class UserSignUp implements UseCase<User, UserSignUpParams> {
   UserSignUp({required this.authRepository});
 
   @override
-  Future<Either<Failure, User>> call(UserSignUpParams params) {
+  Future<Either<ServerFailure, User>> call(UserSignUpParams params) {
     return authRepository.signUpWithEmailPassword(
       name: params.name,
       email: params.email,

@@ -1,7 +1,8 @@
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 
-class ChatModel extends Chat {
-  ChatModel({required super.id});
+class ChatModel {
+  final String id;
+  ChatModel({required this.id});
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{'id': id};
@@ -9,5 +10,9 @@ class ChatModel extends Chat {
 
   factory ChatModel.fromJson(Map<String, dynamic> map) {
     return ChatModel(id: map['id']);
+  }
+
+  Chat toEntity() {
+    return Chat(id: id);
   }
 }

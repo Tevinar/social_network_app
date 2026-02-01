@@ -4,7 +4,6 @@ import 'package:bloc_app/core/secrets/app_secrets.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:bloc_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:bloc_app/features/auth/domain/usecases/current_user.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_up.dart';

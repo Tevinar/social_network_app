@@ -3,22 +3,31 @@ part of 'init_dependencies.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
+  // supabase
   Supabase supabase = await Supabase.initialize(
     url: AppSecrets.supabaseUrl,
     anonKey: AppSecrets.supabaseAnonKey,
   );
   serviceLocator.registerLazySingleton(() => supabase.client);
-  _initAuth();
-  _initBlog();
-  _initChat();
+
+  // app
+  serviceLocator.registerLazySingleton(
+    () => AppUserCubit(
+      authRepository: serviceLocator(),
+      userSignOut: serviceLocator(),
+    ),
+  );
 
   // core
-  serviceLocator.registerLazySingleton(() => AppUserCubit());
-
   serviceLocator.registerLazySingleton(() => InternetConnection());
   serviceLocator.registerLazySingleton<ConnectionChecker>(
     () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
   );
+
+  // features
+  _initAuth();
+  _initBlog();
+  _initChat();
 }
 
 void _initAuth() {
@@ -40,16 +49,13 @@ void _initAuth() {
     // Usecases
     ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))
     ..registerLazySingleton(() => UserSignIn(authRepositoy: serviceLocator()))
-    ..registerLazySingleton(() => CurrentUser(authRepository: serviceLocator()))
     ..registerLazySingleton(() => UserSignOut(authRepository: serviceLocator()))
     // BLoC
     ..registerLazySingleton(
       () => AuthBloc(
-        userSignOut: serviceLocator(),
         userSignUp: serviceLocator(),
         userSignIn: serviceLocator(),
-        currentUser: serviceLocator(),
-        appUserCubit: serviceLocator(),
+        authRepository: serviceLocator(),
       ),
     );
 }
@@ -60,9 +66,6 @@ void _initBlog() {
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    // ..registerLazySingleton<BlogLocalDataSource>(//
-    //   () => BlogLocalDataSourceImpl(serviceLocator()),
-    // )
     // Repositories
     ..registerLazySingleton<BlogRepository>(
       () => BlogRepositoryImpl(

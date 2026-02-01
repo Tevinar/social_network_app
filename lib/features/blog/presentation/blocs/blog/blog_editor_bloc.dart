@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +20,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   }
 
   void _onAddBlog(AddBlog event, Emitter<BlogEditorState> emit) async {
-    Either<Failure, Blog> res = await _uploadBlog.call(
+    Either<ServerFailure, Blog> res = await _uploadBlog.call(
       CreateBlogParams(
         posterId: event.posterId,
         title: event.title,

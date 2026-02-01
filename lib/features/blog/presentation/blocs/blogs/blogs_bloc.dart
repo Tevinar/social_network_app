@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc_app/core/errors/failure.dart';
+import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
@@ -35,7 +35,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   // Listens to scroll position to trigger pagination when nearing the bottom
   final ScrollController _scrollController = ScrollController();
   // Subscription to passive blog change stream (insert/update/delete)
-  late final StreamSubscription<Either<Failure, BlogChange>> _blogChangeSub;
+  late final StreamSubscription<Either<ServerFailure, BlogChange>>
+  _blogChangeSub;
 
   /// Creates the BlogsBloc and immediately:
   /// - starts listening to scroll events for pagination
@@ -89,7 +90,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
     _blogChangeSub = _repository.watchBlogChanges().listen((
-      Either<Failure, BlogChange> event,
+      Either<ServerFailure, BlogChange> event,
     ) {
       add(BlogChangeReceived(event));
     });
@@ -181,7 +182,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         totalBlogsInDatabase: state.totalBlogsInDatabase,
       ),
     );
-    final Either<Failure, List<Blog>> result = await _getBlogsPage(
+    final Either<ServerFailure, List<Blog>> result = await _getBlogsPage(
       state.pageNumber,
     );
     result.fold(
@@ -222,7 +223,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   ///
   /// This value is used to determine when pagination has reached the end.
   Future<void> _initializeBlogsCount(Emitter<BlogsState> emit) async {
-    final Either<Failure, int> result = await _getBlogsCount(NoParams());
+    final Either<ServerFailure, int> result = await _getBlogsCount(NoParams());
     result.fold(
       (error) {
         emit(

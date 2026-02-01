@@ -1,180 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'router_config.dart';
+part of 'routes.dart';
 
 // **************************************************************************
 // GoRouterGenerator
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
+  $appShellRouteData,
   $signInPageRoute,
   $signUpPageRoute,
-  $loadingPageRoute,
   $addNewBlogPageRoute,
   $blogViewerPageRoute,
+  $initialLoadingPageRoute,
   $newChatPageRoute,
-  $appShellRouteData,
 ];
-
-RouteBase get $signInPageRoute => GoRouteData.$route(
-  path: '/signInPage',
-  factory: $SignInPageRoute._fromState,
-);
-
-mixin $SignInPageRoute on GoRouteData {
-  static SignInPageRoute _fromState(GoRouterState state) =>
-      const SignInPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/signInPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $signUpPageRoute => GoRouteData.$route(
-  path: '/signUpPage',
-  factory: $SignUpPageRoute._fromState,
-);
-
-mixin $SignUpPageRoute on GoRouteData {
-  static SignUpPageRoute _fromState(GoRouterState state) =>
-      const SignUpPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/signUpPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $loadingPageRoute => GoRouteData.$route(
-  path: '/loadingPage',
-  factory: $LoadingPageRoute._fromState,
-);
-
-mixin $LoadingPageRoute on GoRouteData {
-  static LoadingPageRoute _fromState(GoRouterState state) =>
-      const LoadingPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/loadingPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $addNewBlogPageRoute => GoRouteData.$route(
-  path: '/addNewBlogPage',
-  factory: $AddNewBlogPageRoute._fromState,
-);
-
-mixin $AddNewBlogPageRoute on GoRouteData {
-  static AddNewBlogPageRoute _fromState(GoRouterState state) =>
-      const AddNewBlogPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/addNewBlogPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $blogViewerPageRoute => GoRouteData.$route(
-  path: '/blogViewerPage',
-  factory: $BlogViewerPageRoute._fromState,
-);
-
-mixin $BlogViewerPageRoute on GoRouteData {
-  static BlogViewerPageRoute _fromState(GoRouterState state) =>
-      BlogViewerPageRoute($extra: state.extra as Blog);
-
-  BlogViewerPageRoute get _self => this as BlogViewerPageRoute;
-
-  @override
-  String get location => GoRouteData.$location('/blogViewerPage');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
-RouteBase get $newChatPageRoute => GoRouteData.$route(
-  path: '/newChatPage',
-  factory: $NewChatPageRoute._fromState,
-);
-
-mixin $NewChatPageRoute on GoRouteData {
-  static NewChatPageRoute _fromState(GoRouterState state) =>
-      const NewChatPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/newChatPage');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
 
 RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
   factory: $AppShellRouteDataExtension._fromState,
@@ -186,10 +26,7 @@ RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
     ),
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(
-          path: '/chatsPage',
-          factory: $ChatsPageRoute._fromState,
-        ),
+        GoRouteData.$route(path: '/chats', factory: $ChatsPageRoute._fromState),
       ],
     ),
   ],
@@ -225,7 +62,163 @@ mixin $ChatsPageRoute on GoRouteData {
       const ChatsPageRoute();
 
   @override
-  String get location => GoRouteData.$location('/chatsPage');
+  String get location => GoRouteData.$location('/chats');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $signInPageRoute =>
+    GoRouteData.$route(path: '/sign-in', factory: $SignInPageRoute._fromState);
+
+mixin $SignInPageRoute on GoRouteData {
+  static SignInPageRoute _fromState(GoRouterState state) =>
+      const SignInPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sign-in');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $signUpPageRoute =>
+    GoRouteData.$route(path: '/sign-up', factory: $SignUpPageRoute._fromState);
+
+mixin $SignUpPageRoute on GoRouteData {
+  static SignUpPageRoute _fromState(GoRouterState state) =>
+      const SignUpPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/sign-up');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $addNewBlogPageRoute => GoRouteData.$route(
+  path: '/add-new-blog',
+  factory: $AddNewBlogPageRoute._fromState,
+);
+
+mixin $AddNewBlogPageRoute on GoRouteData {
+  static AddNewBlogPageRoute _fromState(GoRouterState state) =>
+      const AddNewBlogPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/add-new-blog');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $blogViewerPageRoute => GoRouteData.$route(
+  path: '/blog-viewer',
+  factory: $BlogViewerPageRoute._fromState,
+);
+
+mixin $BlogViewerPageRoute on GoRouteData {
+  static BlogViewerPageRoute _fromState(GoRouterState state) =>
+      BlogViewerPageRoute($extra: state.extra as Blog);
+
+  BlogViewerPageRoute get _self => this as BlogViewerPageRoute;
+
+  @override
+  String get location => GoRouteData.$location('/blog-viewer');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
+RouteBase get $initialLoadingPageRoute => GoRouteData.$route(
+  path: '/initial-loading',
+  factory: $InitialLoadingPageRoute._fromState,
+);
+
+mixin $InitialLoadingPageRoute on GoRouteData {
+  static InitialLoadingPageRoute _fromState(GoRouterState state) =>
+      const InitialLoadingPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/initial-loading');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $newChatPageRoute => GoRouteData.$route(
+  path: '/new-chat',
+  factory: $NewChatPageRoute._fromState,
+);
+
+mixin $NewChatPageRoute on GoRouteData {
+  static NewChatPageRoute _fromState(GoRouterState state) =>
+      const NewChatPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/new-chat');
 
   @override
   void go(BuildContext context) => context.go(location);

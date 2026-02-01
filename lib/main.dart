@@ -1,12 +1,11 @@
+import 'package:bloc_app/app/router/app.dart';
 import 'package:bloc_app/app/session/app_user_cubit.dart';
-import 'package:bloc_app/core/theme/theme.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
 import 'package:bloc_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat/chat_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
-import 'package:bloc_app/app/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,18 +32,4 @@ void main() async {
       child: const MyApp(),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Social Network App',
-      theme: AppTheme.darkThemeMode,
-      routerConfig: AppRouter.router,
-    );
-  }
 }

@@ -3,7 +3,7 @@ import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bloc_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:bloc_app/features/auth/presentation/widgets/auth_gradient_button.dart';
-import 'package:bloc_app/app/router/router_config.dart';
+import 'package:bloc_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

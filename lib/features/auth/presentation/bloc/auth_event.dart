@@ -3,6 +3,7 @@ part of 'auth_bloc.dart';
 @immutable
 sealed class AuthEvent {}
 
+/// User intent: sign up
 final class AuthSignup extends AuthEvent {
   final String name;
   final String email;
@@ -11,6 +12,7 @@ final class AuthSignup extends AuthEvent {
   AuthSignup({required this.name, required this.email, required this.password});
 }
 
+/// User intent: sign in
 final class AuthSignIn extends AuthEvent {
   final String email;
   final String password;
@@ -18,7 +20,8 @@ final class AuthSignIn extends AuthEvent {
   AuthSignIn({required this.email, required this.password});
 }
 
-class AuthStateChanged extends AuthEvent {
+/// Internal event: auth state changed from repository stream
+class _AuthStateChanged extends AuthEvent {
   final Either<ServerFailure, User?> authState;
-  AuthStateChanged(this.authState);
+  _AuthStateChanged(this.authState);
 }

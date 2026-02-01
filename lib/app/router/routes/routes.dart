@@ -1,0 +1,20 @@
+import 'package:bloc_app/app/bootstrap/initial_loading_page.dart';
+import 'package:bloc_app/app/router/shell/app_shell.dart';
+import 'package:bloc_app/features/auth/presentation/pages/signin_page.dart';
+import 'package:bloc_app/features/auth/presentation/pages/signup_page.dart';
+import 'package:bloc_app/features/blog/domain/entities/blog.dart';
+import 'package:bloc_app/features/blog/presentation/pages/add_new_blog_page.dart';
+import 'package:bloc_app/features/blog/presentation/pages/blog_viewer_page.dart';
+import 'package:bloc_app/features/blog/presentation/pages/blogs_page.dart';
+import 'package:bloc_app/features/chat/presentation/pages/chats_page.dart';
+import 'package:bloc_app/features/chat/presentation/pages/new_chat_page.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+part 'routes.g.dart';
+
+part 'app_shell_routes.dart';
+part 'features/auth_routes.dart';
+part 'features/blog_routes.dart';
+part 'bootstrap_routes.dart';
+part 'features/chat_routes.dart';

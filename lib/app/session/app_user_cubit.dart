@@ -9,12 +9,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'app_user_state.dart';
 
-/// Stores the current authenticated user information
-/// And make it available throughout the app
+/// App-level cubit that exposes the **current authentication session**
+/// to the entire application.
+///
+/// Responsibilities:
+/// - listen to `AuthRepository.authStateChanges()`
+/// - expose whether a user is signed in or signed out
+/// - provide a global `signOut()` intent
+///
+/// This cubit does NOT handle authentication flows (sign-in / sign-up).
+/// It only reflects session state and is safe to use across all features.
 class AppUserCubit extends Cubit<AppUserState> {
   final UserSignOut _userSignOut;
   late final StreamSubscription _authStateChangesSub;
-  AuthRepository _authRepository;
+  final AuthRepository _authRepository;
   AppUserCubit({
     required UserSignOut userSignOut,
     required AuthRepository authRepository,

@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 
 /// Builds the "shell" for the app by building a Scaffold with a
 /// BottomNavigationBar, where [child] is placed in the body of the Scaffold.
-class AppNavigationBar extends StatelessWidget {
+class AppShell extends StatelessWidget {
   /// The navigation shell and container for the branch Navigators.
   final StatefulNavigationShell navigationShell;
 
-  const AppNavigationBar({required this.navigationShell, Key? key})
+  const AppShell({required this.navigationShell, Key? key})
     : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
 
   @override

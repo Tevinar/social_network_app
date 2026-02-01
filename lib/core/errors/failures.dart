@@ -6,3 +6,7 @@ sealed class Failure {
 class ServerFailure extends Failure {
   ServerFailure(super.message);
 }
+
+class InvalidInputFailure extends Failure {
+  InvalidInputFailure(super.message);
+}

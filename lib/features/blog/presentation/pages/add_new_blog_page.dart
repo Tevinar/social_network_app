@@ -37,21 +37,32 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   }
 
   void uploadBlog() {
-    if (formKey.currentState!.validate() &&
-        selectedTopics.isNotEmpty &&
-        image != null) {
-      String userId =
-          (context.read<AppUserCubit>().state as AppUserSignedIn).user.id;
-      context.read<BlogEditorBloc>().add(
-        AddBlog(
-          title: titleController.text.trim(),
-          content: contentController.text.trim(),
-          topics: selectedTopics,
-          image: image!,
-          posterId: userId,
-        ),
-      );
+    if (image == null) {
+      showSnackBar(context, 'Please select an image');
+      return;
     }
+    if (selectedTopics.isEmpty) {
+      showSnackBar(context, 'Please select at least one topic');
+      return;
+    }
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+    AppUserState state = context.read<AppUserCubit>().state;
+    if (state is! AppUserSignedIn) {
+      showSnackBar(context, 'You must be signed in to add a blog');
+      return;
+    }
+
+    context.read<BlogEditorBloc>().add(
+      AddBlog(
+        title: titleController.text.trim(),
+        content: contentController.text.trim(),
+        topics: selectedTopics,
+        image: image!,
+        posterId: state.user.id,
+      ),
+    );
   }
 
   @override

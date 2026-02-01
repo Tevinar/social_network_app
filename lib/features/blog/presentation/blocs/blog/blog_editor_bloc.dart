@@ -20,7 +20,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   }
 
   void _onAddBlog(AddBlog event, Emitter<BlogEditorState> emit) async {
-    Either<ServerFailure, Blog> res = await _uploadBlog.call(
+    Either<Failure, Blog> res = await _uploadBlog.call(
       CreateBlogParams(
         posterId: event.posterId,
         title: event.title,

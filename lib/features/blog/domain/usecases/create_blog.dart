@@ -8,12 +8,29 @@ import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart'
 import 'package:fpdart/fpdart.dart';
 
 class CreateBlog implements UseCase<Blog, CreateBlogParams> {
-  BlogRepository blogRepository;
-  CreateBlog({required this.blogRepository});
+  final BlogRepository _blogRepository;
+  CreateBlog({required BlogRepository blogRepository})
+    : _blogRepository = blogRepository;
 
   @override
-  Future<Either<ServerFailure, Blog>> call(CreateBlogParams params) {
-    return blogRepository.createBlog(
+  Future<Either<Failure, Blog>> call(CreateBlogParams params) async {
+    if (params.image.path.isEmpty) {
+      return left(InvalidInputFailure('Image cannot be empty'));
+    }
+    if (params.title.isEmpty) {
+      return left(InvalidInputFailure('Title cannot be empty'));
+    }
+    if (params.content.isEmpty) {
+      return left(InvalidInputFailure('Content cannot be empty'));
+    }
+    if (params.posterId.isEmpty) {
+      return left(InvalidInputFailure('Poster ID cannot be empty'));
+    }
+    if (params.topics.isEmpty) {
+      return left(InvalidInputFailure('At least one topic must be selected'));
+    }
+
+    return _blogRepository.createBlog(
       image: params.image,
       title: params.title,
       content: params.content,

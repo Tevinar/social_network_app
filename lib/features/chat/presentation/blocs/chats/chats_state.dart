@@ -1,0 +1,41 @@
+part of 'chats_bloc.dart';
+
+@immutable
+sealed class ChatsState {
+  final List<Chat> chats;
+  final int pageNumber;
+  final int? totalChatsInDatabase;
+
+  const ChatsState({
+    required this.chats,
+    required this.pageNumber,
+    this.totalChatsInDatabase,
+  });
+}
+
+final class ChatsLoading extends ChatsState {
+  const ChatsLoading({
+    required super.chats,
+    required super.pageNumber,
+    super.totalChatsInDatabase,
+  });
+}
+
+final class ChatsSuccess extends ChatsState {
+  const ChatsSuccess({
+    required super.chats,
+    required super.pageNumber,
+    super.totalChatsInDatabase,
+  });
+}
+
+final class ChatsFailure extends ChatsState {
+  final String error;
+
+  const ChatsFailure({
+    required this.error,
+    required super.chats,
+    required super.pageNumber,
+    super.totalChatsInDatabase,
+  });
+}

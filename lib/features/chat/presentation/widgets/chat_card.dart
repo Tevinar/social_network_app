@@ -1,8 +1,10 @@
 import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:flutter/material.dart';
 
 class ChatCard extends StatelessWidget {
-  const ChatCard({super.key});
+  final Chat chat;
+  const ChatCard({super.key, required this.chat});
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +23,16 @@ class ChatCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        'Name Name Name Name Name Name Name Name Name ',
+                        chat.members.map((e) => e.name).join(', '),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-                    const Text('08:15'),
+                    Text(chat.lastMessage.updatedAt.toString()),
                   ],
                 ),
 
                 Text(
-                  'Last message Last message Last message Last message',
+                  chat.lastMessage.content,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppPallete.greyColor,
                     overflow: TextOverflow.ellipsis,

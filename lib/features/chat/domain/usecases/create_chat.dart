@@ -6,14 +6,22 @@ import 'package:bloc_app/core/usecases/usecase.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:bloc_app/features/chat/domain/repositories/chat_repository.dart';
 
-class CreateChat implements UseCase<Chat, List<User>> {
+class CreateChat implements UseCase<Chat, CreateChatParams> {
   final ChatRepository _chatRepository;
   CreateChat({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   @override
-  Future<Either<Failure, Chat>> call(List<User> params) {
-    List<String> memberIds = params.map((user) => user.id).toList();
-    return _chatRepository.createChat(memberIds);
+  Future<Either<Failure, Chat>> call(CreateChatParams params) {
+    return _chatRepository.createChat(
+      params.members,
+      params.firstMessageContent,
+    );
   }
+}
+
+class CreateChatParams {
+  final List<User> members;
+  final String firstMessageContent;
+  CreateChatParams({required this.members, required this.firstMessageContent});
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bloc_app/core/constants/supabase_schema/buckets.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/blog_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
+import 'package:bloc_app/core/constants/supabase_schema/schema_names.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/core/errors/exceptions.dart';
 import 'package:bloc_app/core/errors/exceptions_mapper.dart';
@@ -137,11 +138,13 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
     controller = StreamController<BlogChange>(
       onListen: () {
-        channel = supabaseClient.realtime.channel('public:${Tables.blogs}');
+        channel = supabaseClient.realtime.channel(
+          '${SchemaTypes.public}:${Tables.blogs}',
+        );
 
         channel.onPostgresChanges(
           event: PostgresChangeEvent.all,
-          schema: 'public',
+          schema: SchemaTypes.public,
           table: Tables.blogs,
           callback: (payload) {
             try {

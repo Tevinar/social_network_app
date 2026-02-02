@@ -165,7 +165,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     }
 
     // If we don't have more blogs to load, do nothing
-    if (state.blogs.length == state.totalBlogsInDatabase) {
+    if (state.blogs.length == state.totalBlogsInDatabase &&
+        state.totalBlogsInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have blogs loading

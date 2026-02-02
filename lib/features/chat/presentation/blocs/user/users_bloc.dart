@@ -49,7 +49,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     }
 
     // If we don't have more users to load, do nothing
-    if (state.users.length == state.totalUsersInDatabase) {
+    if (state.users.length == state.totalUsersInDatabase &&
+        state.totalUsersInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have users loading

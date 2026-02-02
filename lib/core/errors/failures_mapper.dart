@@ -7,6 +7,7 @@ Failure mapExceptionToFailure(Object error) {
   }
 
   if (error is ServerException) {
+    print('Error Code: ${error.code}, Message: ${error.message}');
     switch (error.code) {
       case '401':
       case '403':

@@ -7,6 +7,10 @@ class UserModel {
   final String email;
   UserModel({required this.id, required this.name, required this.email});
 
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'id': id, 'name': name, 'email': email};
+  }
+
   /// UserModel.fromJson factory constructor initializes a final variable from a JSON object.
   factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel(
@@ -14,6 +18,10 @@ class UserModel {
       name: map['name'] ?? '',
       email: map['email'] ?? '',
     );
+  }
+
+  factory UserModel.fromEntity(User user) {
+    return UserModel(id: user.id, name: user.name, email: user.email);
   }
 
   UserModel copyWith({String? id, String? name, String? email}) {

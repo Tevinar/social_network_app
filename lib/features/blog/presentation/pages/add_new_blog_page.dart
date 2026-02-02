@@ -6,7 +6,7 @@ import 'package:bloc_app/core/constants/config/blog_config.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/pick_image.dart';
 import 'package:bloc_app/core/utils/show_snackbar.dart';
-import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/widgets/blog_editor.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';

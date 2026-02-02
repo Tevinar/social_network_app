@@ -14,7 +14,7 @@ import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart'
 import 'package:bloc_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:bloc_app/features/blog/domain/usecases/get_blogs_page.dart';
 import 'package:bloc_app/features/blog/domain/usecases/create_blog.dart';
-import 'package:bloc_app/features/blog/presentation/blocs/blog/blog_editor_bloc.dart';
+import 'package:bloc_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:bloc_app/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:bloc_app/features/chat/data/data_sources/users_remote_data_source.dart';
@@ -23,9 +23,12 @@ import 'package:bloc_app/features/chat/data/repositories/user_list_repository_im
 import 'package:bloc_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:bloc_app/features/chat/domain/usecases/create_chat.dart';
+import 'package:bloc_app/features/chat/domain/usecases/get_chats_count.dart';
+import 'package:bloc_app/features/chat/domain/usecases/get_chats_page.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_users_page.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/chat/chat_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';

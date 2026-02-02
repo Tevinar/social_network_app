@@ -1,4 +1,10 @@
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
+import 'package:bloc_app/features/chat/domain/entities/chat_message.dart';
+
 class Chat {
-  String id;
-  Chat({required this.id});
+  final String id;
+  final ChatMessage lastMessage;
+  final List<User> members;
+
+  Chat({required this.id, required this.lastMessage, required this.members});
 }

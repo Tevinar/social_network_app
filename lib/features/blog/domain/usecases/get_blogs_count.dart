@@ -9,7 +9,7 @@ class GetBlogsCount implements UseCase<int, NoParams> {
     : _blogRepository = blogRepository;
 
   @override
-  Future<Either<ServerFailure, int>> call(NoParams params) {
+  Future<Either<Failure, int>> call(NoParams params) {
     return _blogRepository.getBlogsCount();
   }
 }

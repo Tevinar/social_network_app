@@ -10,7 +10,7 @@ class UserSignOut implements UseCase<void, NoParams> {
   UserSignOut({required this.authRepository});
 
   @override
-  Future<Either<ServerFailure, void>> call(NoParams params) {
+  Future<Either<Failure, void>> call(NoParams params) {
     return authRepository.signOut();
   }
 }

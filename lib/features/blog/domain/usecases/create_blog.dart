@@ -15,19 +15,21 @@ class CreateBlog implements UseCase<Blog, CreateBlogParams> {
   @override
   Future<Either<Failure, Blog>> call(CreateBlogParams params) async {
     if (params.image.path.isEmpty) {
-      return left(InvalidInputFailure('Image cannot be empty'));
+      return left(const ValidationFailure('Image cannot be empty'));
     }
     if (params.title.isEmpty) {
-      return left(InvalidInputFailure('Title cannot be empty'));
+      return left(const ValidationFailure('Title cannot be empty'));
     }
     if (params.content.isEmpty) {
-      return left(InvalidInputFailure('Content cannot be empty'));
+      return left(const ValidationFailure('Content cannot be empty'));
     }
     if (params.posterId.isEmpty) {
-      return left(InvalidInputFailure('Poster ID cannot be empty'));
+      return left(const ValidationFailure('Poster ID cannot be empty'));
     }
     if (params.topics.isEmpty) {
-      return left(InvalidInputFailure('At least one topic must be selected'));
+      return left(
+        const ValidationFailure('At least one topic must be selected'),
+      );
     }
 
     return _blogRepository.createBlog(

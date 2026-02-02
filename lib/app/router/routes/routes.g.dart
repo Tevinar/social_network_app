@@ -14,6 +14,7 @@ List<RouteBase> get $appRoutes => [
   $blogViewerPageRoute,
   $initialLoadingPageRoute,
   $newChatPageRoute,
+  $chatMessagesPageRoute,
 ];
 
 RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
@@ -219,6 +220,32 @@ mixin $NewChatPageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/new-chat');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $chatMessagesPageRoute => GoRouteData.$route(
+  path: '/chat-messages',
+  factory: $ChatMessagesPageRoute._fromState,
+);
+
+mixin $ChatMessagesPageRoute on GoRouteData {
+  static ChatMessagesPageRoute _fromState(GoRouterState state) =>
+      const ChatMessagesPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/chat-messages');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class BlogCardPlaceholder extends StatelessWidget {
   final Color color;
 
-  const BlogCardPlaceholder({super.key, this.color = const Color(0xFFE0E0E0)});
+  const BlogCardPlaceholder({super.key, this.color = AppPallete.greyColor});
 
   @override
   Widget build(BuildContext context) {

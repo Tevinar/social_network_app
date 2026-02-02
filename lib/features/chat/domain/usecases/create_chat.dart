@@ -12,7 +12,7 @@ class CreateChat implements UseCase<Chat, List<User>> {
     : _chatRepository = chatRepository;
 
   @override
-  Future<Either<ServerFailure, Chat>> call(List<User> params) {
+  Future<Either<Failure, Chat>> call(List<User> params) {
     List<String> memberIds = params.map((user) => user.id).toList();
     return _chatRepository.createChat(memberIds);
   }

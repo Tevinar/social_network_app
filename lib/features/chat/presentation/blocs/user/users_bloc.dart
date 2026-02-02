@@ -65,7 +65,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         totalUsersInDatabase: state.totalUsersInDatabase,
       ),
     );
-    final Either<ServerFailure, List<User>> result = await _getUsersPage(
+    final Either<Failure, List<User>> result = await _getUsersPage(
       state.pageNumber,
     );
     result.fold(
@@ -95,7 +95,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   ScrollController get scrollController => _scrollController;
 
   Future<void> _initializeUsersCount(Emitter<UsersState> emit) async {
-    final Either<ServerFailure, int> result = await _getUsersCount(NoParams());
+    final Either<Failure, int> result = await _getUsersCount(NoParams());
     result.fold(
       (error) {
         emit(

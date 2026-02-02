@@ -9,7 +9,7 @@ class GetUsersCount implements UseCase<int, NoParams> {
     : _usersRepository = usersRepository;
 
   @override
-  Future<Either<ServerFailure, int>> call(NoParams params) {
+  Future<Either<Failure, int>> call(NoParams params) {
     return _usersRepository.getUsersCount();
   }
 }

@@ -9,7 +9,7 @@ class GetBlogsPage implements UseCase<List<Blog>, int> {
   GetBlogsPage({required this.blogRepository});
 
   @override
-  Future<Either<ServerFailure, List<Blog>>> call(int pageNumber) {
+  Future<Either<Failure, List<Blog>>> call(int pageNumber) {
     return blogRepository.getBlogsPage(pageNumber);
   }
 }

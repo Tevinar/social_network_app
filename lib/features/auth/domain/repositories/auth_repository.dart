@@ -3,18 +3,18 @@ import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class AuthRepository {
-  Stream<Either<ServerFailure, User?>> authStateChanges();
+  Stream<Either<Failure, User?>> authStateChanges();
 
-  Future<Either<ServerFailure, User>> signUpWithEmailPassword({
+  Future<Either<Failure, User>> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   });
 
-  Future<Either<ServerFailure, User>> signInWithEmailPassword({
+  Future<Either<Failure, User>> signInWithEmailPassword({
     required String email,
     required String password,
   });
 
-  Future<Either<ServerFailure, void>> signOut();
+  Future<Either<Failure, void>> signOut();
 }

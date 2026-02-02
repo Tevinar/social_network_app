@@ -8,3 +8,11 @@ class NewChatPageRoute extends GoRouteData with $NewChatPageRoute {
   Widget build(BuildContext context, GoRouterState state) =>
       const NewChatPage();
 }
+
+@TypedGoRoute<ChatMessagesPageRoute>(path: '/chat-messages')
+class ChatMessagesPageRoute extends GoRouteData with $ChatMessagesPageRoute {
+  const ChatMessagesPageRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ChatMessagesPage();
+}

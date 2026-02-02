@@ -20,9 +20,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   Future<void> _onCreateChat(ChatCreate event, Emitter<ChatState> emit) async {
-    final Either<ServerFailure, Chat> res = await _createChat.call(
-      event.chatMembers,
-    );
+    final Either<Failure, Chat> res = await _createChat.call(event.chatMembers);
 
     res.fold(
       (l) => emit(ChatFailure(l.message)),

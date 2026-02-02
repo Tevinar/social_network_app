@@ -10,7 +10,7 @@ class GetUsersPage implements UseCase<List<User>, int> {
     : _usersRepository = usersRepository;
 
   @override
-  Future<Either<ServerFailure, List<User>>> call(int nextPage) {
+  Future<Either<Failure, List<User>>> call(int nextPage) {
     return _usersRepository.getUsersPage(nextPage);
   }
 }

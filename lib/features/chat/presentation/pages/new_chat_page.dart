@@ -1,10 +1,24 @@
+import 'package:bloc_app/app/router/routes/routes.dart';
+import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:bloc_app/core/utils/show_snackbar.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/chat/chat_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/widgets/user_checkbox_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NewChatPage extends StatelessWidget {
+class NewChatPage extends StatefulWidget {
   const NewChatPage({super.key});
+
+  @override
+  State<NewChatPage> createState() => _NewChatPageState();
+}
+
+class _NewChatPageState extends State<NewChatPage> {
+  List<User> selectedUsers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +34,9 @@ class NewChatPage extends StatelessWidget {
             return SingleChildScrollView(
               child: Column(
                 children: List.generate(
-                  4,
-                  (index) => const Text(' Loading user...'),
-                ), // TODO Replace with proper placeholder
+                  3,
+                  (index) => const UserCheckboxPlaceholder(),
+                ),
               ),
             );
           } else {
@@ -35,15 +49,87 @@ class NewChatPage extends StatelessWidget {
                 if (index == state.users.length) {
                   return const Loader(size: 30);
                 } else {
-                  return Text(
-                    state.users[index].name,
-                  ); // TODO Replace with proper user card
+                  if (state.users[index].id ==
+                      (context.read<AppUserCubit>().state as AppUserSignedIn)
+                          .user
+                          .id) {
+                    return const SizedBox.shrink();
+                  }
+                  return CheckboxListTile(
+                    secondary: const CircleAvatar(child: Icon(Icons.person)),
+                    title: Text(state.users[index].name),
+                    checkboxShape: const CircleBorder(),
+                    checkboxScaleFactor: 1.35,
+                    side: const BorderSide(
+                      width: 0.5,
+                      color: AppPallete.greyColor,
+                    ),
+                    checkColor: AppPallete.whiteColor,
+                    activeColor: AppPallete.gradient1,
+                    value: selectedUsers.contains(state.users[index]),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedUsers.add(state.users[index]);
+                        } else {
+                          selectedUsers.remove(state.users[index]);
+                        }
+                      });
+                    },
+                  );
                 }
               },
             );
           }
         },
       ),
+      floatingActionButton: selectedUsers.isEmpty
+          ? null
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: BlocConsumer<ChatBloc, ChatState>(
+                listener: (context, state) {
+                  if (state is ChatCreateSuccess) {
+                    const ChatMessagesPageRoute().pushReplacement(context);
+                  } else if (state is ChatFailure) {
+                    showSnackBar(context, state.message);
+                  }
+                },
+                builder: (context, state) {
+                  bool isLoading = state is ChatLoading;
+                  return TextButton.icon(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            context.read<ChatBloc>().add(
+                              ChatCreate(chatMembers: selectedUsers),
+                            );
+                          },
+                    label: isLoading
+                        ? const Loader(size: 25)
+                        : Text(
+                            'Message',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                    icon: isLoading
+                        ? null
+                        : const Icon(Icons.send, color: AppPallete.whiteColor),
+
+                    style: ButtonStyle(
+                      backgroundColor: const WidgetStatePropertyAll(
+                        AppPallete.gradient1,
+                      ),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(10),
+                        ),
+                      ),
+                      fixedSize: const WidgetStatePropertyAll(Size(140, 50)),
+                    ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }

@@ -22,6 +22,6 @@ final class AuthSignIn extends AuthEvent {
 
 /// Internal event: auth state changed from repository stream
 class _AuthStateChanged extends AuthEvent {
-  final Either<ServerFailure, User?> authState;
+  final Either<Failure, User?> authState;
   _AuthStateChanged(this.authState);
 }

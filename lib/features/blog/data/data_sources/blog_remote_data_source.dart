@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/constants/supabase_schema/buckets.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/blog_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:bloc_app/core/errors/exceptions_mapper.dart';
 import 'package:bloc_app/features/blog/data/models/blog_model.dart';
 import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -28,18 +28,14 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
   @override
   Future<BlogModel> postBlog(BlogModel blog) async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       final List<Map<String, dynamic>> blogData = await supabaseClient
           .from(Tables.blogs)
           .insert(blog.toJson())
           .select();
 
       return BlogModel.fromJson(blogData.first);
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   @override
@@ -47,27 +43,19 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     required File image,
     required String blogId,
   }) async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       await supabaseClient.storage
           .from(Buckets.blogImages)
           .upload(blogId, image);
       return supabaseClient.storage
           .from(Buckets.blogImages)
           .getPublicUrl(blogId);
-    } on StorageException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   @override
   Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
-    try {
-      if (pageNumber < 1) {
-        throw ArgumentError(ErrorMessages.pageNumberInvalid);
-      }
-
+    return guardRemoteDataSourceCall(() async {
       const int pageSize = 20;
       final int from = (pageNumber - 1) * pageSize;
       final int to = from + pageSize - 1;
@@ -85,22 +73,14 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
             ),
           )
           .toList();
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   @override
   Future<int> getBlogsCount() async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       return await supabaseClient.from(Tables.blogs).count();
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   /// Watches real-time changes on the `blogs` table and emits domain-level
@@ -191,7 +171,10 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
                   break;
               }
             } catch (e, stack) {
-              controller.addError(ServerException(e.toString()), stack);
+              controller.addError(
+                ServerException(message: e.toString()),
+                stack,
+              );
             }
           },
         );

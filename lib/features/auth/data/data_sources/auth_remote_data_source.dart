@@ -1,6 +1,7 @@
 import 'package:bloc_app/core/constants/error_messages.dart';
 import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:bloc_app/core/errors/exceptions_mapper.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -34,20 +35,16 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       final response = await _supabaseClient.auth.signInWithPassword(
         password: password,
         email: email,
       );
       if (response.user == null) {
-        throw const ServerException(ErrorMessages.userNull);
+        throw const ServerException(message: ErrorMessages.userNull);
       }
       return UserModel.fromJson(response.user!.toJson());
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   @override
@@ -56,32 +53,24 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       final response = await _supabaseClient.auth.signUp(
         password: password,
         email: email,
         data: {ProfileFields.name: name},
       );
       if (response.user == null) {
-        throw const ServerException(ErrorMessages.userNull);
+        throw const ServerException(message: ErrorMessages.userNull);
       }
       return UserModel.fromJson(response.user!.toJson());
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   @override
   Future<void> signOut() async {
-    try {
+    return guardRemoteDataSourceCall(() async {
       await _supabaseClient.auth.signOut();
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    });
   }
 
   /// Emits authentication state changes as a stream of [UserModel].

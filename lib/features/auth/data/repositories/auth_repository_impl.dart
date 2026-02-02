@@ -1,9 +1,7 @@
-import 'package:bloc_app/core/constants/error_messages.dart';
-import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:bloc_app/core/errors/failures_mapper.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 
 import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/network/connection_checker.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
@@ -11,15 +9,11 @@ import 'package:fpdart/fpdart.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _authRemoteDataSource;
-  final ConnectionChecker _connectionChecker;
-  const AuthRepositoryImpl({
-    required AuthRemoteDataSource authRemoteDataSource,
-    required ConnectionChecker connectionChecker,
-  }) : _connectionChecker = connectionChecker,
-       _authRemoteDataSource = authRemoteDataSource;
+  const AuthRepositoryImpl({required AuthRemoteDataSource authRemoteDataSource})
+    : _authRemoteDataSource = authRemoteDataSource;
 
   @override
-  Future<Either<ServerFailure, User>> signInWithEmailPassword({
+  Future<Either<Failure, User>> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
@@ -32,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<ServerFailure, User>> signUpWithEmailPassword({
+  Future<Either<Failure, User>> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
@@ -46,35 +40,28 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
-  Future<Either<ServerFailure, User>> _getUser(
+  Future<Either<Failure, User>> _getUser(
     Future<UserModel> Function() fn,
   ) async {
     try {
-      if (!await _connectionChecker.isConnected) {
-        return left(ServerFailure(ErrorMessages.noConnection));
-      }
-
       final user = await fn();
       return right(user.toEntity());
-    } on ServerException catch (e) {
-      return left(ServerFailure(e.message));
+    } catch (e) {
+      return left(mapExceptionToFailure(e));
     }
   }
 
   @override
-  Future<Either<ServerFailure, void>> signOut() async {
+  Future<Either<Failure, void>> signOut() async {
     try {
-      if (!await _connectionChecker.isConnected) {
-        return left(ServerFailure(ErrorMessages.noConnection));
-      }
       return right(_authRemoteDataSource.signOut());
-    } on ServerException catch (e) {
-      return left(ServerFailure(e.message));
+    } catch (e) {
+      return left(mapExceptionToFailure(e));
     }
   }
 
   @override
-  Stream<Either<ServerFailure, User?>> authStateChanges() async* {
+  Stream<Either<Failure, User?>> authStateChanges() async* {
     try {
       await for (final userModel in _authRemoteDataSource.authStateChanges()) {
         // userModel == null → signed out (valid state)
@@ -86,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     } catch (e) {
       // Any unexpected stream error is translated into a Failure
-      yield Left(ServerFailure(e.toString()));
+      yield Left(mapExceptionToFailure(e));
     }
   }
 }

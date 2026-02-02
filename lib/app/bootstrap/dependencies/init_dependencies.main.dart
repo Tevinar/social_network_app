@@ -41,10 +41,7 @@ void _initAuth() {
     )
     // Repositories
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(
-        authRemoteDataSource: serviceLocator(),
-        connectionChecker: serviceLocator(),
-      ),
+      () => AuthRepositoryImpl(authRemoteDataSource: serviceLocator()),
     )
     // Usecases
     ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))
@@ -68,11 +65,7 @@ void _initBlog() {
     )
     // Repositories
     ..registerLazySingleton<BlogRepository>(
-      () => BlogRepositoryImpl(
-        blogRemoteDataSource: serviceLocator(),
-        // blogLocalDataSource: serviceLocator(),
-        connectionChecker: serviceLocator(),
-      ),
+      () => BlogRepositoryImpl(blogRemoteDataSource: serviceLocator()),
     )
     // Usecases
     ..registerLazySingleton(() => CreateBlog(blogRepository: serviceLocator()))

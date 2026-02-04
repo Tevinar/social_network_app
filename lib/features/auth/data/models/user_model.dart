@@ -11,12 +11,19 @@ class UserModel {
     return <String, dynamic>{'id': id, 'name': name, 'email': email};
   }
 
-  /// UserModel.fromJson factory constructor initializes a final variable from a JSON object.
-  factory UserModel.fromJson(Map<String, dynamic> map) {
+  factory UserModel.fromAuthJson(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
+      id: map['id'] as String,
+      email: map['email'] as String,
+      name: map['user_metadata']?['name'] as String? ?? '',
+    );
+  }
+
+  factory UserModel.fromProfileJson(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      email: '', // profiles table doesn’t own email
     );
   }
 

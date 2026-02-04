@@ -1,4 +1,8 @@
+import 'package:bloc_app/app/session/app_user_cubit.dart';
+import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
+import 'package:bloc_app/features/chat/presentation/pages/chat_message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,7 +19,9 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   @override
   void initState() {
     super.initState();
+
     _messageController = TextEditingController();
+    loadInitialChatMessagesPage(context.read<ChatEditorBloc>().state);
   }
 
   @override
@@ -24,33 +30,113 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     super.dispose();
   }
 
+  void loadInitialChatMessagesPage(ChatEditorState state) {
+    if (state is ChatEditorInitial) {
+      context.read<ChatMessagesBloc>().add(
+        LoadInitialChatMessagesPage(state.chatId),
+      );
+    }
+  }
+
+  void _sendMessage(BuildContext context, ChatEditorState state) {
+    final messageText = _messageController.text.trim();
+    if (state is ChatEditorInitial) {
+      context.read<ChatMessagesBloc>().add(
+        AddChatMessage(state.chatId, messageText),
+      );
+      _messageController.clear();
+    } else if (state is ChatEditorWaitingForFirstMessage) {
+      final messageText = _messageController.text.trim();
+      if (messageText.isNotEmpty) {
+        // Dispatch an event to send the message
+        context.read<ChatEditorBloc>().add(
+          AddChatFirstMessage(firstMessageContent: messageText),
+        );
+        _messageController.clear();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatEditorBloc, ChatEditorState>(
-      builder: (context, state) {
+    return BlocConsumer<ChatEditorBloc, ChatEditorState>(
+      listener: (context, state) {
+        loadInitialChatMessagesPage(state);
+      },
+      builder: (context, chatEditorState) {
         return Scaffold(
-          appBar: AppBar(title: Text(state.chatMembers.join(', '))),
+          appBar: AppBar(
+            title: Text(
+              chatEditorState.chatMembers
+                  .where(
+                    (member) =>
+                        member.id !=
+                        (context.read<AppUserCubit>().state as AppUserSignedIn)
+                            .user
+                            .id,
+                  )
+                  .map((member) => member.name)
+                  .join(', '),
+            ),
+          ),
           body: Column(
             children: [
-              if (state is ChatEditorSuccess)
-                Flexible(
-                  child: ListView.builder(
-                    itemCount: 5,
-                    itemBuilder: (context, index) =>
-                        Container(color: Colors.amberAccent, height: 10),
-                  ),
+              if (chatEditorState is ChatEditorInitial)
+                BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
+                  builder: (context, chatMessagesState) {
+                    return Flexible(
+                      child: ListView.builder(
+                        controller: context
+                            .read<ChatMessagesBloc>()
+                            .scrollController,
+                        itemCount:
+                            chatMessagesState.chatMessages.length ==
+                                chatMessagesState.totalChatMessagesInDatabase
+                            ? chatMessagesState.chatMessages.length
+                            : chatMessagesState.chatMessages.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == chatMessagesState.chatMessages.length) {
+                            return const Loader(size: 30);
+                          } else {
+                            String authorName = chatEditorState.chatMembers
+                                .firstWhere(
+                                  (member) =>
+                                      member.id ==
+                                      chatMessagesState
+                                          .chatMessages[index]
+                                          .authorId,
+                                )
+                                .name;
+                            return ChatMessageCard(
+                              chatMessage:
+                                  chatMessagesState.chatMessages[index],
+                              authorName: authorName,
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  },
                 )
               else
                 const Expanded(child: SizedBox()),
-              TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Type your message...',
-                  suffixIcon: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.send),
-                  ),
-                ),
+              BlocBuilder<ChatEditorBloc, ChatEditorState>(
+                builder: (context, state) {
+                  return TextField(
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(context, state),
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      suffixIcon: IconButton(
+                        onPressed: () => _sendMessage(context, state),
+                        icon: state is ChatEditorLoading
+                            ? const Loader()
+                            : const Icon(Icons.send),
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

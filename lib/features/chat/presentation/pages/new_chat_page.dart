@@ -2,7 +2,6 @@ import 'package:bloc_app/app/router/routes/routes.dart';
 import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/common/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
-import 'package:bloc_app/core/utils/show_snackbar.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';

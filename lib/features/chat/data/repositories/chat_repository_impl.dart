@@ -1,8 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:bloc_app/core/errors/failures_mapper.dart';
+import 'package:bloc_app/core/logging/app_logger.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/chat/data/models/chat_model.dart';
+import 'package:bloc_app/features/chat/domain/entities/chat_change.dart';
 import 'package:fpdart/fpdart.dart';
 
 import 'package:bloc_app/core/errors/failures.dart';
@@ -24,9 +26,15 @@ class ChatRepositoryImpl implements ChatRepository {
         members.map((e) => UserModel.fromEntity(e)).toList(),
         firstMessageContent,
       );
+      appLogger.info('Chat created', {'chatId': chat.id});
       return Right(chat.toEntity());
-    } catch (e) {
-      return Left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Error in create chat',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return Left(mapExceptionToFailure(error));
     }
   }
 
@@ -40,8 +48,13 @@ class ChatRepositoryImpl implements ChatRepository {
           .map((chatModel) => chatModel.toEntity())
           .toList();
       return Right(chats);
-    } catch (e) {
-      return Left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to get chats page',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return Left(mapExceptionToFailure(error));
     }
   }
 
@@ -50,8 +63,30 @@ class ChatRepositoryImpl implements ChatRepository {
     try {
       final int chatsCount = await chatRemoteDataSource.getChatsCount();
       return right(chatsCount);
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to get chats count',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return left(mapExceptionToFailure(error));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, ChatChange>> watchChatChanges() async* {
+    try {
+      await for (final chatChange in chatRemoteDataSource.watchChatChanges()) {
+        yield Right(chatChange);
+      }
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to watch chat changes',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      // Any unexpected stream error is translated into a Failure
+      yield left(mapExceptionToFailure(error));
     }
   }
 }

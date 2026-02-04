@@ -1,3 +1,4 @@
+import 'package:bloc_app/core/constants/supabase_schema/fields/chat_fields.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:bloc_app/features/chat/data/models/chat_message_model.dart';
@@ -16,19 +17,19 @@ class ChatModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'id': id,
-      'members': members.map((e) => e.toJson()).toList(),
-      'lastMessage': lastMessage.toJson(),
+      ChatFields.id: id,
+      ChatFields.lastMessageId: lastMessage.id,
+      ChatFields.lastMessageAt: lastMessage.createdAt.toIso8601String(),
     };
   }
 
   factory ChatModel.fromJson(Map<String, dynamic> map) {
     return ChatModel(
-      id: map['id'],
-      members: (map[Tables.profiles] as List<dynamic>)
-          .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+      id: map[ChatFields.id],
+      members: (map[Tables.chatMembers] as List<dynamic>)
+          .map((e) => UserModel.fromProfileJson(e[Tables.profiles]))
           .toList(),
-      lastMessage: ChatMessageModel.fromJson(map[Tables.chatMessages][0]),
+      lastMessage: ChatMessageModel.fromJson(map[Tables.chatMessages]),
     );
   }
 

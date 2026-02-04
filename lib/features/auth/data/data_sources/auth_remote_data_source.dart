@@ -43,7 +43,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
       if (response.user == null) {
         throw const ServerException(message: ErrorMessages.userNull);
       }
-      return UserModel.fromJson(response.user!.toJson());
+      return UserModel.fromAuthJson(response.user!.toJson());
     });
   }
 
@@ -62,7 +62,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
       if (response.user == null) {
         throw const ServerException(message: ErrorMessages.userNull);
       }
-      return UserModel.fromJson(response.user!.toJson());
+      return UserModel.fromAuthJson(response.user!.toJson());
     });
   }
 
@@ -111,7 +111,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
 
       return supabaseUser == null
           ? null
-          : UserModel.fromJson(supabaseUser.toJson());
+          : UserModel.fromAuthJson(supabaseUser.toJson());
     });
   }
 }

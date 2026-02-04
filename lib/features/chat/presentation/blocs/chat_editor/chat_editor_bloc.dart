@@ -14,9 +14,15 @@ class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
 
   ChatEditorBloc({required CreateChat createChat})
     : _createChat = createChat,
-      super(const ChatEditorInitial(chatMembers: [])) {
+      super(const ChatEditorLoading(chatMembers: [])) {
     on<AddChat>(_onAddChat);
     on<AddChatFirstMessage>(_onAddChatFirstMessage);
+    on<SelectChat>(_onSelectChat);
+  }
+
+  @override
+  void onTransition(Transition<ChatEditorEvent, ChatEditorState> transition) {
+    super.onTransition(transition);
   }
 
   /// On chat addition, wait for the first message to be added to backend
@@ -33,14 +39,25 @@ class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
 
     final Either<Failure, Chat> res = await _createChat.call(
       CreateChatParams(
-        members: event.chatMembers,
+        members: state.chatMembers,
         firstMessageContent: event.firstMessageContent,
       ),
     );
 
     res.fold(
       (l) => emit(ChatEditorFailure(l.message, chatMembers: state.chatMembers)),
-      (r) => emit(ChatEditorSuccess(chatMembers: event.chatMembers)),
+      (chat) => emit(
+        ChatEditorInitial(chatId: chat.id, chatMembers: state.chatMembers),
+      ),
+    );
+  }
+
+  Future<void> _onSelectChat(
+    SelectChat event,
+    Emitter<ChatEditorState> emit,
+  ) async {
+    emit(
+      ChatEditorInitial(chatId: event.chatId, chatMembers: event.chatMembers),
     );
   }
 }

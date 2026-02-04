@@ -50,8 +50,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
        _repository = repository,
        super(const BlogsLoading(blogs: [], pageNumber: 1)) {
     on<LoadBlogsNextPage>(_onLoadBlogsNextPage);
-    on<BlogChangeReceived>(onBlogChangeReceived);
-    on<RefreshBlogsView>(onRefreshBlogsView);
+    on<BlogChangeReceived>(_onBlogChangeReceived);
+    on<RefreshBlogsView>(_onRefreshBlogsView);
 
     _addListenerToScrollController();
     _addListenerToSubscription();
@@ -67,7 +67,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   }
 
   // Re-emit the current state to trigger rebuild
-  void onRefreshBlogsView(RefreshBlogsView event, Emitter<BlogsState> emit) {
+  void _onRefreshBlogsView(RefreshBlogsView event, Emitter<BlogsState> emit) {
     emit(state.copyWith());
   }
 
@@ -99,7 +99,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   ///
   /// These changes may affect blogs that were already loaded via pagination.
   /// This handler does not trigger refetching or pagination.
-  void onBlogChangeReceived(
+  void _onBlogChangeReceived(
     BlogChangeReceived event,
     Emitter<BlogsState> emit,
   ) {

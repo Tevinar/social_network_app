@@ -11,23 +11,37 @@ Future<void> initDependencies() async {
   serviceLocator.registerLazySingleton(() => supabase.client);
 
   // app
+  _initApp();
+
+  // core
+  initCore();
+
+  // features
+  _initAuth();
+  _initBlog();
+  _initChat();
+}
+
+void _initApp() {
+  // Session
   serviceLocator.registerLazySingleton(
     () => AppUserCubit(
       authRepository: serviceLocator(),
       userSignOut: serviceLocator(),
     ),
   );
+  // logging
+  serviceLocator.registerLazySingleton(() => createTalker());
+  serviceLocator.registerLazySingleton<AppLogger>(
+    () => AppTalkerLogger(talker: serviceLocator()),
+  );
+}
 
-  // core
+void initCore() {
   serviceLocator.registerLazySingleton(() => InternetConnection());
   serviceLocator.registerLazySingleton<ConnectionChecker>(
     () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
   );
-
-  // features
-  _initAuth();
-  _initBlog();
-  _initChat();
 }
 
 void _initAuth() {
@@ -95,12 +109,20 @@ void _initChat() {
     ..registerLazySingleton<UsersRemoteDataSource>(
       () => UsersRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
+    ..registerLazySingleton<ChatMessageRemoteDataSource>(
+      () => ChatMessageRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
     // Repositories
     ..registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(chatRemoteDataSource: serviceLocator()),
     )
     ..registerLazySingleton<UsersRepository>(
       () => UsersRepositoryImpl(usersRemoteDataSource: serviceLocator()),
+    )
+    ..registerLazySingleton<ChatMessageRepository>(
+      () => ChatMessageRepositoryImpl(
+        chatMessageRemoteDataSource: serviceLocator(),
+      ),
     )
     // Usecases
     ..registerLazySingleton(() => CreateChat(chatRepository: serviceLocator()))
@@ -116,6 +138,15 @@ void _initChat() {
     ..registerLazySingleton(
       () => GetChatsPage(chatRepository: serviceLocator()),
     )
+    ..registerLazySingleton(
+      () => GetChatMessagesPage(chatMessageRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => GetChatMessagesCount(chatMessageRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => CreateChatMessage(chatMessageRepository: serviceLocator()),
+    )
     // BLoC
     ..registerLazySingleton(() => ChatEditorBloc(createChat: serviceLocator()))
     ..registerLazySingleton(
@@ -128,6 +159,15 @@ void _initChat() {
       () => ChatsBloc(
         getChatsPage: serviceLocator(),
         getChatsCount: serviceLocator(),
+        repository: serviceLocator(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => ChatMessagesBloc(
+        getChatMessagesPage: serviceLocator(),
+        getChatMessagesCount: serviceLocator(),
+        repository: serviceLocator(),
+        createChatMessage: serviceLocator(),
       ),
     );
 }

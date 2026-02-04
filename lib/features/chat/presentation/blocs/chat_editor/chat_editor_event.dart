@@ -10,10 +10,13 @@ class AddChat extends ChatEditorEvent {
 }
 
 class AddChatFirstMessage extends ChatEditorEvent {
-  final List<User> chatMembers;
   final String firstMessageContent;
-  AddChatFirstMessage({
-    required this.chatMembers,
-    required this.firstMessageContent,
-  });
+  AddChatFirstMessage({required this.firstMessageContent});
+}
+
+class SelectChat extends ChatEditorEvent {
+  final String chatId;
+  final List<User> chatMembers;
+
+  SelectChat({required this.chatId, required this.chatMembers});
 }

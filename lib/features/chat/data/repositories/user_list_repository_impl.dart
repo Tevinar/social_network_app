@@ -1,4 +1,5 @@
 import 'package:bloc_app/core/errors/failures_mapper.dart';
+import 'package:bloc_app/core/logging/app_logger.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/core/errors/failures.dart';
 import 'package:bloc_app/features/chat/data/data_sources/users_remote_data_source.dart';
@@ -14,8 +15,13 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final users = await usersRemoteDataSource.getUsersPage(pageNumber);
       return Right(users.map((userModel) => userModel.toEntity()).toList());
-    } catch (e) {
-      return Left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to get users page',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return Left(mapExceptionToFailure(error));
     }
   }
 
@@ -24,8 +30,13 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final int usersCount = await usersRemoteDataSource.getUsersCount();
       return right(usersCount);
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to get users count',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return left(mapExceptionToFailure(error));
     }
   }
 }

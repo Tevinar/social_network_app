@@ -11,6 +11,33 @@ sealed class ChatsState {
     required this.pageNumber,
     this.totalChatsInDatabase,
   });
+
+  ChatsState copyWith({
+    List<Chat>? chats,
+    int? pageNumber,
+    int? totalChatsInDatabase,
+  }) {
+    return switch (this) {
+      ChatsLoading() => ChatsLoading(
+        chats: chats ?? this.chats,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalChatsInDatabase: totalChatsInDatabase ?? this.totalChatsInDatabase,
+      ),
+
+      ChatsSuccess() => ChatsSuccess(
+        chats: chats ?? this.chats,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalChatsInDatabase: totalChatsInDatabase ?? this.totalChatsInDatabase,
+      ),
+
+      ChatsFailure(:final error) => ChatsFailure(
+        error: error,
+        chats: chats ?? this.chats,
+        pageNumber: pageNumber ?? this.pageNumber,
+        totalChatsInDatabase: totalChatsInDatabase ?? this.totalChatsInDatabase,
+      ),
+    };
+  }
 }
 
 final class ChatsLoading extends ChatsState {

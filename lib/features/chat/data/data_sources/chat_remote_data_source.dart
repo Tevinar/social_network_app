@@ -6,7 +6,6 @@ import 'package:bloc_app/core/constants/supabase_schema/schema_names.dart';
 import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
 import 'package:bloc_app/core/errors/exceptions.dart';
 import 'package:bloc_app/core/errors/exceptions_mapper.dart';
-import 'package:bloc_app/core/logging/app_logger.dart';
 import 'package:bloc_app/features/auth/data/models/user_model.dart';
 import 'package:bloc_app/features/chat/data/models/chat_message_model.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat_change.dart';
@@ -33,6 +32,8 @@ abstract interface class ChatRemoteDataSource {
 
   /// Fetches a single chat with members and last message.
   Future<ChatModel> getChatById(String chatId);
+
+  Future<ChatModel?> getChatByMembers(List<UserModel> members);
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -68,7 +69,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           'first_message_content': firstMessageContent,
         },
       );
-      appLogger.info('firstMessageData: $firstMessageData');
 
       ChatMessageModel chatMessageModel = ChatMessageModel.fromJson(
         firstMessageData,
@@ -172,6 +172,19 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           .select(_chatSelect)
           .eq(ChatFields.id, chatId)
           .single();
+      return ChatModel.fromJson(result);
+    });
+  }
+
+  @override
+  Future<ChatModel?> getChatByMembers(List<UserModel> members) {
+    return guardRemoteDataSourceCall(() async {
+      final result = await supabaseClient.rpc(
+        'get_chat_by_members',
+        params: {'member_ids': members.map((e) => e.id).toList()},
+      );
+
+      if (result.isEmpty) return null;
       return ChatModel.fromJson(result);
     });
   }

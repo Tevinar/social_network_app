@@ -30,6 +30,7 @@ import 'package:bloc_app/features/chat/domain/repositories/chat_repository.dart'
 import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:bloc_app/features/chat/domain/usecases/create_chat.dart';
 import 'package:bloc_app/features/chat/domain/usecases/create_chat_message.dart';
+import 'package:bloc_app/features/chat/domain/usecases/get_chat_by_members.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_chat_messages_count.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_chat_messages_page.dart';
 import 'package:bloc_app/features/chat/domain/usecases/get_chats_count.dart';

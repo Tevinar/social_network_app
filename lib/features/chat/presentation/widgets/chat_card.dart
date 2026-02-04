@@ -28,6 +28,7 @@ class ChatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         context.read<ChatEditorBloc>().add(
           SelectChat(chatId: chat.id, chatMembers: chat.members),

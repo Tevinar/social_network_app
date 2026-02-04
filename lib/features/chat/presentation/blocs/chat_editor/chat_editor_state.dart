@@ -6,9 +6,13 @@ sealed class ChatEditorState {
   const ChatEditorState({required this.chatMembers});
 }
 
-final class ChatEditorInitial extends ChatEditorState {
+final class ChatEditorDrafted extends ChatEditorState {
+  const ChatEditorDrafted({required super.chatMembers});
+}
+
+final class ChatEditorLoaded extends ChatEditorState {
   final String chatId;
-  const ChatEditorInitial({required super.chatMembers, required this.chatId});
+  const ChatEditorLoaded({required super.chatMembers, required this.chatId});
 }
 
 final class ChatEditorLoading extends ChatEditorState {

@@ -15,4 +15,6 @@ abstract interface class ChatRepository {
   Future<Either<Failure, int>> getChatsCount();
 
   Stream<Either<Failure, ChatChange>> watchChatChanges();
+
+  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members);
 }

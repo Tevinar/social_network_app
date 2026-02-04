@@ -31,7 +31,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   void loadInitialChatMessagesPage(ChatEditorState state) {
-    if (state is ChatEditorInitial) {
+    if (state is ChatEditorLoaded) {
       context.read<ChatMessagesBloc>().add(
         LoadInitialChatMessagesPage(state.chatId),
       );
@@ -40,7 +40,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
 
   void _sendMessage(BuildContext context, ChatEditorState state) {
     final messageText = _messageController.text.trim();
-    if (state is ChatEditorInitial) {
+    if (state is ChatEditorLoaded) {
       context.read<ChatMessagesBloc>().add(
         AddChatMessage(state.chatId, messageText),
       );
@@ -81,7 +81,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
           ),
           body: Column(
             children: [
-              if (chatEditorState is ChatEditorInitial)
+              if (chatEditorState is ChatEditorLoaded)
                 BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
                   builder: (context, chatMessagesState) {
                     return Flexible(

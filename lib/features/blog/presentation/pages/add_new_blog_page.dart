@@ -26,14 +26,22 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   final formKey = GlobalKey<FormState>();
   List<String> selectedTopics = [];
   File? image;
+  bool _isImagePickerLoading = false;
 
   void selectImage() async {
+    if (_isImagePickerLoading) return;
+    setState(() {
+      _isImagePickerLoading = true;
+    });
     final pickedImage = await pickImage();
     if (pickedImage != null) {
       setState(() {
         image = pickedImage;
       });
     }
+    setState(() {
+      _isImagePickerLoading = false;
+    });
   }
 
   void uploadBlog() {
@@ -117,39 +125,42 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                           width: double.infinity,
                           child: ClipRRect(
                             borderRadius: BorderRadiusGeometry.circular(10),
-                            child: Image.file(image!, fit: BoxFit.cover),
+                            child: _isImagePickerLoading
+                                ? const Loader()
+                                : Image.file(image!, fit: BoxFit.cover),
                           ),
                         ),
                       )
                     : GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => selectImage(),
-                        child: Container(
-                          color: AppPallete.backgroundColor,
-                          child: const DottedBorder(
-                            options: RoundedRectDottedBorderOptions(
-                              dashPattern: [10, 4],
-                              color: AppPallete.borderColor,
-                              radius: Radius.circular(10),
-                              strokeCap: StrokeCap.round,
-                            ),
-                            child: SizedBox(
-                              height: 150,
-                              width: double.infinity,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.folder_open, size: 40),
-                                  SizedBox(height: 15),
-                                  Text(
-                                    'Select your image',
-                                    style: TextStyle(fontSize: 15),
+                        child: DottedBorder(
+                          options: const RoundedRectDottedBorderOptions(
+                            dashPattern: [10, 4],
+                            color: AppPallete.borderColor,
+                            radius: Radius.circular(10),
+                            strokeCap: StrokeCap.round,
+                          ),
+                          child: SizedBox(
+                            height: 150,
+                            width: double.infinity,
+                            child: _isImagePickerLoading
+                                ? const Loader()
+                                : const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.folder_open, size: 40),
+                                      SizedBox(height: 15),
+                                      Text(
+                                        'Select your image',
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
                           ),
                         ),
                       ),
+
                 const SizedBox(height: 20),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,

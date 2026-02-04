@@ -26,7 +26,6 @@ class ChatRepositoryImpl implements ChatRepository {
         members.map((e) => UserModel.fromEntity(e)).toList(),
         firstMessageContent,
       );
-      appLogger.info('Chat created', {'chatId': chat.id});
       return Right(chat.toEntity());
     } catch (error, stackTrace) {
       appLogger.error(
@@ -87,6 +86,23 @@ class ChatRepositoryImpl implements ChatRepository {
       );
       // Any unexpected stream error is translated into a Failure
       yield left(mapExceptionToFailure(error));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members) async {
+    try {
+      final ChatModel? chatModel = await chatRemoteDataSource.getChatByMembers(
+        members.map((e) => UserModel.fromEntity(e)).toList(),
+      );
+      return Right(chatModel?.toEntity());
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to get chat by members',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return Left(mapExceptionToFailure(error));
     }
   }
 }

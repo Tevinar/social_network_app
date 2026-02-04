@@ -147,8 +147,16 @@ void _initChat() {
     ..registerLazySingleton(
       () => CreateChatMessage(chatMessageRepository: serviceLocator()),
     )
+    ..registerLazySingleton(
+      () => GetChatByMembers(chatRepository: serviceLocator()),
+    )
     // BLoC
-    ..registerLazySingleton(() => ChatEditorBloc(createChat: serviceLocator()))
+    ..registerLazySingleton(
+      () => ChatEditorBloc(
+        createChat: serviceLocator(),
+        getChatByMembers: serviceLocator(),
+      ),
+    )
     ..registerLazySingleton(
       () => UsersBloc(
         getUsersPage: serviceLocator(),

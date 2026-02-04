@@ -5,7 +5,6 @@ import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/widgets/user_checkbox_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,14 +31,7 @@ class _NewChatPageState extends State<NewChatPage> {
           }
           // Show loading placeholders when users are being fetched for the first time
           else if (state is UsersLoading && state.users.isEmpty) {
-            return SingleChildScrollView(
-              child: Column(
-                children: List.generate(
-                  3,
-                  (index) => const UserCheckboxPlaceholder(),
-                ),
-              ),
-            );
+            return const Loader();
           } else {
             return ListView.builder(
               controller: context.read<UsersBloc>().scrollController,
@@ -90,20 +82,34 @@ class _NewChatPageState extends State<NewChatPage> {
               padding: const EdgeInsets.all(16.0),
               child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
                 listener: (context, state) {
-                  if (state is ChatEditorWaitingForFirstMessage) {
+                  if (state is ChatEditorWaitingForFirstMessage ||
+                      state is ChatEditorLoaded) {
                     const ChatMessagesPageRoute().pushReplacement(context);
                   }
                 },
                 builder: (context, state) {
                   return TextButton.icon(
-                    onPressed: () => context.read<ChatEditorBloc>().add(
-                      AddChat(chatMembers: selectedUsers),
-                    ),
-                    label: Text(
-                      'Message',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    icon: const Icon(Icons.send, color: AppPallete.whiteColor),
+                    onPressed: () {
+                      if (state is! ChatEditorLoading) {
+                        final currentUser =
+                            (context.read<AppUserCubit>().state
+                                    as AppUserSignedIn)
+                                .user;
+                        selectedUsers.add(currentUser);
+                        context.read<ChatEditorBloc>().add(
+                          AddChat(chatMembers: selectedUsers),
+                        );
+                      }
+                    },
+                    label: state is ChatEditorLoading
+                        ? const Loader(size: 25)
+                        : Text(
+                            'Message',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                    icon: state is ChatEditorLoading
+                        ? null
+                        : const Icon(Icons.send, color: AppPallete.whiteColor),
 
                     style: ButtonStyle(
                       backgroundColor: const WidgetStatePropertyAll(

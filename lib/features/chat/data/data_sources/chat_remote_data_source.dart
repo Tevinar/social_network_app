@@ -184,7 +184,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         params: {'member_ids': members.map((e) => e.id).toList()},
       );
 
-      if (result.isEmpty) return null;
+      if (result == null) return null;
       return ChatModel.fromJson(result);
     });
   }

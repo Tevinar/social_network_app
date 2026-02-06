@@ -1,6 +1,7 @@
 import 'package:bloc_app/app/router/routes/routes.dart';
 import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:bloc_app/core/utils/format_date.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/chat/domain/entities/chat.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
@@ -54,7 +55,11 @@ class ChatCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                      Text(chat.lastMessage.updatedAt.toString()),
+                      Text(
+                        chat.lastMessage.updatedAt.day == DateTime.now().day
+                            ? formatToHour(chat.lastMessage.updatedAt)
+                            : formatToDay(chat.lastMessage.updatedAt),
+                      ),
                     ],
                   ),
 

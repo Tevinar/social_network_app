@@ -34,7 +34,7 @@ class BlogsPage extends StatelessWidget {
             }
           },
         ),
-        title: const Text('Blog App'),
+        title: const Text('Blogs'),
         actions: [
           IconButton(
             onPressed: () async {

@@ -13,6 +13,11 @@ class CreateChat implements UseCase<Chat, CreateChatParams> {
 
   @override
   Future<Either<Failure, Chat>> call(CreateChatParams params) {
+    if (params.firstMessageContent.trim().isEmpty) {
+      return Future.value(
+        left(const ValidationFailure('Message cannot be empty')),
+      );
+    }
     return _chatRepository.createChat(
       params.members,
       params.firstMessageContent,

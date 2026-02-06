@@ -1,10 +1,15 @@
 import 'package:bloc_app/app/session/app_user_cubit.dart';
 import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:bloc_app/core/utils/format_date.dart';
+import 'package:bloc_app/features/auth/domain/entities/user.dart';
+import 'package:bloc_app/features/chat/domain/entities/chat_message.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/pages/chat_message_card.dart';
+import 'package:bloc_app/features/chat/presentation/widgets/chat_message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class ChatMessagesPage extends StatefulWidget {
   const ChatMessagesPage({super.key});
@@ -15,12 +20,14 @@ class ChatMessagesPage extends StatefulWidget {
 
 class _ChatMessagesPageState extends State<ChatMessagesPage> {
   late final TextEditingController _messageController;
+  late final User _currentUser;
 
   @override
   void initState() {
     super.initState();
 
     _messageController = TextEditingController();
+    _currentUser = (context.read<AppUserCubit>().state as AppUserSignedIn).user;
     loadInitialChatMessagesPage(context.read<ChatEditorBloc>().state);
   }
 
@@ -57,6 +64,10 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     }
   }
 
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ChatEditorBloc, ChatEditorState>(
@@ -68,13 +79,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
           appBar: AppBar(
             title: Text(
               chatEditorState.chatMembers
-                  .where(
-                    (member) =>
-                        member.id !=
-                        (context.read<AppUserCubit>().state as AppUserSignedIn)
-                            .user
-                            .id,
-                  )
+                  .where((member) => member.id != _currentUser.id)
                   .map((member) => member.name)
                   .join(', '),
             ),
@@ -86,6 +91,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                   builder: (context, chatMessagesState) {
                     return Flexible(
                       child: ListView.builder(
+                        reverse: true,
                         controller: context
                             .read<ChatMessagesBloc>()
                             .scrollController,
@@ -107,10 +113,40 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                                           .authorId,
                                 )
                                 .name;
-                            return ChatMessageCard(
-                              chatMessage:
-                                  chatMessagesState.chatMessages[index],
-                              authorName: authorName,
+                            ChatMessage currentChatMessage =
+                                chatMessagesState.chatMessages[index];
+                            final bool showDateSeparator =
+                                index ==
+                                    chatMessagesState.chatMessages.length - 1 ||
+                                !isSameDay(
+                                  currentChatMessage.createdAt,
+                                  chatMessagesState
+                                      .chatMessages[index + 1]
+                                      .createdAt,
+                                );
+                            return Column(
+                              children: [
+                                if (showDateSeparator)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    child: Text(
+                                      formatToDay(currentChatMessage.createdAt),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ChatMessageCard(
+                                  chatMessage: currentChatMessage,
+                                  authorName: authorName,
+                                  isMe:
+                                      currentChatMessage.authorId ==
+                                      _currentUser.id,
+                                ),
+                              ],
                             );
                           }
                         },
@@ -122,17 +158,48 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                 const Expanded(child: SizedBox()),
               BlocBuilder<ChatEditorBloc, ChatEditorState>(
                 builder: (context, state) {
-                  return TextField(
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(context, state),
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type your message...',
-                      suffixIcon: IconButton(
-                        onPressed: () => _sendMessage(context, state),
-                        icon: state is ChatEditorLoading
-                            ? const Loader()
-                            : const Icon(Icons.send),
+                  return SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        spacing: 5,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              minLines: 1,
+                              maxLines: 6,
+                              textInputAction: TextInputAction.newline,
+                              controller: _messageController,
+                              decoration: InputDecoration(
+                                hintText: 'Type your message...',
+                                filled: true,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton.filled(
+                            style: const ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                AppPallete.gradient1,
+                              ),
+                            ),
+                            onPressed: () =>
+                                _messageController.value.text.isEmpty
+                                ? {}
+                                : _sendMessage(context, state),
+                            icon: state is ChatEditorLoading
+                                ? const Loader()
+                                : const Icon(
+                                    Icons.send,
+                                    color: AppPallete.whiteColor,
+                                  ),
+                          ),
+                        ],
                       ),
                     ),
                   );

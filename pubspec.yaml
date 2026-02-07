@@ -51,6 +51,7 @@ dependencies:
   realtime_client: ^2.7.0
   talker: ^5.1.13
   flutter_dotenv: ^6.0.0
+  mocktail: ^1.0.4
   
 
 dev_dependencies:

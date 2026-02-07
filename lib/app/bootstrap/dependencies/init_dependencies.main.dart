@@ -15,7 +15,7 @@ Future<void> initDependencies() async {
   _initApp();
 
   // core
-  initCore();
+  _initCore();
 
   // features
   _initAuth();
@@ -38,10 +38,17 @@ void _initApp() {
   );
 }
 
-void initCore() {
+void _initCore() {
+  // Connection checker
   serviceLocator.registerLazySingleton(() => InternetConnection());
   serviceLocator.registerLazySingleton<ConnectionChecker>(
     () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
+  );
+
+  // Image picker service
+  serviceLocator.registerLazySingleton(() => ImagePicker());
+  serviceLocator.registerLazySingleton<ImagePickerService>(
+    () => ImagePickerServiceImpl(serviceLocator()),
   );
 }
 

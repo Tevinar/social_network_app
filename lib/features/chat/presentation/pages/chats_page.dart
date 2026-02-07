@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/widgets/chat_card.dart';

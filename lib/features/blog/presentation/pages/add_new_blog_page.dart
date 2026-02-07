@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:bloc_app/app/session/app_user_cubit.dart';
-import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/widgets/loader.dart';
 import 'package:bloc_app/core/constants/config/blog_config.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/pick_image.dart';

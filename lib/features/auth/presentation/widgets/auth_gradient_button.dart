@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';

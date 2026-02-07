@@ -1,5 +1,5 @@
 import 'package:bloc_app/app/session/app_user_cubit.dart';
-import 'package:bloc_app/core/common/widgets/loader.dart';
+import 'package:bloc_app/core/widgets/loader.dart';
 import 'package:bloc_app/core/theme/app_pallete.dart';
 import 'package:bloc_app/core/utils/format_date.dart';
 import 'package:bloc_app/features/auth/domain/entities/user.dart';

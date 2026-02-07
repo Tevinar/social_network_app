@@ -3,7 +3,7 @@ import 'package:bloc_app/core/errors/failures.dart';
 
 Failure mapExceptionToFailure(Object error) {
   if (error is NetworkException) {
-    return const NetworkFailure();
+    return NetworkFailure(debugMessage: error.message);
   }
 
   if (error is ServerException) {
@@ -11,10 +11,10 @@ Failure mapExceptionToFailure(Object error) {
       case '401':
       case '403':
       case 'PGRST301':
-        return const UnauthorizedFailure();
+        return UnauthorizedFailure(debugMessage: error.message);
 
       case '404':
-        return const NotFoundFailure();
+        return NotFoundFailure(debugMessage: error.message);
 
       case '23505':
         return ValidationFailure(

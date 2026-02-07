@@ -1,9 +1,9 @@
 import 'package:bloc_app/app/logging/app_talker_logger.dart';
 import 'package:bloc_app/app/logging/talker_config.dart';
 import 'package:bloc_app/app/session/app_user_cubit.dart';
+import 'package:bloc_app/core/config/env.dart';
 import 'package:bloc_app/core/logging/app_logger.dart';
 import 'package:bloc_app/core/network/connection_checker.dart';
-import 'package:bloc_app/core/secrets/app_secrets.dart';
 import 'package:bloc_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:bloc_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
@@ -41,6 +41,7 @@ import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_edito
 import 'package:bloc_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

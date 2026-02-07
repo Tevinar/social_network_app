@@ -4,9 +4,10 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   // supabase
+  await dotenv.load(fileName: '.env');
   Supabase supabase = await Supabase.initialize(
-    url: AppSecrets.supabaseUrl,
-    anonKey: AppSecrets.supabaseAnonKey,
+    url: Env.supabaseUrl,
+    anonKey: Env.supabaseAnonKey,
   );
   serviceLocator.registerLazySingleton(() => supabase.client);
 

@@ -1,7 +1,7 @@
 part of 'auth_bloc.dart';
 
 @immutable
-sealed class AuthEvent {}
+abstract class AuthEvent {}
 
 /// User intent: sign up
 final class AuthSignup extends AuthEvent {

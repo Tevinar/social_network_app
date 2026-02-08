@@ -78,6 +78,7 @@ class _SignInPageState extends State<SignInPage> {
                 GestureDetector(
                   onTap: () => const SignUpPageRoute().go(context),
                   child: RichText(
+                    key: const Key('signup_text'),
                     text: TextSpan(
                       text: "Don't have an account ? ",
                       style: Theme.of(context).textTheme.titleMedium,

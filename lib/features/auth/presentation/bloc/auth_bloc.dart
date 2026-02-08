@@ -5,6 +5,7 @@ import 'package:bloc_app/features/auth/domain/entities/user.dart';
 import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:bloc_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';

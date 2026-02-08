@@ -1,8 +1,11 @@
 part of 'auth_bloc.dart';
 
 @immutable
-sealed class AuthState {
+abstract class AuthState extends Equatable {
   const AuthState();
+
+  @override
+  List<Object?> get props => [];
 }
 
 final class AuthSignedOut extends AuthState {}

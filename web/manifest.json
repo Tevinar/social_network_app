@@ -1,6 +1,6 @@
 {
-    "name": "bloc_app",
-    "short_name": "bloc_app",
+    "name": "social_network_app",
+    "short_name": "social_network_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

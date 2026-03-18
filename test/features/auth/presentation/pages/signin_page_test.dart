@@ -1,5 +1,5 @@
-import 'package:social_network_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:social_network_app/features/auth/presentation/pages/signin_page.dart';
+import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

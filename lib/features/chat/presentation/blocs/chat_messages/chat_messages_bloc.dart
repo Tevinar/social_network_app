@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:social_network_app/core/errors/failures.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat_message_change.dart';
-import 'package:social_network_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:social_network_app/features/chat/domain/usecases/create_chat_message.dart';
-import 'package:social_network_app/features/chat/domain/usecases/get_chat_messages_count.dart';
-import 'package:social_network_app/features/chat/domain/usecases/get_chat_messages_page.dart';
+import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
+import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
+import 'package:social_app/features/chat/domain/usecases/create_chat_message.dart';
+import 'package:social_app/features/chat/domain/usecases/get_chat_messages_count.dart';
+import 'package:social_app/features/chat/domain/usecases/get_chat_messages_page.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:social_network_app/core/errors/failures.dart';
-import 'package:social_network_app/features/auth/domain/entities/user.dart';
-import 'package:social_network_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:social_network_app/features/auth/domain/usecases/user_sign_in.dart';
-import 'package:social_network_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

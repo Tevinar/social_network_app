@@ -1,14 +1,14 @@
-import 'package:social_network_app/app/bootstrap/initial_loading_page.dart';
-import 'package:social_network_app/app/router/shell/app_shell.dart';
-import 'package:social_network_app/features/auth/presentation/pages/signin_page.dart';
-import 'package:social_network_app/features/auth/presentation/pages/signup_page.dart';
-import 'package:social_network_app/features/blog/domain/entities/blog.dart';
-import 'package:social_network_app/features/blog/presentation/pages/add_new_blog_page.dart';
-import 'package:social_network_app/features/blog/presentation/pages/blog_viewer_page.dart';
-import 'package:social_network_app/features/blog/presentation/pages/blogs_page.dart';
-import 'package:social_network_app/features/chat/presentation/pages/chat_messages_page.dart';
-import 'package:social_network_app/features/chat/presentation/pages/chats_page.dart';
-import 'package:social_network_app/features/chat/presentation/pages/new_chat_page.dart';
+import 'package:social_app/app/bootstrap/initial_loading_page.dart';
+import 'package:social_app/app/router/shell/app_shell.dart';
+import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
+import 'package:social_app/features/auth/presentation/pages/signup_page.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/presentation/pages/add_new_blog_page.dart';
+import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
+import 'package:social_app/features/blog/presentation/pages/blogs_page.dart';
+import 'package:social_app/features/chat/presentation/pages/chat_messages_page.dart';
+import 'package:social_app/features/chat/presentation/pages/chats_page.dart';
+import 'package:social_app/features/chat/presentation/pages/new_chat_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

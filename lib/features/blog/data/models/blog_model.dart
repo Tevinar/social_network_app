@@ -1,4 +1,4 @@
-import 'package:social_network_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
 
 class BlogModel {
   final String id;

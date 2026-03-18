@@ -1,5 +1,5 @@
-import 'package:social_network_app/core/errors/exceptions.dart';
-import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/failures.dart';
 
 Failure mapExceptionToFailure(Object error) {
   if (error is NetworkException) {

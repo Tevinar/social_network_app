@@ -1,8 +1,8 @@
-# Social Network App
+# Social App
 
 Application Flutter de reseau social connectee a Supabase, utilisant la Clean Architecture, structuree avec BLoC, `get_it` et une organisation par feature. Le projet couvre l'authentification, la publication de blogs avec image, ainsi qu'une messagerie en temps reel.
 
-Note: le nom du repository et le package Dart du projet sont `social_network_app`.
+Note: le nom du repository et le package Dart du projet sont `social_app`.
 
 ## Fonctionnalites
 

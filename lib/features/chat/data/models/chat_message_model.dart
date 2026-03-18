@@ -1,5 +1,5 @@
-import 'package:social_network_app/core/constants/supabase_schema/fields/chat_message_fields.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/chat_message_fields.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class ChatMessageModel {

@@ -1,7 +1,7 @@
-import 'package:social_network_app/core/errors/failures.dart';
-import 'package:social_network_app/core/usecases/usecase.dart';
-import 'package:social_network_app/features/blog/domain/entities/blog.dart';
-import 'package:social_network_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/usecases/usecase.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class GetBlogsPage implements UseCase<List<Blog>, int> {

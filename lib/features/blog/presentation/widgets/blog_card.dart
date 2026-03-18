@@ -1,6 +1,6 @@
-import 'package:social_network_app/core/utils/calculate_reading_time.dart';
-import 'package:social_network_app/features/blog/domain/entities/blog.dart';
-import 'package:social_network_app/app/router/routes/routes.dart';
+import 'package:social_app/core/utils/calculate_reading_time.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 
 class BlogCard extends StatelessWidget {

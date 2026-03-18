@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:social_network_app/core/errors/failures.dart';
-import 'package:social_network_app/features/auth/domain/entities/user.dart';
-import 'package:social_network_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:social_network_app/features/auth/domain/usecases/user_sign_in.dart';
-import 'package:social_network_app/features/auth/domain/usecases/user_sign_up.dart';
-import 'package:social_network_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';

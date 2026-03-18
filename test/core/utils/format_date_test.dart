@@ -1,4 +1,4 @@
-import 'package:social_network_app/core/utils/format_date.dart';
+import 'package:social_app/core/utils/format_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

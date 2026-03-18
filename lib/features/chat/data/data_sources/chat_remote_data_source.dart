@@ -1,17 +1,17 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
-import 'package:social_network_app/core/constants/supabase_schema/fields/chat_fields.dart';
-import 'package:social_network_app/core/constants/supabase_schema/schema_names.dart';
-import 'package:social_network_app/core/constants/supabase_schema/tables.dart';
-import 'package:social_network_app/core/errors/exceptions.dart';
-import 'package:social_network_app/core/errors/exceptions_mapper.dart';
-import 'package:social_network_app/features/auth/data/models/user_model.dart';
-import 'package:social_network_app/features/chat/data/models/chat_message_model.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat_change.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/chat_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
+import 'package:social_app/core/constants/supabase_schema/tables.dart';
+import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/chat/data/models/chat_message_model.dart';
+import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:social_network_app/features/chat/data/models/chat_model.dart';
+import 'package:social_app/features/chat/data/models/chat_model.dart';
 
 abstract interface class ChatRemoteDataSource {
   /// Creates a chat with the given members and an initial message.

@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:social_network_app/core/constants/supabase_schema/buckets.dart';
-import 'package:social_network_app/core/constants/supabase_schema/fields/blog_fields.dart';
-import 'package:social_network_app/core/constants/supabase_schema/fields/profile_fields.dart';
-import 'package:social_network_app/core/constants/supabase_schema/schema_names.dart';
-import 'package:social_network_app/core/constants/supabase_schema/tables.dart';
-import 'package:social_network_app/core/errors/exceptions.dart';
-import 'package:social_network_app/core/errors/exceptions_mapper.dart';
-import 'package:social_network_app/features/blog/data/models/blog_model.dart';
-import 'package:social_network_app/features/blog/domain/entities/blog_change.dart';
+import 'package:social_app/core/constants/supabase_schema/buckets.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/blog_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/profile_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
+import 'package:social_app/core/constants/supabase_schema/tables.dart';
+import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:social_app/features/blog/data/models/blog_model.dart';
+import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class BlogRemoteDataSource {

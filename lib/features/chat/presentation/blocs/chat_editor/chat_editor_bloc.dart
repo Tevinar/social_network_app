@@ -1,8 +1,8 @@
-import 'package:social_network_app/features/auth/domain/entities/user.dart';
-import 'package:social_network_app/core/errors/failures.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat.dart';
-import 'package:social_network_app/features/chat/domain/usecases/create_chat.dart';
-import 'package:social_network_app/features/chat/domain/usecases/get_chat_by_members.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/features/chat/domain/entities/chat.dart';
+import 'package:social_app/features/chat/domain/usecases/create_chat.dart';
+import 'package:social_app/features/chat/domain/usecases/get_chat_by_members.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';

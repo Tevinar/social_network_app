@@ -1,7 +1,7 @@
-import 'package:social_network_app/core/theme/app_pallete.dart';
-import 'package:social_network_app/core/utils/format_date.dart';
-import 'package:social_network_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_network_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

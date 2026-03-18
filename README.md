@@ -83,12 +83,22 @@ Chaque feature isole:
 flutter pub get
 ```
 
-Creer ensuite un fichier `.env` a la racine du projet:
+Le projet peut demarrer directement apres le clone grace au fichier versionne `assets/config/env.public`.
+
+Si vous voulez surcharger la configuration localement sans rien commit, creez un fichier `.env` a la racine du projet:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 ```
+
+Puis lancez l'application avec:
+
+```bash
+flutter run --dart-define-from-file=.env
+```
+
+Sans override local, un simple `flutter run` utilisera la configuration publique fournie par le repository.
 
 ## Configuration Supabase attendue
 
@@ -113,6 +123,8 @@ L'application s'appuie sur les ressources suivantes:
 Les noms sont references directement dans le code, il faut donc conserver cette convention ou adapter les constantes du dossier `lib/core/constants/supabase_schema`.
 
 Important: le code ne cree pas de ligne dans `profiles` apres inscription. Il faut donc prevoir cote Supabase un mecanisme de synchronisation entre `auth.users` et `profiles` (par exemple via un trigger PostgreSQL) afin que le nom de l'utilisateur soit disponible dans les blogs et la messagerie.
+
+Note: la configuration publique versionnee est adaptee a un usage de demo / onboarding. Pour un projet de production, gardez un backend dedie et des policies RLS strictes.
 
 ### Champs utilises cote application
 
@@ -167,6 +179,7 @@ Exemples:
 flutter run -d chrome
 flutter run -d ios
 flutter run -d android
+flutter run --dart-define-from-file=.env
 ```
 
 ## Commandes utiles

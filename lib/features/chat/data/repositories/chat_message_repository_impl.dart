@@ -1,11 +1,11 @@
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/errors/failures_mapper.dart';
-import 'package:bloc_app/core/logging/app_logger.dart';
-import 'package:bloc_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
-import 'package:bloc_app/features/chat/data/models/chat_message_model.dart';
-import 'package:bloc_app/features/chat/domain/entities/chat_message.dart';
-import 'package:bloc_app/features/chat/domain/entities/chat_message_change.dart';
-import 'package:bloc_app/features/chat/domain/repositories/chat_message_repository.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/core/errors/failures_mapper.dart';
+import 'package:social_network_app/core/logging/app_logger.dart';
+import 'package:social_network_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
+import 'package:social_network_app/features/chat/data/models/chat_message_model.dart';
+import 'package:social_network_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_network_app/features/chat/domain/entities/chat_message_change.dart';
+import 'package:social_network_app/features/chat/domain/repositories/chat_message_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class ChatMessageRepositoryImpl implements ChatMessageRepository {

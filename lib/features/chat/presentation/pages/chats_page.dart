@@ -1,8 +1,8 @@
-import 'package:bloc_app/core/widgets/loader.dart';
-import 'package:bloc_app/core/theme/app_pallete.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/widgets/chat_card.dart';
-import 'package:bloc_app/app/router/routes/routes.dart';
+import 'package:social_network_app/core/widgets/loader.dart';
+import 'package:social_network_app/core/theme/app_pallete.dart';
+import 'package:social_network_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
+import 'package:social_network_app/features/chat/presentation/widgets/chat_card.dart';
+import 'package:social_network_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

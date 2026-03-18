@@ -1,23 +1,17 @@
-import 'package:bloc_app/app/router/app.dart';
-import 'package:bloc_app/app/session/app_user_cubit.dart';
-import 'package:bloc_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
-import 'package:bloc_app/app/bootstrap/dependencies/init_dependencies.dart';
-import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
-import 'package:bloc_app/features/chat/presentation/blocs/user/users_bloc.dart';
+import 'package:social_network_app/app/router/app.dart';
+import 'package:social_network_app/app/session/app_user_cubit.dart';
+import 'package:social_network_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:social_network_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
+import 'package:social_network_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_network_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
+import 'package:social_network_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_network_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
+import 'package:social_network_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
+import 'package:social_network_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
-  /// WidgetsFlutterBinding is a Flutter framework component that acts as the glue between the
-  /// Flutter framework and the underlying platform. It's responsible for handling the
-  /// interaction between Flutter widgets and the native platform services.
-  ///
-  /// This method ensures that the Flutter framework is properly initialized before
-  /// running any asynchronous operations in your main() function.
   WidgetsFlutterBinding.ensureInitialized();
   await initDependencies();
 

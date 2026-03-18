@@ -1,6 +1,6 @@
-import 'package:bloc_app/core/errors/exceptions.dart';
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/errors/failures_mapper.dart';
+import 'package:social_network_app/core/errors/exceptions.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/core/errors/failures_mapper.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

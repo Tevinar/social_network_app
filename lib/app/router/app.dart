@@ -1,5 +1,5 @@
-import 'package:bloc_app/app/router/app_router.dart';
-import 'package:bloc_app/core/theme/theme.dart';
+import 'package:social_network_app/app/router/app_router.dart';
+import 'package:social_network_app/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {

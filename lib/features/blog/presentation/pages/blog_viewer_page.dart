@@ -1,8 +1,8 @@
-import 'package:bloc_app/core/widgets/loader.dart';
-import 'package:bloc_app/core/theme/app_pallete.dart';
-import 'package:bloc_app/core/utils/calculate_reading_time.dart';
-import 'package:bloc_app/core/utils/format_date.dart';
-import 'package:bloc_app/features/blog/domain/entities/blog.dart';
+import 'package:social_network_app/core/widgets/loader.dart';
+import 'package:social_network_app/core/theme/app_pallete.dart';
+import 'package:social_network_app/core/utils/calculate_reading_time.dart';
+import 'package:social_network_app/core/utils/format_date.dart';
+import 'package:social_network_app/features/blog/domain/entities/blog.dart';
 import 'package:flutter/material.dart';
 
 class BlogViewerPage extends StatelessWidget {

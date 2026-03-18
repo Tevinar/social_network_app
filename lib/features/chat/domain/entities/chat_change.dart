@@ -1,4 +1,4 @@
-import 'package:bloc_app/features/chat/domain/entities/chat.dart';
+import 'package:social_network_app/features/chat/domain/entities/chat.dart';
 
 sealed class ChatChange {}
 

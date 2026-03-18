@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/theme/app_pallete.dart';
+import 'package:social_network_app/core/theme/app_pallete.dart';
 import 'package:flutter/material.dart';
 
 class BlogCardPlaceholder extends StatelessWidget {

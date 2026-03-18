@@ -2,16 +2,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bloc_app/core/errors/failures_mapper.dart';
-import 'package:bloc_app/features/blog/domain/entities/blog_change.dart';
+import 'package:social_network_app/core/errors/failures_mapper.dart';
+import 'package:social_network_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/features/blog/data/data_sources/blog_remote_data_source.dart';
-import 'package:bloc_app/features/blog/data/models/blog_model.dart';
-import 'package:bloc_app/features/blog/domain/entities/blog.dart';
-import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/features/blog/data/data_sources/blog_remote_data_source.dart';
+import 'package:social_network_app/features/blog/data/models/blog_model.dart';
+import 'package:social_network_app/features/blog/domain/entities/blog.dart';
+import 'package:social_network_app/features/blog/domain/repositories/blog_repository.dart';
 
 class BlogRepositoryImpl implements BlogRepository {
   final BlogRemoteDataSource blogRemoteDataSource;
@@ -82,7 +82,7 @@ class BlogRepositoryImpl implements BlogRepository {
       }
     } catch (error) {
       // Any unexpected stream error is translated into a Failure
-      yield left(mapExceptionToFailure(error));
+      yield Left(mapExceptionToFailure(error));
     }
   }
 }

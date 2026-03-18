@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/services/image_picker_service.dart';
-import 'package:bloc_app/core/utils/pick_image.dart';
+import 'package:social_network_app/core/services/image_picker_service.dart';
+import 'package:social_network_app/core/utils/pick_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';

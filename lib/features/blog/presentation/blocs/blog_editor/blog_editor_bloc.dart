@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/features/blog/domain/entities/blog.dart';
-import 'package:bloc_app/features/blog/domain/usecases/create_blog.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/features/blog/domain/entities/blog.dart';
+import 'package:social_network_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';

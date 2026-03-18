@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:bloc_app/core/usecases/usecase.dart';
-import 'package:bloc_app/features/auth/domain/entities/user.dart';
-import 'package:bloc_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:bloc_app/features/auth/domain/usecases/user_sign_out.dart';
+import 'package:social_network_app/core/usecases/usecase.dart';
+import 'package:social_network_app/features/auth/domain/entities/user.dart';
+import 'package:social_network_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:social_network_app/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,4 +1,4 @@
-import 'package:bloc_app/core/errors/failures.dart';
+import 'package:social_network_app/core/errors/failures.dart';
 import 'package:fpdart/fpdart.dart';
 
 //We create here a generic interface to avoid creating the same abstract class for each feature in the use cases sub-layer

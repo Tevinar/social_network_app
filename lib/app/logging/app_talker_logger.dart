@@ -1,5 +1,5 @@
 import 'package:talker/talker.dart';
-import 'package:bloc_app/core/logging/app_logger.dart';
+import 'package:social_network_app/core/logging/app_logger.dart';
 
 class AppTalkerLogger implements AppLogger {
   final Talker _talker;

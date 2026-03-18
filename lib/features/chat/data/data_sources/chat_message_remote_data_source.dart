@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:bloc_app/core/constants/supabase_schema/fields/chat_message_fields.dart';
-import 'package:bloc_app/core/constants/supabase_schema/schema_names.dart';
-import 'package:bloc_app/core/constants/supabase_schema/tables.dart';
-import 'package:bloc_app/core/errors/exceptions.dart';
-import 'package:bloc_app/core/errors/exceptions_mapper.dart';
-import 'package:bloc_app/features/chat/data/models/chat_message_model.dart';
-import 'package:bloc_app/features/chat/domain/entities/chat_message_change.dart';
+import 'package:social_network_app/core/constants/supabase_schema/fields/chat_message_fields.dart';
+import 'package:social_network_app/core/constants/supabase_schema/schema_names.dart';
+import 'package:social_network_app/core/constants/supabase_schema/tables.dart';
+import 'package:social_network_app/core/errors/exceptions.dart';
+import 'package:social_network_app/core/errors/exceptions_mapper.dart';
+import 'package:social_network_app/features/chat/data/models/chat_message_model.dart';
+import 'package:social_network_app/features/chat/domain/entities/chat_message_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class ChatMessageRemoteDataSource {

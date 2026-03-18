@@ -1,8 +1,8 @@
-import 'package:bloc_app/core/constants/error_messages.dart';
-import 'package:bloc_app/core/constants/supabase_schema/fields/profile_fields.dart';
-import 'package:bloc_app/core/errors/exceptions.dart';
-import 'package:bloc_app/core/errors/exceptions_mapper.dart';
-import 'package:bloc_app/features/auth/data/models/user_model.dart';
+import 'package:social_network_app/core/constants/error_messages.dart';
+import 'package:social_network_app/core/constants/supabase_schema/fields/profile_fields.dart';
+import 'package:social_network_app/core/errors/exceptions.dart';
+import 'package:social_network_app/core/errors/exceptions_mapper.dart';
+import 'package:social_network_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Creation of an abstract class to respect dependendy inversion principle. Therefore, if

@@ -1,11 +1,11 @@
-import 'package:bloc_app/app/session/app_user_cubit.dart';
-import 'package:bloc_app/core/widgets/loader.dart';
-import 'package:bloc_app/core/theme/app_pallete.dart';
-import 'package:bloc_app/core/utils/show_snackbar.dart';
-import 'package:bloc_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
-import 'package:bloc_app/features/blog/presentation/widgets/blog_card.dart';
-import 'package:bloc_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
-import 'package:bloc_app/app/router/routes/routes.dart';
+import 'package:social_network_app/app/session/app_user_cubit.dart';
+import 'package:social_network_app/core/widgets/loader.dart';
+import 'package:social_network_app/core/theme/app_pallete.dart';
+import 'package:social_network_app/core/utils/show_snackbar.dart';
+import 'package:social_network_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
+import 'package:social_network_app/features/blog/presentation/widgets/blog_card.dart';
+import 'package:social_network_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
+import 'package:social_network_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

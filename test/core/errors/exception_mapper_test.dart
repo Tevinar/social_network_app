@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/errors/exceptions_mapper.dart';
+import 'package:social_network_app/core/errors/exceptions_mapper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:bloc_app/core/errors/exceptions.dart';
+import 'package:social_network_app/core/errors/exceptions.dart';
 
 void main() {
   group('guardRemoteDataSourceCall', () {

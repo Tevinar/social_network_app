@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:bloc_app/features/auth/domain/entities/user.dart';
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/usecases/usecase.dart';
-import 'package:bloc_app/features/chat/domain/usecases/get_users_count.dart';
-import 'package:bloc_app/features/chat/domain/usecases/get_users_page.dart';
+import 'package:social_network_app/features/auth/domain/entities/user.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/core/usecases/usecase.dart';
+import 'package:social_network_app/features/chat/domain/usecases/get_users_count.dart';
+import 'package:social_network_app/features/chat/domain/usecases/get_users_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';

@@ -1,6 +1,6 @@
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/usecases/usecase.dart';
-import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/core/usecases/usecase.dart';
+import 'package:social_network_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class GetUsersCount implements UseCase<int, NoParams> {

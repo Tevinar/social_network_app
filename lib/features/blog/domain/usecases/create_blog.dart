@@ -1,10 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/core/usecases/usecase.dart';
-import 'package:bloc_app/features/blog/domain/entities/blog.dart';
-import 'package:bloc_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/core/usecases/usecase.dart';
+import 'package:social_network_app/features/blog/domain/entities/blog.dart';
+import 'package:social_network_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class CreateBlog implements UseCase<Blog, CreateBlogParams> {

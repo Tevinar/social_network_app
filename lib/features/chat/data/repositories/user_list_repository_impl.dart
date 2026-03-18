@@ -1,9 +1,9 @@
-import 'package:bloc_app/core/errors/failures_mapper.dart';
-import 'package:bloc_app/core/logging/app_logger.dart';
-import 'package:bloc_app/features/auth/domain/entities/user.dart';
-import 'package:bloc_app/core/errors/failures.dart';
-import 'package:bloc_app/features/chat/data/data_sources/users_remote_data_source.dart';
-import 'package:bloc_app/features/chat/domain/repositories/users_repository.dart';
+import 'package:social_network_app/core/errors/failures_mapper.dart';
+import 'package:social_network_app/core/logging/app_logger.dart';
+import 'package:social_network_app/features/auth/domain/entities/user.dart';
+import 'package:social_network_app/core/errors/failures.dart';
+import 'package:social_network_app/features/chat/data/data_sources/users_remote_data_source.dart';
+import 'package:social_network_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class UsersRepositoryImpl implements UsersRepository {

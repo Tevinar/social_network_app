@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bloc_app/core/services/image_picker_service.dart';
+import 'package:social_network_app/core/services/image_picker_service.dart';
 import 'package:get_it/get_it.dart';
 
 Future<File?> pickImage() async {

@@ -46,7 +46,6 @@ void main() async {
                 BlocProvider(create: (_) => serviceLocator<ChatEditorBloc>()),
                 BlocProvider(create: (_) => serviceLocator<UsersBloc>()),
                 BlocProvider(create: (_) => serviceLocator<ChatsBloc>()),
-                BlocProvider(create: (_) => serviceLocator<ChatMessagesBloc>()),
               ],
               child: const SocialApp(),
             ),

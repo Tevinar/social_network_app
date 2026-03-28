@@ -178,7 +178,7 @@ void _initChat() {
         repository: serviceLocator(),
       ),
     )
-    ..registerLazySingleton(
+    ..registerFactory(
       () => ChatMessagesBloc(
         getChatMessagesPage: serviceLocator(),
         getChatMessagesCount: serviceLocator(),

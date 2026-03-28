@@ -4,16 +4,23 @@ import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
+/// A auth gradient button widget.
 class AuthGradientButton extends StatelessWidget {
+  /// Creates a [AuthGradientButton].
   const AuthGradientButton({
     required this.buttonText,
     required this.onPressed,
     super.key,
   });
+
+  /// The button text.
   final String buttonText;
+
+  /// The on pressed.
   final VoidCallback onPressed;
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(

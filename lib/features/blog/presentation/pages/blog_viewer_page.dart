@@ -5,11 +5,16 @@ import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 
+/// A blog viewer page widget.
 class BlogViewerPage extends StatelessWidget {
+  /// Creates a [BlogViewerPage].
   const BlogViewerPage({required this.blog, super.key});
+
+  /// The blog.
   final Blog blog;
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -48,7 +53,8 @@ class BlogViewerPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      '${formatToDay(blog.updatedAt)} . ${calculateReadingTime(blog.content)} min',
+                      '${formatToDay(blog.updatedAt)} . '
+                      '${calculateReadingTime(blog.content)} min',
                       style: const TextStyle(
                         color: AppPallete.greyColor,
                         fontSize: 16,

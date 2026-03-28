@@ -6,7 +6,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:social_app/features/auth/domain/repositories/'
+    'auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
@@ -22,7 +23,7 @@ void main() {
   late MockUserSignUp userSignUp;
   late MockAuthRepository authRepository;
 
-  final testUser = User(id: '123', name: 'Test User', email: 'test@test.com');
+  const testUser = User(id: '123', name: 'Test User', email: 'test@test.com');
 
   setUp(() {
     userSignIn = MockUserSignIn();
@@ -42,9 +43,12 @@ void main() {
 
   group('AuthBloc – sign in', () {
     blocTest<AuthBloc, AuthState>(
-      'Given sign-in succeeds When adding AuthSignIn Then [Loading, SignedIn] is emitted',
+      'Given sign-in succeeds when adding AuthSignIn, then '
+      '[Loading, SignedIn] is emitted',
       build: () {
-        when(() => userSignIn(any())).thenAnswer((_) async => Right(testUser));
+        when(
+          () => userSignIn(any()),
+        ).thenAnswer((_) async => const Right(testUser));
 
         return AuthBloc(
           userSignIn: userSignIn,
@@ -54,7 +58,7 @@ void main() {
       },
       act: (bloc) =>
           bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
-      expect: () => [AuthLoading(), AuthSignedIn(testUser)],
+      expect: () => [AuthLoading(), const AuthSignedIn(testUser)],
       verify: (_) {
         verify(
           () => userSignIn(
@@ -69,7 +73,8 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
-      'Given sign-in fails When adding AuthSignIn Then [Loading, Failure] is emitted',
+      'Given sign-in fails when adding AuthSignIn, then '
+      '[Loading, Failure] is emitted',
       build: () {
         when(
           () => userSignIn(any()),
@@ -92,9 +97,12 @@ void main() {
 
   group('AuthBloc – sign up', () {
     blocTest<AuthBloc, AuthState>(
-      'Given sign-up succeeds When adding AuthSignup Then [Loading, SignedIn] is emitted',
+      'Given sign-up succeeds when adding AuthSignup, then '
+      '[Loading, SignedIn] is emitted',
       build: () {
-        when(() => userSignUp(any())).thenAnswer((_) async => Right(testUser));
+        when(
+          () => userSignUp(any()),
+        ).thenAnswer((_) async => const Right(testUser));
 
         return AuthBloc(
           userSignIn: userSignIn,
@@ -109,13 +117,14 @@ void main() {
           password: 'password',
         ),
       ),
-      expect: () => [AuthLoading(), AuthSignedIn(testUser)],
+      expect: () => [AuthLoading(), const AuthSignedIn(testUser)],
     );
   });
 
   group('AuthBloc – auth state stream', () {
     blocTest<AuthBloc, AuthState>(
-      'Given authStateChanges emits null When listening to auth stream Then SignedOut is emitted',
+      'Given authStateChanges emits null when listening to the auth stream, '
+      'then SignedOut is emitted',
       build: () {
         when(
           () => authRepository.authStateChanges(),
@@ -131,11 +140,12 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
-      'Given authStateChanges emits a user When listening to auth stream Then SignedIn is emitted',
+      'Given authStateChanges emits a user when listening to the auth '
+      'stream, then SignedIn is emitted',
       build: () {
         when(
           () => authRepository.authStateChanges(),
-        ).thenAnswer((_) => Stream.value(Right(testUser)));
+        ).thenAnswer((_) => Stream.value(const Right(testUser)));
 
         return AuthBloc(
           userSignIn: userSignIn,
@@ -143,11 +153,12 @@ void main() {
           authRepository: authRepository,
         );
       },
-      expect: () => [AuthSignedIn(testUser)],
+      expect: () => [const AuthSignedIn(testUser)],
     );
 
     blocTest<AuthBloc, AuthState>(
-      'Given authStateChanges emits a failure When listening to auth stream Then Failure is emitted',
+      'Given authStateChanges emits a failure when listening to the auth '
+      'stream, then Failure is emitted',
       build: () {
         when(
           () => authRepository.authStateChanges(),

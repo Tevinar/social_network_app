@@ -6,8 +6,12 @@ import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/data/data_sources/users_remote_data_source.dart';
 import 'package:social_app/features/chat/domain/repositories/users_repository.dart';
 
+/// An users repository impl.
 class UsersRepositoryImpl implements UsersRepository {
+  /// Creates a [UsersRepositoryImpl].
   UsersRepositoryImpl({required this.usersRemoteDataSource});
+
+  /// The users remote data source.
   UsersRemoteDataSource usersRemoteDataSource;
 
   @override
@@ -17,7 +21,7 @@ class UsersRepositoryImpl implements UsersRepository {
         pageNumber,
       );
       return right(users.map((userModel) => userModel.toEntity()).toList());
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -36,7 +40,7 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       final usersCount = await usersRemoteDataSource.getUsersCount();
       return right(usersCount);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {

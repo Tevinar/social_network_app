@@ -6,7 +6,9 @@ import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/utils/stream_to_listenable.dart';
 
+/// An app router.
 class AppRouter {
+  /// The router.
   static final router = GoRouter(
     debugLogDiagnostics: kDebugMode,
     initialLocation: const InitialLoadingPageRoute().location,

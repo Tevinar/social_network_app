@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'dart:io';
 
@@ -13,11 +12,17 @@ import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:uuid/uuid.dart';
 
+/// Repository implementation that maps blog data source results
+/// to domain types.
 class BlogRepositoryImpl implements BlogRepository {
-  final BlogRemoteDataSource blogRemoteDataSource;
+  /// Creates a [BlogRepositoryImpl].
   BlogRepositoryImpl({required this.blogRemoteDataSource});
 
+  /// Remote data source used for blog persistence and realtime updates.
+  final BlogRemoteDataSource blogRemoteDataSource;
+
   @override
+  /// Uploads the image, persists the blog, and returns the created domain blog.
   Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
@@ -47,7 +52,7 @@ class BlogRepositoryImpl implements BlogRepository {
       );
 
       return right(savedBlog.toEntity());
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -63,13 +68,14 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Fetches a page of blogs and maps the models to domain entities.
   Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber) async {
     try {
       final blogs = await blogRemoteDataSource.getBlogsPage(
         pageNumber,
       );
       return right(blogs.map((blogModel) => blogModel.toEntity()).toList());
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -85,11 +91,12 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Fetches the total number of blogs available in the backend.
   Future<Either<Failure, int>> getBlogsCount() async {
     try {
       final blogsCount = await blogRemoteDataSource.getBlogsCount();
       return right(blogsCount);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -105,13 +112,14 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Streams realtime blog changes mapped to domain-level change objects.
   Stream<Either<Failure, BlogChange>> watchBlogChanges() async* {
     try {
       await for (final BlogChange blogChange
           in blogRemoteDataSource.watchBlogChanges()) {
         yield right(blogChange);
       }
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {

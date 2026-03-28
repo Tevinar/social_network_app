@@ -10,7 +10,9 @@ import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_edi
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
 
+/// A chat messages page widget.
 class ChatMessagesPage extends StatefulWidget {
+  /// Creates a [ChatMessagesPage].
   const ChatMessagesPage({super.key});
 
   @override

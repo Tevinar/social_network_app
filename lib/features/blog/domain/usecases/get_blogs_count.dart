@@ -3,7 +3,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 
+/// A get blogs count.
 class GetBlogsCount implements UseCase<int, NoParams> {
+  /// Creates a [GetBlogsCount].
   GetBlogsCount({required BlogRepository blogRepository})
     : _blogRepository = blogRepository;
   final BlogRepository _blogRepository;

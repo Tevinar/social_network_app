@@ -23,6 +23,7 @@ part 'auth_state.dart';
 /// This bloc owns **authentication logic**, but not global session state.
 /// Global access to the current user is handled by `AppUserCubit`.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  /// Creates a [AuthBloc].
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,

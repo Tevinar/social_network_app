@@ -5,11 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:social_app/features/chat/domain/usecases/create_chat_message.dart';
-import 'package:social_app/features/chat/domain/usecases/get_chat_messages_count.dart';
-import 'package:social_app/features/chat/domain/usecases/get_chat_messages_page.dart';
+import 'package:social_app/features/chat/domain/entities/'
+    'chat_message_change.dart';
+import 'package:social_app/features/chat/domain/repositories/'
+    'chat_message_repository.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'create_chat_message.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'get_chat_messages_count.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'get_chat_messages_page.dart';
 
 part 'chat_messages_event.dart';
 part 'chat_messages_state.dart';
@@ -121,7 +126,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
         );
       },
       (success) {
-        // No need to do anything, the new chatMessage will be emitted by the stream subscription
+        // The realtime stream will emit the inserted chat message.
       },
     );
   }
@@ -140,9 +145,9 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     add(LoadChatMessagesNextPage());
   }
 
-  /// Applies real-time chatMessages changes (insert/update/delete) to the current state.
+  /// Applies realtime insert, update, and delete changes to the current state.
   ///
-  /// These changes may affect chatMessages that were already loaded via pagination.
+  /// These changes may affect chat messages already loaded via pagination.
   /// This handler does not trigger refetching or pagination.
   void _onChatChangeReceived(
     ChatMessageChangeReceived event,
@@ -274,6 +279,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     );
   }
 
+  /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
   /// Lazily initializes the total number of chatMessages in the database.

@@ -10,7 +10,9 @@ import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 part 'users_event.dart';
 part 'users_state.dart';
 
+/// A users bloc.
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
+  /// Creates a [UsersBloc].
   UsersBloc({
     required GetUsersPage getUsersPage,
     required GetUsersCount getUsersCount,
@@ -99,6 +101,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     );
   }
 
+  /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
   Future<void> _initializeUsersCount(Emitter<UsersState> emit) async {

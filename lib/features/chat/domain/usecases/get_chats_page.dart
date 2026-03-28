@@ -4,7 +4,9 @@ import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
+/// A get chats page widget.
 class GetChatsPage implements UseCase<List<Chat>, int> {
+  /// Creates a [GetChatsPage].
   GetChatsPage({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
   final ChatRepository _chatRepository;

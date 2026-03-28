@@ -208,6 +208,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     );
   }
 
+  /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
   /// Lazily initializes the total number of chats in the database.

@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/data_sources/'
+    'auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -30,7 +31,8 @@ void main() {
   });
   group('signInWithEmailPassword', () {
     test(
-      'Given Supabase returns a user When signing in with email and password Then a UserModel is returned',
+      'Given Supabase returns a user when signing in with email and password, '
+      'then a UserModel is returned',
       () async {
         // Arrange
         final userJson = {'id': '123', 'email': 'test@test.com'};
@@ -60,7 +62,8 @@ void main() {
     );
 
     test(
-      'Given Supabase returns null When signing in with email and password Then a ServerException is thrown',
+      'Given Supabase returns null when signing in with email and password, '
+      'then a ServerException is thrown',
       () async {
         // Arrange
 
@@ -83,7 +86,8 @@ void main() {
     );
 
     test(
-      'Given Supabase throws an exception When signing in with email and password Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing in with email and '
+      'password, then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -107,7 +111,8 @@ void main() {
 
   group('signUpWithEmailPassword', () {
     test(
-      'Given Supabase returns a user When signing up with email and password Then a UserModel is returned',
+      'Given Supabase returns a user when signing up with email and password, '
+      'then a UserModel is returned',
       () async {
         // Arrange
         final userJson = <String, Object>{
@@ -143,7 +148,8 @@ void main() {
     );
 
     test(
-      'Given Supabase returns null When signing up with email and password Then a ServerException is thrown',
+      'Given Supabase returns null when signing up with email and password, '
+      'then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -167,7 +173,8 @@ void main() {
     );
 
     test(
-      'Given Supabase throws an exception When signing up with email and password Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing up with email and '
+      'password, then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -207,7 +214,8 @@ void main() {
     );
 
     test(
-      'Given Supabase throws an exception When signing out Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing out, then a '
+      'ServerException is thrown',
       () async {
         // Arrange
         when(() => auth.signOut()).thenThrow(Exception('Supabase error'));
@@ -223,7 +231,8 @@ void main() {
 
   group('authStateChanges', () {
     test(
-      'Given Supabase emits an auth state with a user When listening to auth changes Then a UserModel is returned',
+      'Given Supabase emits an auth state with a user when listening to auth '
+      'changes, then a UserModel is returned',
       () async {
         final authState = MockAuthState();
         // Arrange
@@ -256,7 +265,8 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session When listening to auth changes Then null is returned',
+      'Given Supabase emits an auth state with a null session when listening '
+      'to auth changes, then null is returned',
       () async {
         final authState = MockAuthState();
         // Arrange
@@ -275,7 +285,8 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session When listening to auth changes Then null is returned',
+      'Given Supabase emits an auth state with a null session when listening '
+      'to auth changes, then null is returned',
       () async {
         final authState = MockAuthState();
         // Arrange

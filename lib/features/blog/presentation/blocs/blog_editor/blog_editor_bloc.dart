@@ -7,7 +7,9 @@ import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 part 'blog_editor_event.dart';
 part 'blog_editor_state.dart';
 
+/// A blog editor bloc.
 class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
+  /// Creates a [BlogEditorBloc].
   BlogEditorBloc({required CreateBlog uploadBlog})
     : _uploadBlog = uploadBlog,
       super(BlogInitial()) {

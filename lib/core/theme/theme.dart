@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 
+/// An app theme.
 class AppTheme {
   static OutlineInputBorder _border([Color color = AppPallete.borderColor]) =>
       OutlineInputBorder(
@@ -8,6 +9,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(10),
       );
 
+  /// The dark theme mode.
   static final ThemeData darkThemeMode = ThemeData.dark().copyWith(
     scaffoldBackgroundColor: AppPallete.backgroundColor,
     chipTheme: const ChipThemeData(

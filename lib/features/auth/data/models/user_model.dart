@@ -1,16 +1,29 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:social_app/features/auth/domain/entities/user.dart';
 
+/// Data model used to serialize user payloads from auth and profile sources.
 class UserModel {
-  final String id;
-  final String name;
-  final String email;
-  UserModel({required this.id, required this.name, required this.email});
+  /// Creates a [UserModel].
+  const UserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'id': id, 'name': name, 'email': email};
+  /// Creates a [UserModel] from a profile row payload.
+  factory UserModel.fromProfileJson(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      email: '', // profiles table doesn’t own email
+    );
   }
 
+  /// Creates a [UserModel] from a domain [User].
+  factory UserModel.fromEntity(User user) {
+    return UserModel(id: user.id, name: user.name, email: user.email);
+  }
+
+  /// Creates a [UserModel] from an auth payload.
   factory UserModel.fromAuthJson(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] as String,
@@ -21,18 +34,21 @@ class UserModel {
     );
   }
 
-  factory UserModel.fromProfileJson(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      email: '', // profiles table doesn’t own email
-    );
+  /// Unique user identifier.
+  final String id;
+
+  /// Display name.
+  final String name;
+
+  /// Email address when available.
+  final String email;
+
+  /// Converts the model to a serializable JSON map.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'id': id, 'name': name, 'email': email};
   }
 
-  factory UserModel.fromEntity(User user) {
-    return UserModel(id: user.id, name: user.name, email: user.email);
-  }
-
+  /// Returns a copy with the provided fields replaced.
   UserModel copyWith({String? id, String? name, String? email}) {
     return UserModel(
       id: id ?? this.id,
@@ -41,6 +57,7 @@ class UserModel {
     );
   }
 
+  /// Converts the model to the domain [User] entity.
   User toEntity() {
     return User(id: id, name: name, email: email);
   }

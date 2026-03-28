@@ -7,10 +7,15 @@ import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 
+/// A chat card widget.
 class ChatCard extends StatelessWidget {
+  /// Creates a [ChatCard].
   const ChatCard({required this.chat, super.key});
+
+  /// The chat.
   final Chat chat;
 
+  /// The compute chat members names.
   String computeChatMembersNames(BuildContext context) {
     final chatMembersWithoutCurrentUser = chat.members
         .where(
@@ -26,6 +31,7 @@ class ChatCard extends StatelessWidget {
   }
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

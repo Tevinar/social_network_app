@@ -5,18 +5,27 @@ import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 
+/// A chat message card widget.
 class ChatMessageCard extends StatelessWidget {
+  /// Creates a [ChatMessageCard].
   const ChatMessageCard({
     required this.isMe,
     required this.chatMessage,
     required this.authorName,
     super.key,
   });
+
+  /// The chat message.
   final ChatMessage chatMessage;
+
+  /// The author name.
   final String authorName;
+
+  /// Whether the value bool.
   final bool isMe;
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     final bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
 

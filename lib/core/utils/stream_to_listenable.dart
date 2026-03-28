@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 
 // for convert stream to listenable
+/// A stream to listenable.
 class StreamToListenable extends ChangeNotifier {
+  /// Creates a [StreamToListenable].
   StreamToListenable(List<Stream<void>> streams) {
     _subscriptions = streams.map((stream) {
       return stream.asBroadcastStream().listen(

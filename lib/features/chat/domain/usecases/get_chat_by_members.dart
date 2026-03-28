@@ -5,7 +5,9 @@ import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
+/// A get chat by members.
 class GetChatByMembers implements UseCase<Chat?, GetChatByMembersParams> {
+  /// Creates a [GetChatByMembers].
   GetChatByMembers({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
   final ChatRepository _chatRepository;
@@ -16,7 +18,11 @@ class GetChatByMembers implements UseCase<Chat?, GetChatByMembersParams> {
   }
 }
 
+/// A get chat by members params.
 class GetChatByMembersParams {
+  /// Creates a [GetChatByMembersParams].
   GetChatByMembersParams({required this.members});
+
+  /// The members.
   final List<User> members;
 }

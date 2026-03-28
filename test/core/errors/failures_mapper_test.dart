@@ -6,7 +6,8 @@ import 'package:social_app/core/errors/failures_mapper.dart';
 void main() {
   group('mapExceptionToFailure', () {
     test(
-      'NetworkException gives a NetworkFailure with the correct message and debug message',
+      'NetworkException gives a NetworkFailure '
+      'with the correct message and debug message',
       () {
         // Arrange
         const error = NetworkException(message: 'debug message');

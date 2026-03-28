@@ -5,10 +5,14 @@ import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
+    'chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/user/'
+    'users_bloc.dart';
 
+/// A new chat page widget.
 class NewChatPage extends StatefulWidget {
+  /// Creates a [NewChatPage].
   const NewChatPage({super.key});
 
   @override
@@ -29,7 +33,7 @@ class _NewChatPageState extends State<NewChatPage> {
               child: Text('Error loading users : ${state.error}'),
             );
           }
-          // Show loading placeholders when users are being fetched for the first time
+          // Show placeholders while the first page of users is loading.
           else if (state is UsersLoading && state.users.isEmpty) {
             return const Loader();
           } else {

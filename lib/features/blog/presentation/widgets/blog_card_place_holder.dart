@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 
+/// A blog card placeholder.
 class BlogCardPlaceholder extends StatelessWidget {
+  /// Creates a [BlogCardPlaceholder].
   const BlogCardPlaceholder({super.key, this.color = AppPallete.greyColor});
+
+  /// The color.
   final Color color;
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     return Container(
       height: 200,

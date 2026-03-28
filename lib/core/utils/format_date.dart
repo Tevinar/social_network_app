@@ -8,6 +8,7 @@ bool _isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
+/// The format to day.
 String formatToDay(DateTime dateTime) {
   final now = DateTime.now();
   final today = _dateOnly(now);
@@ -22,6 +23,7 @@ String formatToDay(DateTime dateTime) {
   return DateFormat('d MMM, yyyy').format(dateTime);
 }
 
+/// The format to hour.
 String formatToHour(DateTime dateTime) {
   return DateFormat('HH:mm').format(dateTime);
 }

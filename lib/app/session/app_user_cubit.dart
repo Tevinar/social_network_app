@@ -22,6 +22,7 @@ part 'app_user_state.dart';
 /// This cubit does NOT handle authentication flows (sign-in / sign-up).
 /// It only reflects session state and is safe to use across all features.
 class AppUserCubit extends Cubit<AppUserState> {
+  /// Creates a [AppUserCubit].
   AppUserCubit({
     required UserSignOut userSignOut,
     required AuthRepository authRepository,

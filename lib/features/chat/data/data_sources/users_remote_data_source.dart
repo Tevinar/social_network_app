@@ -4,12 +4,18 @@ import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// An users remote data source.
 abstract interface class UsersRemoteDataSource {
+  /// The get users page.
   Future<List<UserModel>> getUsersPage(int pageNumber);
+
+  /// The get users count.
   Future<int> getUsersCount();
 }
 
+/// An users remote data source impl.
 class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
+  /// Creates a [UsersRemoteDataSourceImpl].
   UsersRemoteDataSourceImpl({required SupabaseClient supabaseClient})
     : _supabaseClient = supabaseClient;
   final SupabaseClient _supabaseClient;

@@ -19,6 +19,7 @@ import 'package:social_app/core/logging/app_logger.dart';
 /// - [onChange]: state changes in debug mode only, to keep production logs
 ///   focused on actionable failures
 class AppBlocObserver extends BlocObserver {
+  /// Creates a [AppBlocObserver].
   AppBlocObserver({required AppLogger logger}) : _logger = logger;
   final AppLogger _logger;
 

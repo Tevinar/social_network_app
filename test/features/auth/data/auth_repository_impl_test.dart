@@ -7,9 +7,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/data_sources/'
+    'auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:social_app/features/auth/data/repositories/'
+    'auth_repository_impl.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
@@ -21,7 +23,11 @@ void main() {
   late MockAppLogger logger;
   late AuthRepositoryImpl repository;
 
-  final userModel = UserModel(id: '123', email: 'test@test.com', name: 'Test');
+  const userModel = UserModel(
+    id: '123',
+    email: 'test@test.com',
+    name: 'Test',
+  );
 
   setUp(() async {
     await GetIt.I.reset();
@@ -39,7 +45,8 @@ void main() {
 
   group('signInWithEmailPassword', () {
     test(
-      'Given remote succeeds When signing in with email and password Then Right<User> is returned',
+      'Given remote succeeds when signing in with email and password, then '
+      'Right<User> is returned',
       () async {
         // Arrange
         when(
@@ -67,7 +74,8 @@ void main() {
     );
 
     test(
-      'Given remote throws When signing in with email and password Then Left<Failure> is returned',
+      'Given remote throws when signing in with email and password, then '
+      'Left<Failure> is returned',
       () async {
         // Arrange
         when(
@@ -95,7 +103,8 @@ void main() {
 
   group('signUpWithEmailPassword', () {
     test(
-      'Given remote succeeds When signing up with email and password Then Right<User> is returned',
+      'Given remote succeeds when signing up with email and password, then '
+      'Right<User> is returned',
       () async {
         // Arrange
         when(
@@ -119,7 +128,8 @@ void main() {
     );
 
     test(
-      'Given remote throws When signing up with email and password Then Left<Failure> is returned',
+      'Given remote throws when signing up with email and password, then '
+      'Left<Failure> is returned',
       () async {
         // Arrange
         when(
@@ -195,7 +205,8 @@ void main() {
 
   group('authStateChanges', () {
     test(
-      'Given remote emits UserModel When listening to auth changes Then Right<User> is emitted',
+      'Given remote emits UserModel when listening to auth changes, then '
+      'Right<User> is emitted',
       () async {
         // Arrange
         when(
@@ -220,7 +231,8 @@ void main() {
     );
 
     test(
-      'Given remote emits null When listening to auth changes Then Right(null) is emitted',
+      'Given remote emits null when listening to auth changes, then '
+      'Right(null) is emitted',
       () async {
         // Arrange
         when(
@@ -236,7 +248,8 @@ void main() {
     );
 
     test(
-      'Given remote stream throws When listening to auth changes Then Left<Failure> is emitted',
+      'Given remote stream throws when listening to auth changes, then '
+      'Left<Failure> is emitted',
       () async {
         // Arrange
         when(() => remote.authStateChanges()).thenAnswer(

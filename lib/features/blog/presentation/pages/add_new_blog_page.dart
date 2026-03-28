@@ -14,7 +14,9 @@ import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_editor.dart';
 
+/// A add new blog page widget.
 class AddNewBlogPage extends StatefulWidget {
+  /// Creates a [AddNewBlogPage].
   const AddNewBlogPage({super.key});
 
   @override
@@ -46,7 +48,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
           image = pickedImage;
         });
       }
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       appLogger.error(
         'Failed to pick image from gallery',
         error: error,

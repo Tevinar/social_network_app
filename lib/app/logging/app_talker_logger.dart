@@ -1,7 +1,9 @@
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:talker/talker.dart';
 
+/// A app talker logger.
 class AppTalkerLogger implements AppLogger {
+  /// Creates a [AppTalkerLogger].
   AppTalkerLogger({required Talker talker}) : _talker = talker;
   final Talker _talker;
 

@@ -7,7 +7,9 @@ import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 
+/// An auth repository impl.
 class AuthRepositoryImpl implements AuthRepository {
+  /// Creates a [AuthRepositoryImpl].
   const AuthRepositoryImpl({required AuthRemoteDataSource authRemoteDataSource})
     : _authRemoteDataSource = authRemoteDataSource;
   final AuthRemoteDataSource _authRemoteDataSource;
@@ -23,7 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       return right(user.toEntity());
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -51,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       return right(user.toEntity());
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -71,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _authRemoteDataSource.signOut();
       return right(null);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
@@ -98,7 +100,7 @@ class AuthRepositoryImpl implements AuthRepository {
           yield right(userModel.toEntity());
         }
       }
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {

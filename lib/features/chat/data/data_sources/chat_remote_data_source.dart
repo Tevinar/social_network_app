@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:social_app/core/constants/supabase_schema/fields/chat_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/'
+    'chat_fields.dart';
 import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
 import 'package:social_app/core/constants/supabase_schema/tables.dart';
 import 'package:social_app/core/errors/exceptions.dart';
@@ -11,6 +12,7 @@ import 'package:social_app/features/chat/data/models/chat_model.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// A chat remote data source.
 abstract interface class ChatRemoteDataSource {
   /// Creates a chat with the given members and an initial message.
   /// Returns the created chat with its first message.
@@ -31,13 +33,17 @@ abstract interface class ChatRemoteDataSource {
   /// Fetches a single chat with members and last message.
   Future<ChatModel> getChatById(String chatId);
 
+  /// The get chat by members.
   Future<ChatModel?> getChatByMembers(List<UserModel> members);
 }
 
+/// A chat remote data source impl.
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
-  SupabaseClient supabaseClient;
-
+  /// Creates a [ChatRemoteDataSourceImpl].
   ChatRemoteDataSourceImpl({required this.supabaseClient});
+
+  /// The supabase client.
+  SupabaseClient supabaseClient;
 
   /// Shared select clause used to fetch a fully hydrated chat.
   ///
@@ -110,48 +116,50 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
     controller = StreamController<ChatChange>(
       onListen: () {
-        channel = supabaseClient.realtime.channel(
-          '${SchemaTypes.public}:${Tables.chats}',
-        );
+        channel =
+            supabaseClient.realtime.channel(
+                '${SchemaTypes.public}:${Tables.chats}',
+              )
+              /// No need to filter by user here, as the RLS policies will
+              /// ensure that only relevant changes are sent to the client.
+              ..onPostgresChanges(
+                event: PostgresChangeEvent.all,
+                schema: SchemaTypes.public,
+                table: Tables.chats,
+                callback: (payload) async {
+                  try {
+                    switch (payload.eventType) {
+                      case PostgresChangeEvent.insert:
+                        final chatId =
+                            payload.newRecord[ChatFields.id] as String;
+                        final chat = await getChatById(chatId);
+                        controller.add(ChatInserted(chat.toEntity()));
 
-        /// No need to filter by user here, as the RLS policies will ensure that
-        /// only relevant changes are sent to the client.
-        channel.onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: SchemaTypes.public,
-          table: Tables.chats,
-          callback: (payload) async {
-            try {
-              switch (payload.eventType) {
-                case PostgresChangeEvent.insert:
-                  final chatId = payload.newRecord[ChatFields.id] as String;
-                  final chat = await getChatById(chatId);
-                  controller.add(ChatInserted(chat.toEntity()));
+                      case PostgresChangeEvent.update:
+                        final chatId =
+                            payload.newRecord[ChatFields.id] as String;
+                        final chat = await getChatById(chatId);
+                        controller.add(ChatUpdated(chat.toEntity()));
 
-                case PostgresChangeEvent.update:
-                  final chatId = payload.newRecord[ChatFields.id] as String;
-                  final chat = await getChatById(chatId);
-                  controller.add(ChatUpdated(chat.toEntity()));
+                      case PostgresChangeEvent.delete:
+                        final deletedChatId =
+                            payload.oldRecord[ChatFields.id] as String;
+                        controller.add(ChatDeleted(deletedChatId));
 
-                case PostgresChangeEvent.delete:
-                  final deletedChatId =
-                      payload.oldRecord[ChatFields.id] as String;
-                  controller.add(ChatDeleted(deletedChatId));
-
-                case PostgresChangeEvent.all:
-                  // Not emitted as a payload event, but required for exhaustiveness
-                  break;
-              }
-            } catch (e, stack) {
-              controller.addError(
-                ServerException(message: e.toString()),
-                stack,
-              );
-            }
-          },
-        );
-
-        channel.subscribe();
+                      case PostgresChangeEvent.all:
+                        // Required for exhaustive handling
+                        // but never emitted here.
+                        break;
+                    }
+                  } on Exception catch (e, stack) {
+                    controller.addError(
+                      ServerException(message: e.toString()),
+                      stack,
+                    );
+                  }
+                },
+              )
+              ..subscribe();
       },
       onCancel: () async {
         await controller.close();

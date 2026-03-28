@@ -1,11 +1,15 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 
-//We create here a generic interface to avoid creating the same abstract class for each feature in the use cases sub-layer
+// Shared use case contract used across features to avoid duplicating the same
+// abstract definition in each use case sub-layer.
+/// An use case.
+// ignore: one_member_abstracts
 abstract interface class UseCase<SuccessType, Params> {
+  /// Executes the use case.
   Future<Either<Failure, SuccessType>> call(Params params);
-  //Note : when a method is called 'call' in a class, it means that you can call this method directly with the name
-  //of an instance of the class.
+  // A `call` method lets the instance itself be invoked like a function.
 }
 
+/// A no params.
 class NoParams {}

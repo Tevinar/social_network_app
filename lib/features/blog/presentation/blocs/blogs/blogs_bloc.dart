@@ -214,8 +214,10 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     );
   }
 
+  /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
+  /// The scroll to top.
   Future<void> scrollToTop() async {
     await _scrollController.animateTo(
       0,

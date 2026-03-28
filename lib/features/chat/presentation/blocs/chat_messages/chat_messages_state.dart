@@ -1,6 +1,7 @@
 part of 'chat_messages_bloc.dart';
 
 @immutable
+/// Represents chat messages state.
 sealed class ChatMessagesState {
   const ChatMessagesState({
     required this.chatId,
@@ -8,13 +9,25 @@ sealed class ChatMessagesState {
     required this.pageNumber,
     this.totalChatMessagesInDatabase,
   });
+
+  /// The chat id.
   final String chatId;
+
+  /// The chat messages.
   final List<ChatMessage> chatMessages;
+
+  /// The int.
   final int pageNumber;
+
+  /// The int.
   final int? totalChatMessagesInDatabase;
 
+  /// The copy with.
   ChatMessagesState copyWith({
+    /// The chat id.
     String? chatId,
+
+    /// The chat messages.
     List<ChatMessage>? chatMessages,
     int? pageNumber,
     int? totalChatMessagesInDatabase,
@@ -48,7 +61,9 @@ sealed class ChatMessagesState {
   }
 }
 
+/// A chat messages loading.
 final class ChatMessagesLoading extends ChatMessagesState {
+  /// Creates a [ChatMessagesLoading].
   const ChatMessagesLoading({
     required super.chatId,
     required super.chatMessages,
@@ -57,7 +72,9 @@ final class ChatMessagesLoading extends ChatMessagesState {
   });
 }
 
+/// A chat messages success.
 final class ChatMessagesSuccess extends ChatMessagesState {
+  /// Creates a [ChatMessagesSuccess].
   const ChatMessagesSuccess({
     required super.chatId,
     required super.chatMessages,
@@ -66,7 +83,9 @@ final class ChatMessagesSuccess extends ChatMessagesState {
   });
 }
 
+/// Represents chat messages failure.
 final class ChatMessagesFailure extends ChatMessagesState {
+  /// Creates a [ChatMessagesFailure].
   const ChatMessagesFailure({
     required super.chatId,
     required this.error,
@@ -74,5 +93,7 @@ final class ChatMessagesFailure extends ChatMessagesState {
     required super.pageNumber,
     super.totalChatMessagesInDatabase,
   });
+
+  /// The error.
   final String error;
 }

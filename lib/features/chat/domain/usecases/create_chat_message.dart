@@ -3,7 +3,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
 
+/// A create chat message.
 class CreateChatMessage implements UseCase<void, CreateChatMessageParams> {
+  /// Creates a [CreateChatMessage].
   CreateChatMessage({required ChatMessageRepository chatMessageRepository})
     : _chatMessageRepository = chatMessageRepository;
   final ChatMessageRepository _chatMessageRepository;
@@ -22,8 +24,14 @@ class CreateChatMessage implements UseCase<void, CreateChatMessageParams> {
   }
 }
 
+/// A create chat message params.
 class CreateChatMessageParams {
+  /// Creates a [CreateChatMessageParams].
   CreateChatMessageParams({required this.chatId, required this.content});
+
+  /// The chat id.
   final String chatId;
+
+  /// The content.
   final String content;
 }

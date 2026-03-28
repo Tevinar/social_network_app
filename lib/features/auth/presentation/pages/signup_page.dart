@@ -7,7 +7,9 @@ import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_gradient_button.dart';
 
+/// A sign up page widget.
 class SignUpPage extends StatefulWidget {
+  /// Creates a [SignUpPage].
   const SignUpPage({super.key});
 
   @override

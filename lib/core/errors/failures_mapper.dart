@@ -1,6 +1,7 @@
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 
+/// The map exception to failure.
 Failure mapExceptionToFailure(Object error) {
   if (error is NetworkException) {
     return NetworkFailure(debugMessage: error.message);

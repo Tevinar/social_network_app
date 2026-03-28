@@ -3,7 +3,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
+/// A get chats count.
 class GetChatsCount implements UseCase<int, NoParams> {
+  /// Creates a [GetChatsCount].
   GetChatsCount({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
   final ChatRepository _chatRepository;

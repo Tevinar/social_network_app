@@ -1,13 +1,17 @@
 part of 'routes.dart';
 
+/// A route for blog page.
 class BlogPageRoute extends GoRouteData with $BlogPageRoute {
+  /// Creates a [BlogPageRoute].
   const BlogPageRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const BlogsPage();
 }
 
+/// A route for chats page.
 class ChatsPageRoute extends GoRouteData with $ChatsPageRoute {
+  /// Creates a [ChatsPageRoute].
   const ChatsPageRoute();
 
   @override
@@ -28,7 +32,9 @@ class ChatsPageRoute extends GoRouteData with $ChatsPageRoute {
     ),
   ],
 )
+/// A route for app shell data.
 class AppShellRouteData extends StatefulShellRouteData {
+  /// Creates a [AppShellRouteData].
   const AppShellRouteData();
 
   @override

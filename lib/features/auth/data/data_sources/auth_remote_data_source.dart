@@ -1,31 +1,38 @@
 import 'package:social_app/core/constants/error_messages.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/profile_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/'
+    'profile_fields.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Creation of an abstract class to respect dependendy inversion principle. Therefore, if
-// we later want to switch Supabase for, for example, Firebase, we can be creating a new class
-// that implement AuthRemoteDataSource
+// This abstraction keeps the data layer decoupled from Supabase so another
+// backend implementation can be introduced later without changing callers.
+/// An auth remote data source.
 abstract interface class AuthRemoteDataSource {
+  /// The sign up with email password.
   Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   });
 
+  /// The sign in with email password.
   Future<UserModel> signInWithEmailPassword({
     required String email,
     required String password,
   });
 
+  /// The sign out.
   Future<void> signOut();
 
+  /// The auth state changes.
   Stream<UserModel?> authStateChanges();
 }
 
+/// An auth remote data source supabase impl.
 class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
+  /// Creates a [AuthRemoteDataSourceSupabaseImpl].
   const AuthRemoteDataSourceSupabaseImpl(this._supabaseClient);
   final SupabaseClient _supabaseClient;
 
@@ -79,9 +86,9 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
   // [UserModel].
   //
   // ### Execution boundary ownership (important)
-  // Unlike Future-based remote methods, this method does **not own the execution
-  // lifecycle** of the operation. Supabase Auth owns the stream and may emit
-  // events or errors asynchronously, long after this method has returned.
+  // Unlike Future-based remote methods, this method does not own the execution
+  // lifecycle. Supabase Auth owns the stream and may emit events or errors
+  // asynchronously long after this method has returned.
   //
   // For this reason, this method **must not translate errors** into custom
   // infrastructure exceptions (e.g. `ServerException`), as doing so would

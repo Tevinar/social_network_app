@@ -4,13 +4,16 @@ import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/chat/data/models/chat_message_model.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 
+/// A chat model.
 class ChatModel {
+  /// Creates a [ChatModel].
   ChatModel({
     required this.id,
     required this.lastMessage,
     required this.members,
   });
 
+  /// Creates a [ChatModel].
   factory ChatModel.fromJson(Map<String, dynamic> map) {
     return ChatModel(
       id: map[ChatFields.id] as String,
@@ -27,10 +30,17 @@ class ChatModel {
       ),
     );
   }
+
+  /// The id.
   final String id;
+
+  /// The last message.
   final ChatMessageModel lastMessage;
+
+  /// The members.
   final List<UserModel> members;
 
+  /// The to json.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       ChatFields.id: id,
@@ -39,6 +49,7 @@ class ChatModel {
     };
   }
 
+  /// The to entity.
   Chat toEntity() {
     return Chat(
       id: id,

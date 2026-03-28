@@ -26,7 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserSignUp _userSignUp;
   final UserSignIn _userSignIn;
   final AuthRepository _authRepository;
-  late final StreamSubscription _authStateChangesSub;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,
@@ -43,9 +43,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   @override
-  Future<void> close() {
-    _authStateChangesSub.cancel();
-    return super.close();
+  Future<void> close() async {
+    try {
+      await _authStateChangesSub.cancel();
+    } finally {
+      await super.close();
+    }
   }
 
   void _onAuthStateChanged(_AuthStateChanged event, Emitter<AuthState> emit) {
@@ -66,9 +69,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  void _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
+  Future<void> _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final res = await _userSignUp(
+    final Either<Failure, User> res = await _userSignUp(
       UserSignUpParams(
         name: event.name,
         email: event.email,
@@ -82,9 +85,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  void _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
+  Future<void> _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final res = await _userSignIn(
+    final Either<Failure, User> res = await _userSignIn(
       UserSignInParams(email: event.email, password: event.password),
     );
 

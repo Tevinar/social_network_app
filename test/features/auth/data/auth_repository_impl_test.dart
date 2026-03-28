@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:get_it/get_it.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
@@ -12,15 +14,27 @@ import 'package:mocktail/mocktail.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
+class MockAppLogger extends Mock implements AppLogger {}
+
 void main() {
   late MockAuthRemoteDataSource remote;
+  late MockAppLogger logger;
   late AuthRepositoryImpl repository;
 
   final userModel = UserModel(id: '123', email: 'test@test.com', name: 'Test');
 
-  setUp(() {
+  setUp(() async {
+    await GetIt.I.reset();
     remote = MockAuthRemoteDataSource();
+    logger = MockAppLogger();
+
+    GetIt.I.registerSingleton<AppLogger>(logger);
+
     repository = AuthRepositoryImpl(authRemoteDataSource: remote);
+  });
+
+  tearDown(() async {
+    await GetIt.I.reset();
   });
 
   group('signInWithEmailPassword', () {
@@ -36,7 +50,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final result = await repository.signInWithEmailPassword(
+        final Either<Failure, User> result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -64,7 +78,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'no internet'));
 
         // Act
-        final result = await repository.signInWithEmailPassword(
+        final Either<Failure, User> result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -93,7 +107,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final result = await repository.signUpWithEmailPassword(
+        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -117,7 +131,7 @@ void main() {
         ).thenThrow(const ServerException(message: 'error'));
 
         // Act
-        final result = await repository.signUpWithEmailPassword(
+        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -125,10 +139,19 @@ void main() {
 
         // Assert
         expect(result, isA<Left<Failure, User>>());
+
         result.fold(
           (failure) => expect(failure, isA<UnexpectedFailure>()),
           (_) => fail('Expected failure'),
         );
+
+        verify(
+          () => logger.error(
+            'Unexpected error in AuthRepositoryImpl.signUpWithEmailPassword',
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
       },
     );
   });
@@ -141,7 +164,7 @@ void main() {
         when(() => remote.signOut()).thenAnswer((_) async {});
 
         // Act
-        final result = await repository.signOut();
+        final Either<Failure, void> result = await repository.signOut();
 
         // Assert
         expect(result, isA<Right<Failure, void>>());
@@ -158,7 +181,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'offline'));
 
         // Act
-        final result = await repository.signOut();
+        final Either<Failure, void> result = await repository.signOut();
 
         // Assert
         expect(result, isA<Left<Failure, void>>());
@@ -180,7 +203,7 @@ void main() {
         ).thenAnswer((_) => Stream.value(userModel));
 
         // Act
-        final stream = repository.authStateChanges();
+        final Stream<Either<Failure, User?>> stream = repository.authStateChanges();
 
         // Assert
         await expectLater(
@@ -207,7 +230,7 @@ void main() {
         // Act & Assert
         await expectLater(
           repository.authStateChanges(),
-          emits(const Right(null)),
+          emits(const Right<Failure, User?>(null)),
         );
       },
     );

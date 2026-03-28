@@ -36,8 +36,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
 
   final ScrollController _scrollController = ScrollController();
 
-  late final StreamSubscription<Either<Failure, ChatMessageChange>>
-  _chatMessageChangeSub;
+  late final StreamSubscription<Either<Failure, ChatMessageChange>> _chatMessageChangeSub;
 
   /// Creates the ChatMessagesBloc and immediately:
   /// - starts listening to scroll events for pagination
@@ -65,18 +64,23 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   }
 
   @override
-  Future<void> close() {
-    _chatMessageChangeSub.cancel();
-    _scrollController.dispose();
-    return super.close();
+  Future<void> close() async {
+    try {
+      await _chatMessageChangeSub.cancel();
+    } finally {
+      try {
+        _scrollController.dispose();
+      } finally {
+        await super.close();
+      }
+    }
   }
 
   // Add a listener to scrollController events
   // and fetch more chatMessages when reaching the bottom
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadChatMessagesNextPage());
       }
@@ -96,11 +100,11 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     });
   }
 
-  void _onAddChatMessage(
+  Future<void> _onAddChatMessage(
     AddChatMessage event,
     Emitter<ChatMessagesState> emit,
   ) async {
-    final result = await _createChatMessage(
+    final Either<Failure, dynamic> result = await _createChatMessage(
       CreateChatMessageParams(chatId: event.chatId, content: event.content),
     );
 
@@ -164,8 +168,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
                 chatMessageChange.chatMessage,
                 ...state.chatMessages,
               ],
-              totalChatMessagesInDatabase:
-                  (state.totalChatMessagesInDatabase ?? 0) + 1,
+              totalChatMessagesInDatabase: (state.totalChatMessagesInDatabase ?? 0) + 1,
             ),
           );
         }
@@ -175,8 +178,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
             state.copyWith(
               chatMessages: state.chatMessages
                   .map(
-                    (chatMessage) =>
-                        chatMessage.id == chatMessageChange.chatMessage.id
+                    (chatMessage) => chatMessage.id == chatMessageChange.chatMessage.id
                         ? chatMessageChange.chatMessage
                         : chatMessage,
                   )
@@ -190,12 +192,10 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
             state.copyWith(
               chatMessages: state.chatMessages
                   .where(
-                    (chatMessage) =>
-                        chatMessage.id != chatMessageChange.chatMessageId,
+                    (chatMessage) => chatMessage.id != chatMessageChange.chatMessageId,
                   )
                   .toList(),
-              totalChatMessagesInDatabase:
-                  (state.totalChatMessagesInDatabase ?? 1) - 1,
+              totalChatMessagesInDatabase: (state.totalChatMessagesInDatabase ?? 1) - 1,
             ),
           );
         }
@@ -235,13 +235,12 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
         totalChatMessagesInDatabase: state.totalChatMessagesInDatabase,
       ),
     );
-    final Either<Failure, List<ChatMessage>> result =
-        await _getChatMessagesPage(
-          GetChatMessagesPageParams(
-            pageNumber: state.pageNumber,
-            chatId: state.chatId,
-          ),
-        );
+    final Either<Failure, List<ChatMessage>> result = await _getChatMessagesPage(
+      GetChatMessagesPageParams(
+        pageNumber: state.pageNumber,
+        chatId: state.chatId,
+      ),
+    );
     result.fold(
       (error) {
         emit(
@@ -255,7 +254,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
         );
       },
       (chatsNextPage) {
-        List<ChatMessage> newChatMessages = [
+        final List<ChatMessage> newChatMessages = [
           ...state.chatMessages,
           ...chatsNextPage,
         ];

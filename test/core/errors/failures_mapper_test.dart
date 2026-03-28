@@ -9,10 +9,10 @@ void main() {
       'NetworkException gives a NetworkFailure with the correct message and debug message',
       () {
         // Arrange
-        final error = const NetworkException(message: 'debug message');
+        const error = NetworkException(message: 'debug message');
 
         // Act
-        final failure = mapExceptionToFailure(error);
+        final Failure failure = mapExceptionToFailure(error);
 
         // Assert
         expect(failure, isA<NetworkFailure>());
@@ -26,7 +26,7 @@ void main() {
       const error = ServerException(message: 'Token expired', code: '401');
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnauthorizedFailure>());
@@ -40,7 +40,7 @@ void main() {
     test('ServerException with 403 → UnauthorizedFailure', () {
       const error = ServerException(message: 'Forbidden', code: '403');
 
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       expect(failure, isA<UnauthorizedFailure>());
     });
@@ -50,7 +50,7 @@ void main() {
       const error = ServerException(message: 'Resource not found', code: '404');
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<NotFoundFailure>());
@@ -66,7 +66,7 @@ void main() {
       );
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<ValidationFailure>());
@@ -85,7 +85,7 @@ void main() {
       );
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<ValidationFailure>());
@@ -101,7 +101,7 @@ void main() {
       );
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnexpectedFailure>());
@@ -114,7 +114,7 @@ void main() {
       final error = Exception('Some random exception');
 
       // Act
-      final failure = mapExceptionToFailure(error);
+      final Failure failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnexpectedFailure>());

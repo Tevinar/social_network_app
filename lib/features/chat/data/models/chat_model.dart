@@ -25,11 +25,15 @@ class ChatModel {
 
   factory ChatModel.fromJson(Map<String, dynamic> map) {
     return ChatModel(
-      id: map[ChatFields.id],
+      id: map[ChatFields.id] as String,
       members: (map[Tables.chatMembers] as List<dynamic>)
-          .map((e) => UserModel.fromProfileJson(e[Tables.profiles]))
+          .map(
+            (e) => UserModel.fromProfileJson(
+              (e as Map<String, dynamic>)[Tables.profiles] as Map<String, dynamic>,
+            ),
+          )
           .toList(),
-      lastMessage: ChatMessageModel.fromJson(map[Tables.chatMessages]),
+      lastMessage: ChatMessageModel.fromJson(map[Tables.chatMessages] as Map<String, dynamic>),
     );
   }
 

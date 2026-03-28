@@ -26,7 +26,7 @@ class _NewChatPageState extends State<NewChatPage> {
         builder: (context, state) {
           if (state is UsersFailure) {
             return Center(
-              child: Text(('Error loading users : ${state.error}')),
+              child: Text('Error loading users : ${state.error}'),
             );
           }
           // Show loading placeholders when users are being fetched for the first time
@@ -43,9 +43,7 @@ class _NewChatPageState extends State<NewChatPage> {
                   return const Loader(size: 30);
                 } else {
                   if (state.users[index].id ==
-                      (context.read<AppUserCubit>().state as AppUserSignedIn)
-                          .user
-                          .id) {
+                      (context.read<AppUserCubit>().state as AppUserSignedIn).user.id) {
                     return const SizedBox.shrink();
                   }
                   return CheckboxListTile(
@@ -82,8 +80,7 @@ class _NewChatPageState extends State<NewChatPage> {
               padding: const EdgeInsets.all(16.0),
               child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
                 listener: (context, state) {
-                  if (state is ChatEditorWaitingForFirstMessage ||
-                      state is ChatEditorLoaded) {
+                  if (state is ChatEditorWaitingForFirstMessage || state is ChatEditorLoaded) {
                     const ChatMessagesPageRoute().pushReplacement(context);
                   }
                 },
@@ -91,10 +88,8 @@ class _NewChatPageState extends State<NewChatPage> {
                   return TextButton.icon(
                     onPressed: () {
                       if (state is! ChatEditorLoading) {
-                        final currentUser =
-                            (context.read<AppUserCubit>().state
-                                    as AppUserSignedIn)
-                                .user;
+                        final User currentUser =
+                            (context.read<AppUserCubit>().state as AppUserSignedIn).user;
                         selectedUsers.add(currentUser);
                         context.read<ChatEditorBloc>().add(
                           AddChat(chatMembers: selectedUsers),

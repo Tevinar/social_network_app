@@ -45,20 +45,18 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
 
       final List<Map<String, dynamic>> rawChatMessages = await supabaseClient
           .from(Tables.chatMessages)
-          .select('*')
+          .select()
           .eq(ChatMessageFields.chatId, chatId)
           .range(from, to)
           .order(ChatMessageFields.createdAt, ascending: false);
-      return rawChatMessages
-          .map((rawChatMessage) => ChatMessageModel.fromJson(rawChatMessage))
-          .toList();
+      return rawChatMessages.map(ChatMessageModel.fromJson).toList();
     });
   }
 
   @override
   Future<int> getChatMessagesCount(String chatId) async {
     return guardRemoteDataSourceCall(() async {
-      final response = await supabaseClient
+      final PostgrestResponse<PostgrestList> response = await supabaseClient
           .from(Tables.chatMessages)
           .select()
           .eq(ChatMessageFields.chatId, chatId)
@@ -105,8 +103,9 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
                   break;
 
                 case PostgresChangeEvent.delete:
+                  final String deletedMessageId = payload.oldRecord[ChatMessageFields.id] as String;
                   controller.add(
-                    ChatMessageDeleted(payload.oldRecord[ChatMessageFields.id]),
+                    ChatMessageDeleted(deletedMessageId),
                   );
                   break;
 
@@ -127,6 +126,7 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
       },
       onCancel: () async {
         await channel.unsubscribe();
+        await controller.close();
       },
     );
 

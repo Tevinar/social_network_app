@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
@@ -21,7 +23,7 @@ part 'app_user_state.dart';
 /// It only reflects session state and is safe to use across all features.
 class AppUserCubit extends Cubit<AppUserState> {
   final UserSignOut _userSignOut;
-  late final StreamSubscription _authStateChangesSub;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
   final AuthRepository _authRepository;
   AppUserCubit({
     required UserSignOut userSignOut,
@@ -33,9 +35,12 @@ class AppUserCubit extends Cubit<AppUserState> {
   }
 
   @override
-  Future<void> close() {
-    _authStateChangesSub.cancel();
-    return super.close();
+  Future<void> close() async {
+    try {
+      await _authStateChangesSub.cancel();
+    } finally {
+      await super.close();
+    }
   }
 
   void _subscribeToAuthStateChanges() {
@@ -53,6 +58,11 @@ class AppUserCubit extends Cubit<AppUserState> {
   /// Global sign-out intent
   Future<void> signOut() async {
     emit(AppUserLoading());
-    await _userSignOut(NoParams());
+
+    final Either<Failure, void> result = await _userSignOut(NoParams());
+    result.fold(
+      (failure) => emit(AppUserFailure(failure.message)),
+      (_) => emit(AppUserSignedOut()),
+    );
   }
 }

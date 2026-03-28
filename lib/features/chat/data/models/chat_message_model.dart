@@ -29,11 +29,11 @@ class ChatMessageModel {
 
   factory ChatMessageModel.fromJson(Map<String, dynamic> map) {
     return ChatMessageModel(
-      id: map[ChatMessageFields.id],
-      authorId: map[ChatMessageFields.authorId],
-      content: map[ChatMessageFields.content],
-      createdAt: DateTime.parse(map[ChatMessageFields.createdAt]),
-      updatedAt: DateTime.parse(map[ChatMessageFields.updatedAt]),
+      id: map[ChatMessageFields.id] as String,
+      authorId: map[ChatMessageFields.authorId] as String,
+      content: map[ChatMessageFields.content] as String,
+      createdAt: DateTime.parse(map[ChatMessageFields.createdAt] as String),
+      updatedAt: DateTime.parse(map[ChatMessageFields.updatedAt] as String),
     );
   }
 

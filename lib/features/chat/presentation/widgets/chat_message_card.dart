@@ -19,13 +19,13 @@ class ChatMessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
+    final Color bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
 
-    final alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
+    final Alignment alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
 
     final borderRadius = BorderRadius.only(
-      topLeft: isMe ? const Radius.circular(16) : const Radius.circular(0),
-      topRight: isMe ? const Radius.circular(0) : const Radius.circular(16),
+      topLeft: isMe ? const Radius.circular(16) : Radius.zero,
+      topRight: isMe ? Radius.zero : const Radius.circular(16),
       bottomLeft: const Radius.circular(16),
       bottomRight: const Radius.circular(16),
     );
@@ -48,9 +48,7 @@ class ChatMessageCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!isMe &&
-                      context.read<ChatEditorBloc>().state.chatMembers.length >
-                          2)
+                  if (!isMe && context.read<ChatEditorBloc>().state.chatMembers.length > 2)
                     Text(
                       authorName,
                       style: Theme.of(context).textTheme.titleMedium,

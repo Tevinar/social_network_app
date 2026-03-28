@@ -10,7 +10,7 @@ void main() {
   group('guardRemoteDataSourceCall', () {
     test('returns value when call succeeds', () async {
       // Act
-      final result = await guardRemoteDataSourceCall(() async {
+      final int result = await guardRemoteDataSourceCall(() async {
         return 42;
       });
 
@@ -22,7 +22,7 @@ void main() {
       'translates PostgrestException into ServerException with code',
       () async {
         // Arrange
-        final exception = const PostgrestException(
+        const exception = PostgrestException(
           message: 'Database error',
           code: '23505',
         );
@@ -48,7 +48,7 @@ void main() {
 
     test('translates SocketException into NetworkException', () async {
       // Arrange
-      final exception = const SocketException('No internet');
+      const exception = SocketException('No internet');
 
       // Act
       Future<void> act() async {

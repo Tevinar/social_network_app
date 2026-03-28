@@ -1,4 +1,5 @@
 import 'package:social_app/core/errors/failures_mapper.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 
 import 'package:social_app/core/errors/failures.dart';
@@ -17,12 +18,25 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return _getUser(
-      () async => await _authRemoteDataSource.signInWithEmailPassword(
+    try {
+      final UserModel user = await _authRemoteDataSource.signInWithEmailPassword(
         email: email,
         password: password,
-      ),
-    );
+      );
+      return right(user.toEntity());
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in AuthRepositoryImpl.signInWithEmailPassword',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
+    }
   }
 
   @override
@@ -31,49 +45,71 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return _getUser(
-      () async => await _authRemoteDataSource.signUpWithEmailPassword(
+    try {
+      final UserModel user = await _authRemoteDataSource.signUpWithEmailPassword(
         name: name,
         email: email,
         password: password,
-      ),
-    );
-  }
-
-  Future<Either<Failure, User>> _getUser(
-    Future<UserModel> Function() fn,
-  ) async {
-    try {
-      final user = await fn();
+      );
       return right(user.toEntity());
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in AuthRepositoryImpl.signUpWithEmailPassword',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
-      return right(_authRemoteDataSource.signOut());
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+      await _authRemoteDataSource.signOut();
+      return right(null);
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in AuthRepositoryImpl.signOut',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
   @override
   Stream<Either<Failure, User?>> authStateChanges() async* {
     try {
-      await for (final userModel in _authRemoteDataSource.authStateChanges()) {
+      await for (final UserModel? userModel in _authRemoteDataSource.authStateChanges()) {
         // userModel == null → signed out (valid state)
         if (userModel == null) {
-          yield const Right(null);
+          yield right(null);
         } else {
-          yield Right(userModel.toEntity());
+          yield right(userModel.toEntity());
         }
       }
-    } catch (e) {
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in AuthRepositoryImpl.authStateChanges',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
       // Any unexpected stream error is translated into a Failure
-      yield Left(mapExceptionToFailure(e));
+      yield left(failure);
     }
   }
 }

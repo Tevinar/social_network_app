@@ -35,15 +35,15 @@ class BlogModel {
 
   factory BlogModel.fromJson(Map<String, dynamic> map) {
     return BlogModel(
-      id: map['id'] ?? '',
-      posterId: map['poster_id'] ?? '',
-      title: map['title'] ?? '',
-      content: map['content'] ?? '',
-      imageUrl: map['image_url'] ?? '',
-      topics: List<String>.from(map['topics'] ?? []),
+      id: (map['id'] as String?) ?? '',
+      posterId: (map['poster_id'] as String?) ?? '',
+      title: (map['title'] as String?) ?? '',
+      content: (map['content'] as String?) ?? '',
+      imageUrl: (map['image_url'] as String?) ?? '',
+      topics: List<String>.from((map['topics'] as List<dynamic>?) ?? []),
       updatedAt: map['updated_at'] == null
           ? DateTime.now()
-          : DateTime.parse(map['updated_at']),
+          : DateTime.parse(map['updated_at'] as String),
     );
   }
 

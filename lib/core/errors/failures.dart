@@ -11,7 +11,7 @@ class NetworkFailure extends Failure {
 }
 
 class UnauthorizedFailure extends Failure {
-  const UnauthorizedFailure({String? debugMessage, String? code})
+  const UnauthorizedFailure({String? debugMessage})
     : super(
         'Your session has expired. Please sign in again.',
         debugMessage: debugMessage,

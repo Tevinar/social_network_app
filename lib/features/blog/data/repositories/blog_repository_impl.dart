@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:social_app/core/errors/failures_mapper.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
@@ -26,13 +27,13 @@ class BlogRepositoryImpl implements BlogRepository {
     required List<String> topics,
   }) async {
     try {
-      String blogId = const Uuid().v1();
-      String imageUrl = await blogRemoteDataSource.uploadBlogImage(
+      final String blogId = const Uuid().v1();
+      final String imageUrl = await blogRemoteDataSource.uploadBlogImage(
         image: image,
         blogId: blogId,
       );
 
-      BlogModel blogModel = BlogModel(
+      final BlogModel blogModel = BlogModel(
         id: blogId,
         posterId: posterId,
         title: title,
@@ -47,8 +48,18 @@ class BlogRepositoryImpl implements BlogRepository {
       );
 
       return right(savedBlog.toEntity());
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.createBlog',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
@@ -59,8 +70,18 @@ class BlogRepositoryImpl implements BlogRepository {
         pageNumber,
       );
       return right(blogs.map((blogModel) => blogModel.toEntity()).toList());
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.getBlogsPage',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
@@ -69,20 +90,39 @@ class BlogRepositoryImpl implements BlogRepository {
     try {
       final int blogsCount = await blogRemoteDataSource.getBlogsCount();
       return right(blogsCount);
-    } catch (e) {
-      return left(mapExceptionToFailure(e));
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.getBlogsCount',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
   @override
   Stream<Either<Failure, BlogChange>> watchBlogChanges() async* {
     try {
-      await for (final blogChange in blogRemoteDataSource.watchBlogChanges()) {
-        yield Right(blogChange);
+      await for (final BlogChange blogChange in blogRemoteDataSource.watchBlogChanges()) {
+        yield right(blogChange);
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.watchBlogChanges',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
       // Any unexpected stream error is translated into a Failure
-      yield Left(mapExceptionToFailure(error));
+      yield left(mapExceptionToFailure(error));
     }
   }
 }

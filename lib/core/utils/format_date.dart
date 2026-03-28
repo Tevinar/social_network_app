@@ -10,9 +10,9 @@ bool _isSameDay(DateTime a, DateTime b) {
 
 String formatToDay(DateTime dateTime) {
   final now = DateTime.now();
-  final today = _dateOnly(now);
-  final yesterday = _dateOnly(now.subtract(const Duration(days: 1)));
-  final value = _dateOnly(dateTime);
+  final DateTime today = _dateOnly(now);
+  final DateTime yesterday = _dateOnly(now.subtract(const Duration(days: 1)));
+  final DateTime value = _dateOnly(dateTime);
 
   if (_isSameDay(value, today)) {
     return 'Today';

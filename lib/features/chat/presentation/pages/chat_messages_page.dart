@@ -45,14 +45,14 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   void _sendMessage(BuildContext context, ChatEditorState state) {
-    final messageText = _messageController.text.trim();
+    final String messageText = _messageController.text.trim();
     if (state is ChatEditorLoaded) {
       context.read<ChatMessagesBloc>().add(
         AddChatMessage(state.chatId, messageText),
       );
       _messageController.clear();
     } else if (state is ChatEditorWaitingForFirstMessage) {
-      final messageText = _messageController.text.trim();
+      final String messageText = _messageController.text.trim();
       if (messageText.isNotEmpty) {
         // Dispatch an event to send the message
         context.read<ChatEditorBloc>().add(
@@ -91,9 +91,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                     return Flexible(
                       child: ListView.builder(
                         reverse: true,
-                        controller: context
-                            .read<ChatMessagesBloc>()
-                            .scrollController,
+                        controller: context.read<ChatMessagesBloc>().scrollController,
                         itemCount:
                             chatMessagesState.chatMessages.length ==
                                 chatMessagesState.totalChatMessagesInDatabase
@@ -103,25 +101,19 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                           if (index == chatMessagesState.chatMessages.length) {
                             return const Loader(size: 30);
                           } else {
-                            String authorName = chatEditorState.chatMembers
+                            final String authorName = chatEditorState.chatMembers
                                 .firstWhere(
                                   (member) =>
-                                      member.id ==
-                                      chatMessagesState
-                                          .chatMessages[index]
-                                          .authorId,
+                                      member.id == chatMessagesState.chatMessages[index].authorId,
                                 )
                                 .name;
-                            ChatMessage currentChatMessage =
+                            final ChatMessage currentChatMessage =
                                 chatMessagesState.chatMessages[index];
                             final bool showDateSeparator =
-                                index ==
-                                    chatMessagesState.chatMessages.length - 1 ||
+                                index == chatMessagesState.chatMessages.length - 1 ||
                                 !isSameDay(
                                   currentChatMessage.createdAt,
-                                  chatMessagesState
-                                      .chatMessages[index + 1]
-                                      .createdAt,
+                                  chatMessagesState.chatMessages[index + 1].createdAt,
                                 );
                             return Column(
                               children: [
@@ -141,9 +133,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                                 ChatMessageCard(
                                   chatMessage: currentChatMessage,
                                   authorName: authorName,
-                                  isMe:
-                                      currentChatMessage.authorId ==
-                                      _currentUser.id,
+                                  isMe: currentChatMessage.authorId == _currentUser.id,
                                 ),
                               ],
                             );
@@ -187,8 +177,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
                                 AppPallete.gradient1,
                               ),
                             ),
-                            onPressed: () =>
-                                _messageController.value.text.isEmpty
+                            onPressed: () => _messageController.value.text.isEmpty
                                 ? {}
                                 : _sendMessage(context, state),
                             icon: state is ChatEditorLoading

@@ -15,7 +15,7 @@ class UserModel {
     return UserModel(
       id: map['id'] as String,
       email: map['email'] as String,
-      name: map['user_metadata']?['name'] as String? ?? '',
+      name: (map['user_metadata'] as Map<String, dynamic>?)?['name'] as String? ?? '',
     );
   }
 

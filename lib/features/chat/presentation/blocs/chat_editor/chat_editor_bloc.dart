@@ -29,7 +29,7 @@ class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
   /// If chat already exists, directly navigate to the chat page
   Future<void> _onAddChat(AddChat event, Emitter<ChatEditorState> emit) async {
     emit(ChatEditorLoading(chatMembers: event.chatMembers));
-    final res = await _getChatByMembers.call(
+    final Either<Failure, Chat?> res = await _getChatByMembers.call(
       GetChatByMembersParams(members: event.chatMembers),
     );
 

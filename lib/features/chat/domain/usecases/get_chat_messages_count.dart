@@ -1,13 +1,14 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// A get chat messages count.
 class GetChatMessagesCount implements UseCase<int, String> {
-  final ChatMessageRepository _chatMessageRepository;
-
+  /// Creates a [GetChatMessagesCount].
   GetChatMessagesCount({required ChatMessageRepository chatMessageRepository})
     : _chatMessageRepository = chatMessageRepository;
+  final ChatMessageRepository _chatMessageRepository;
 
   @override
   Future<Either<Failure, int>> call(String chatId) {

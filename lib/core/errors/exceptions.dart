@@ -1,18 +1,28 @@
+/// Represents server exception.
 class ServerException implements Exception {
-  final String message;
-  final String? code;
-
+  /// Creates a [ServerException].
   const ServerException({required this.message, this.code});
+
+  /// The message.
+  final String message;
+
+  /// The code.
+  final String? code;
 
   @override
   String toString() => 'ServerException: $message (code: $code)';
 }
 
+/// Represents network exception.
 class NetworkException implements Exception {
-  final String message;
-  final String? code;
-
+  /// Creates a [NetworkException].
   const NetworkException({required this.message, this.code});
+
+  /// The message.
+  final String message;
+
+  /// The code.
+  final String? code;
 
   @override
   String toString() => 'NetworkException: $message (code: $code)';

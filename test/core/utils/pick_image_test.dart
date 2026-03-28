@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:social_app/core/services/image_picker_service.dart';
-import 'package:social_app/core/utils/pick_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:social_app/core/services/image_picker_service.dart';
+import 'package:social_app/core/utils/pick_image.dart';
 
 class MockImagePickerService extends Mock implements ImagePickerService {}
 
@@ -27,7 +27,7 @@ void main() {
     when(() => picker.pickFromGallery()).thenAnswer((_) async => xFile);
 
     // Act
-    final File? result = await pickImage();
+    final result = await pickImage();
 
     // Assert
     expect(result, isA<File>());
@@ -39,7 +39,7 @@ void main() {
     when(() => picker.pickFromGallery()).thenAnswer((_) async => null);
 
     // Act
-    final File? result = await pickImage();
+    final result = await pickImage();
 
     // Assert
     expect(result, isNull);

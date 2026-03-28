@@ -1,18 +1,26 @@
 part of 'blogs_bloc.dart';
 
 @immutable
+/// Represents blogs state.
 sealed class BlogsState {
-  final List<Blog> blogs;
-  final int pageNumber;
-  final int? totalBlogsInDatabase;
-
   const BlogsState({
     required this.blogs,
     required this.pageNumber,
     this.totalBlogsInDatabase,
   });
 
+  /// The blogs.
+  final List<Blog> blogs;
+
+  /// The int.
+  final int pageNumber;
+
+  /// The int.
+  final int? totalBlogsInDatabase;
+
+  /// The copy with.
   BlogsState copyWith({
+    /// The blogs.
     List<Blog>? blogs,
     int? pageNumber,
     int? totalBlogsInDatabase,
@@ -40,7 +48,9 @@ sealed class BlogsState {
   }
 }
 
+/// A blogs loading.
 final class BlogsLoading extends BlogsState {
+  /// Creates a [BlogsLoading].
   const BlogsLoading({
     required super.blogs,
     required super.pageNumber,
@@ -48,7 +58,9 @@ final class BlogsLoading extends BlogsState {
   });
 }
 
+/// A blogs success.
 final class BlogsSuccess extends BlogsState {
+  /// Creates a [BlogsSuccess].
   const BlogsSuccess({
     required super.blogs,
     required super.pageNumber,
@@ -56,13 +68,16 @@ final class BlogsSuccess extends BlogsState {
   });
 }
 
+/// Represents blogs failure.
 final class BlogsFailure extends BlogsState {
-  final String error;
-
+  /// Creates a [BlogsFailure].
   const BlogsFailure({
     required this.error,
     required super.blogs,
     required super.pageNumber,
     super.totalBlogsInDatabase,
   });
+
+  /// The error.
+  final String error;
 }

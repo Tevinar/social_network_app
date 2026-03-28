@@ -1,10 +1,13 @@
-import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:flutter/material.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
 
+/// A loader widget.
 class Loader extends StatelessWidget {
-  final double? size;
-
+  /// Creates a [Loader].
   const Loader({super.key, this.size});
+
+  /// The double.
+  final double? size;
 
   @override
   Widget build(BuildContext context) {

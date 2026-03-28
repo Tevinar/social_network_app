@@ -1,8 +1,9 @@
-import 'package:social_app/core/errors/exceptions.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/features/auth/data/data_sources/'
+    'auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
@@ -30,7 +31,8 @@ void main() {
   });
   group('signInWithEmailPassword', () {
     test(
-      'Given Supabase returns a user When signing in with email and password Then a UserModel is returned',
+      'Given Supabase returns a user when signing in with email and password, '
+      'then a UserModel is returned',
       () async {
         // Arrange
         final userJson = {'id': '123', 'email': 'test@test.com'};
@@ -43,7 +45,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final UserModel result = await ds.signInWithEmailPassword(
+        final result = await ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -60,7 +62,8 @@ void main() {
     );
 
     test(
-      'Given Supabase returns null When signing in with email and password Then a ServerException is thrown',
+      'Given Supabase returns null when signing in with email and password, '
+      'then a ServerException is thrown',
       () async {
         // Arrange
 
@@ -72,7 +75,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final Future<UserModel> result = ds.signInWithEmailPassword(
+        final result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -83,7 +86,8 @@ void main() {
     );
 
     test(
-      'Given Supabase throws an exception When signing in with email and password Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing in with email and '
+      'password, then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -94,7 +98,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<UserModel> result = ds.signInWithEmailPassword(
+        final result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -107,10 +111,11 @@ void main() {
 
   group('signUpWithEmailPassword', () {
     test(
-      'Given Supabase returns a user When signing up with email and password Then a UserModel is returned',
+      'Given Supabase returns a user when signing up with email and password, '
+      'then a UserModel is returned',
       () async {
         // Arrange
-        final Map<String, Object> userJson = {
+        final userJson = <String, Object>{
           'id': '123',
           'email': 'test@test.com',
           'user_metadata': {'name': 'Test User'},
@@ -125,7 +130,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final UserModel result = await ds.signUpWithEmailPassword(
+        final result = await ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -143,7 +148,8 @@ void main() {
     );
 
     test(
-      'Given Supabase returns null When signing up with email and password Then a ServerException is thrown',
+      'Given Supabase returns null when signing up with email and password, '
+      'then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -155,7 +161,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final Future<UserModel> result = ds.signUpWithEmailPassword(
+        final result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -167,7 +173,8 @@ void main() {
     );
 
     test(
-      'Given Supabase throws an exception When signing up with email and password Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing up with email and '
+      'password, then a ServerException is thrown',
       () async {
         // Arrange
         when(
@@ -179,7 +186,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<UserModel> result = ds.signUpWithEmailPassword(
+        final result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -192,25 +199,29 @@ void main() {
   });
 
   group('signOut', () {
-    test('Given Supabase signs out When signing out Then it completes', () async {
-      // Arrange
-      when(() => auth.signOut()).thenAnswer((_) async {});
+    test(
+      'Given Supabase signs out When signing out Then it completes',
+      () async {
+        // Arrange
+        when(() => auth.signOut()).thenAnswer((_) async {});
 
-      // Act
-      await ds.signOut();
+        // Act
+        await ds.signOut();
 
-      // Assert
-      verify(() => auth.signOut()).called(1);
-    });
+        // Assert
+        verify(() => auth.signOut()).called(1);
+      },
+    );
 
     test(
-      'Given Supabase throws an exception When signing out Then a ServerException is thrown',
+      'Given Supabase throws an exception when signing out, then a '
+      'ServerException is thrown',
       () async {
         // Arrange
         when(() => auth.signOut()).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<void> result = ds.signOut();
+        final result = ds.signOut();
 
         // Assert
         expect(result, throwsA(isA<ServerException>()));
@@ -220,7 +231,8 @@ void main() {
 
   group('authStateChanges', () {
     test(
-      'Given Supabase emits an auth state with a user When listening to auth changes Then a UserModel is returned',
+      'Given Supabase emits an auth state with a user when listening to auth '
+      'changes, then a UserModel is returned',
       () async {
         final authState = MockAuthState();
         // Arrange
@@ -236,7 +248,7 @@ void main() {
         ).thenReturn({'id': '123', 'email': 'test@test.com'});
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(
@@ -253,7 +265,8 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session When listening to auth changes Then null is returned',
+      'Given Supabase emits an auth state with a null session when listening '
+      'to auth changes, then null is returned',
       () async {
         final authState = MockAuthState();
         // Arrange
@@ -264,7 +277,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));
@@ -272,7 +285,8 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session When listening to auth changes Then null is returned',
+      'Given Supabase emits an auth state with a null session when listening '
+      'to auth changes, then null is returned',
       () async {
         final authState = MockAuthState();
         // Arrange
@@ -283,7 +297,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));

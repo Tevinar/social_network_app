@@ -1,11 +1,13 @@
 part of 'init_dependencies.dart';
 
-final serviceLocator = GetIt.instance;
+/// The service locator.
+final GetIt serviceLocator = GetIt.instance;
 
+/// The init dependencies.
 Future<void> initDependencies() async {
   // Shared public config is committed for zero-config onboarding.
   await dotenv.load(fileName: 'assets/config/env.public');
-  final Supabase supabase = await Supabase.initialize(
+  final supabase = await Supabase.initialize(
     url: Env.supabaseUrl,
     anonKey: Env.supabaseAnonKey,
   );
@@ -25,39 +27,40 @@ Future<void> initDependencies() async {
 
 void _initApp() {
   // Session
-  serviceLocator.registerLazySingleton(
-    () => AppUserCubit(
-      authRepository: serviceLocator(),
-      userSignOut: serviceLocator(),
-    ),
-  );
-  // logging
-  serviceLocator.registerLazySingleton(createTalker);
-  serviceLocator.registerLazySingleton<AppLogger>(
-    () => AppTalkerLogger(talker: serviceLocator()),
-  );
+  serviceLocator
+    ..registerLazySingleton(
+      () => AppUserCubit(
+        authRepository: serviceLocator(),
+        userSignOut: serviceLocator(),
+      ),
+    )
+    // logging
+    ..registerLazySingleton(createTalker)
+    ..registerLazySingleton<AppLogger>(
+      () => AppTalkerLogger(talker: serviceLocator()),
+    );
 }
 
 void _initCore() {
   // Connection checker
-  serviceLocator.registerLazySingleton(InternetConnection.new);
-  serviceLocator.registerLazySingleton<ConnectionChecker>(
-    () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
-  );
-
-  // Image picker service
-  serviceLocator.registerLazySingleton(ImagePicker.new);
-  serviceLocator.registerLazySingleton<ImagePickerService>(
-    () => ImagePickerServiceImpl(serviceLocator()),
-  );
+  serviceLocator
+    ..registerLazySingleton(InternetConnection.new)
+    ..registerLazySingleton<ConnectionChecker>(
+      () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
+    )
+    // Image picker service
+    ..registerLazySingleton(ImagePicker.new)
+    ..registerLazySingleton<ImagePickerService>(
+      () => ImagePickerServiceImpl(serviceLocator()),
+    );
 }
 
 void _initAuth() {
   serviceLocator
     // Datasources
-    // We need to specify that '<AuthRemoteDataSource>' because the parameter 'authRemoteDataSource' from 'AuthRepositoryImpl'
-    // require an object of type 'AuthRemoteDataSource' and not an object of type 'AuthRemoteDataSourceSupabaseImpl'.
-    // If we don't specify this, GetIt won't be able to find this reference when creating a AuthRepositoryImpl instance.
+    // We register the interface type because AuthRepositoryImpl depends on
+    // AuthRemoteDataSource, not on AuthRemoteDataSourceSupabaseImpl directly.
+    // Without this explicit type, GetIt could not resolve the dependency.
     ..registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceSupabaseImpl(serviceLocator()),
     )

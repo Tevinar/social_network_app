@@ -1,19 +1,27 @@
 part of 'users_bloc.dart';
 
 @immutable
+/// Represents users state.
 sealed class UsersState {
-  final List<User> users;
-  final int pageNumber;
-  final int? totalUsersInDatabase;
-
   const UsersState({
     required this.users,
     required this.pageNumber,
     this.totalUsersInDatabase,
   });
+
+  /// The users.
+  final List<User> users;
+
+  /// The int.
+  final int pageNumber;
+
+  /// The int.
+  final int? totalUsersInDatabase;
 }
 
+/// An users loading.
 final class UsersLoading extends UsersState {
+  /// Creates a [UsersLoading].
   const UsersLoading({
     required super.users,
     required super.pageNumber,
@@ -21,7 +29,9 @@ final class UsersLoading extends UsersState {
   });
 }
 
+/// An users success.
 final class UsersSuccess extends UsersState {
+  /// Creates a [UsersSuccess].
   const UsersSuccess({
     required super.users,
     required super.pageNumber,
@@ -29,13 +39,16 @@ final class UsersSuccess extends UsersState {
   });
 }
 
+/// Represents users failure.
 final class UsersFailure extends UsersState {
-  final String error;
-
+  /// Creates a [UsersFailure].
   const UsersFailure({
     required this.error,
     required super.users,
     required super.pageNumber,
     super.totalUsersInDatabase,
   });
+
+  /// The error.
+  final String error;
 }

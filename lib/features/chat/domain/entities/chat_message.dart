@@ -1,17 +1,26 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
+/// Domain entity representing a message sent inside a chat.
 class ChatMessage {
-  String id;
-  String authorId;
-  String content;
-  DateTime createdAt;
-  DateTime updatedAt;
-
-  ChatMessage({
+  /// Creates a [ChatMessage].
+  const ChatMessage({
     required this.id,
     required this.authorId,
     required this.content,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  /// Unique message identifier.
+  final String id;
+
+  /// Identifier of the user who authored the message.
+  final String authorId;
+
+  /// Message text displayed in the conversation.
+  final String content;
+
+  /// Timestamp of the initial message creation.
+  final DateTime createdAt;
+
+  /// Timestamp of the latest message update.
+  final DateTime updatedAt;
 }

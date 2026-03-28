@@ -1,3 +1,7 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:social_app/app/logging/app_talker_logger.dart';
 import 'package:social_app/app/logging/talker_config.dart';
 import 'package:social_app/app/services/image_picker_service_impl.dart';
@@ -16,9 +20,9 @@ import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:social_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
-import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
@@ -43,10 +47,6 @@ import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_edi
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get_it/get_it.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'init_dependencies.main.dart';

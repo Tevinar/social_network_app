@@ -1,24 +1,28 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:uuid/uuid.dart';
-
-import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:uuid/uuid.dart';
 
+/// Repository implementation that maps blog data source results
+/// to domain types.
 class BlogRepositoryImpl implements BlogRepository {
-  final BlogRemoteDataSource blogRemoteDataSource;
+  /// Creates a [BlogRepositoryImpl].
   BlogRepositoryImpl({required this.blogRemoteDataSource});
 
+  /// Remote data source used for blog persistence and realtime updates.
+  final BlogRemoteDataSource blogRemoteDataSource;
+
   @override
+  /// Uploads the image, persists the blog, and returns the created domain blog.
   Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
@@ -27,13 +31,13 @@ class BlogRepositoryImpl implements BlogRepository {
     required List<String> topics,
   }) async {
     try {
-      final String blogId = const Uuid().v1();
-      final String imageUrl = await blogRemoteDataSource.uploadBlogImage(
+      final blogId = const Uuid().v1();
+      final imageUrl = await blogRemoteDataSource.uploadBlogImage(
         image: image,
         blogId: blogId,
       );
 
-      final BlogModel blogModel = BlogModel(
+      final blogModel = BlogModel(
         id: blogId,
         posterId: posterId,
         title: title,
@@ -43,13 +47,13 @@ class BlogRepositoryImpl implements BlogRepository {
         updatedAt: DateTime.now(),
       );
 
-      final BlogModel savedBlog = await blogRemoteDataSource.postBlog(
+      final savedBlog = await blogRemoteDataSource.postBlog(
         blogModel,
       );
 
       return right(savedBlog.toEntity());
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -64,14 +68,15 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Fetches a page of blogs and maps the models to domain entities.
   Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber) async {
     try {
-      final List<BlogModel> blogs = await blogRemoteDataSource.getBlogsPage(
+      final blogs = await blogRemoteDataSource.getBlogsPage(
         pageNumber,
       );
       return right(blogs.map((blogModel) => blogModel.toEntity()).toList());
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -86,12 +91,13 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Fetches the total number of blogs available in the backend.
   Future<Either<Failure, int>> getBlogsCount() async {
     try {
-      final int blogsCount = await blogRemoteDataSource.getBlogsCount();
+      final blogsCount = await blogRemoteDataSource.getBlogsCount();
       return right(blogsCount);
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -106,13 +112,15 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
+  /// Streams realtime blog changes mapped to domain-level change objects.
   Stream<Either<Failure, BlogChange>> watchBlogChanges() async* {
     try {
-      await for (final BlogChange blogChange in blogRemoteDataSource.watchBlogChanges()) {
+      await for (final BlogChange blogChange
+          in blogRemoteDataSource.watchBlogChanges()) {
         yield right(blogChange);
       }
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(

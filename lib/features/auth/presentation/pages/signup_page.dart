@@ -1,13 +1,15 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/show_snackbar.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_gradient_button.dart';
-import 'package:social_app/app/router/routes/routes.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// A sign up page widget.
 class SignUpPage extends StatefulWidget {
+  /// Creates a [SignUpPage].
   const SignUpPage({super.key});
 
   @override
@@ -40,7 +42,9 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: const EdgeInsets.all(15),
 
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 30),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 30,
+                ),
                 child: BlocListener<AuthBloc, AuthState>(
                   listener: (context, state) {
                     if (state is AuthFailure) {
@@ -54,12 +58,18 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         const Text(
                           'Sign Up.',
-                          style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 30),
                         AuthField(hintText: 'Name', controller: nameController),
                         const SizedBox(height: 15),
-                        AuthField(hintText: 'Email', controller: emailController),
+                        AuthField(
+                          hintText: 'Email',
+                          controller: emailController,
+                        ),
                         const SizedBox(height: 15),
                         AuthField(
                           hintText: 'Password',
@@ -92,10 +102,11 @@ class _SignUpPageState extends State<SignUpPage> {
                               children: [
                                 TextSpan(
                                   text: 'Sign In',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: AppPallete.gradient2,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: AppPallete.gradient2,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ],
                             ),

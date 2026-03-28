@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 
+/// A auth field widget.
 class AuthField extends StatelessWidget {
-  final String hintText;
-  final TextEditingController controller;
-  final bool isObscureText;
+  /// Creates a [AuthField].
   const AuthField({
-    super.key,
     required this.hintText,
     required this.controller,
+    super.key,
     this.isObscureText = false,
   });
+
+  /// The hint text.
+  final String hintText;
+
+  /// The controller.
+  final TextEditingController controller;
+
+  /// Whether the value bool.
+  final bool isObscureText;
 
   @override
   Widget build(BuildContext context) {

@@ -1,17 +1,18 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-
-import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// An auth repository impl.
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource _authRemoteDataSource;
+  /// Creates a [AuthRepositoryImpl].
   const AuthRepositoryImpl({required AuthRemoteDataSource authRemoteDataSource})
     : _authRemoteDataSource = authRemoteDataSource;
+  final AuthRemoteDataSource _authRemoteDataSource;
 
   @override
   Future<Either<Failure, User>> signInWithEmailPassword({
@@ -19,13 +20,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final UserModel user = await _authRemoteDataSource.signInWithEmailPassword(
+      final user = await _authRemoteDataSource.signInWithEmailPassword(
         email: email,
         password: password,
       );
       return right(user.toEntity());
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -46,14 +47,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final UserModel user = await _authRemoteDataSource.signUpWithEmailPassword(
+      final user = await _authRemoteDataSource.signUpWithEmailPassword(
         name: name,
         email: email,
         password: password,
       );
       return right(user.toEntity());
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -72,8 +73,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _authRemoteDataSource.signOut();
       return right(null);
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -90,7 +91,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<Either<Failure, User?>> authStateChanges() async* {
     try {
-      await for (final UserModel? userModel in _authRemoteDataSource.authStateChanges()) {
+      await for (final UserModel? userModel
+          in _authRemoteDataSource.authStateChanges()) {
         // userModel == null → signed out (valid state)
         if (userModel == null) {
           yield right(null);
@@ -98,8 +100,8 @@ class AuthRepositoryImpl implements AuthRepository {
           yield right(userModel.toEntity());
         }
       }
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(

@@ -1,13 +1,14 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// A create chat message.
 class CreateChatMessage implements UseCase<void, CreateChatMessageParams> {
-  final ChatMessageRepository _chatMessageRepository;
-
+  /// Creates a [CreateChatMessage].
   CreateChatMessage({required ChatMessageRepository chatMessageRepository})
     : _chatMessageRepository = chatMessageRepository;
+  final ChatMessageRepository _chatMessageRepository;
 
   @override
   Future<Either<Failure, dynamic>> call(CreateChatMessageParams params) {
@@ -23,9 +24,14 @@ class CreateChatMessage implements UseCase<void, CreateChatMessageParams> {
   }
 }
 
+/// A create chat message params.
 class CreateChatMessageParams {
-  final String chatId;
-  final String content;
-
+  /// Creates a [CreateChatMessageParams].
   CreateChatMessageParams({required this.chatId, required this.content});
+
+  /// The chat id.
+  final String chatId;
+
+  /// The content.
+  final String content;
 }

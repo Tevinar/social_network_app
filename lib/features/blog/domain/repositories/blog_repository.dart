@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// A blog repository.
 abstract interface class BlogRepository {
+  /// Create blog.
   Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
@@ -14,8 +16,10 @@ abstract interface class BlogRepository {
     required List<String> topics,
   });
 
+  /// Gets the blogs page.
   Future<Either<Failure, List<Blog>>> getBlogsPage(int pageNumber);
 
+  /// Gets the blogs count.
   Future<Either<Failure, int>> getBlogsCount();
 
   /// Emits domain-level blog change events (insert/update/delete).

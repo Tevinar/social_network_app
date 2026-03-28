@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:social_app/core/constants/supabase_schema/buckets.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/blog_fields.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/profile_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/'
+    'blog_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/'
+    'profile_fields.dart';
 import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
 import 'package:social_app/core/constants/supabase_schema/tables.dart';
 import 'package:social_app/core/errors/exceptions.dart';
@@ -12,25 +14,37 @@ import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// A blog remote data source.
 abstract interface class BlogRemoteDataSource {
+  /// The post blog.
   Future<BlogModel> postBlog(BlogModel blog);
+
+  /// The upload blog image.
   Future<String> uploadBlogImage({required File image, required String blogId});
+
+  /// The get blogs page.
   Future<List<BlogModel>> getBlogsPage(int page);
 
   // Returns the total number of blogs in the database
+  /// The get blogs count.
   Future<int> getBlogsCount();
+
+  /// The watch blog changes.
   Stream<BlogChange> watchBlogChanges();
 }
 
+/// A blog remote data source impl.
 class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
-  SupabaseClient supabaseClient;
-
+  /// Creates a [BlogRemoteDataSourceImpl].
   BlogRemoteDataSourceImpl({required this.supabaseClient});
+
+  /// The supabase client.
+  SupabaseClient supabaseClient;
 
   @override
   Future<BlogModel> postBlog(BlogModel blog) async {
     return guardRemoteDataSourceCall(() async {
-      final List<Map<String, dynamic>> blogData = await supabaseClient
+      final blogData = await supabaseClient
           .from(Tables.blogs)
           .insert(blog.toJson())
           .select();
@@ -45,19 +59,23 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     required String blogId,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      await supabaseClient.storage.from(Buckets.blogImages).upload(blogId, image);
-      return supabaseClient.storage.from(Buckets.blogImages).getPublicUrl(blogId);
+      await supabaseClient.storage
+          .from(Buckets.blogImages)
+          .upload(blogId, image);
+      return supabaseClient.storage
+          .from(Buckets.blogImages)
+          .getPublicUrl(blogId);
     });
   }
 
   @override
   Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
     return guardRemoteDataSourceCall(() async {
-      const int pageSize = 20;
-      final int from = (pageNumber - 1) * pageSize;
-      final int to = from + pageSize - 1;
+      const pageSize = 20;
+      final from = (pageNumber - 1) * pageSize;
+      final to = from + pageSize - 1;
 
-      final List<Map<String, dynamic>> rawBlogs = await supabaseClient
+      final rawBlogs = await supabaseClient
           .from(Tables.blogs)
           .select('*, ${Tables.profiles} (${ProfileFields.name})')
           .range(from, to)
@@ -65,8 +83,8 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       return rawBlogs.map(
         (rawBlog) {
-          final Map<String, dynamic>? profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
-          final String? posterName = profile?[ProfileFields.name] as String?;
+          final profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
+          final posterName = profile?[ProfileFields.name] as String?;
           return BlogModel.fromJson(rawBlog).copyWith(
             posterName: posterName,
           );
@@ -136,52 +154,50 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
     controller = StreamController<BlogChange>(
       onListen: () {
-        channel = supabaseClient.realtime.channel(
-          '${SchemaTypes.public}:${Tables.blogs}',
-        );
+        channel =
+            supabaseClient.realtime.channel(
+                '${SchemaTypes.public}:${Tables.blogs}',
+              )
+              ..onPostgresChanges(
+                event: PostgresChangeEvent.all,
+                schema: SchemaTypes.public,
+                table: Tables.blogs,
+                callback: (payload) {
+                  try {
+                    switch (payload.eventType) {
+                      case PostgresChangeEvent.insert:
+                        controller.add(
+                          BlogInserted(
+                            BlogModel.fromJson(payload.newRecord).toEntity(),
+                          ),
+                        );
 
-        channel.onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: SchemaTypes.public,
-          table: Tables.blogs,
-          callback: (payload) {
-            try {
-              switch (payload.eventType) {
-                case PostgresChangeEvent.insert:
-                  controller.add(
-                    BlogInserted(
-                      BlogModel.fromJson(payload.newRecord).toEntity(),
-                    ),
-                  );
-                  break;
+                      case PostgresChangeEvent.update:
+                        controller.add(
+                          BlogUpdated(
+                            BlogModel.fromJson(payload.newRecord).toEntity(),
+                          ),
+                        );
 
-                case PostgresChangeEvent.update:
-                  controller.add(
-                    BlogUpdated(
-                      BlogModel.fromJson(payload.newRecord).toEntity(),
-                    ),
-                  );
-                  break;
+                      case PostgresChangeEvent.delete:
+                        final deletedBlogId =
+                            payload.oldRecord[BlogFields.id] as String;
+                        controller.add(BlogDeleted(deletedBlogId));
 
-                case PostgresChangeEvent.delete:
-                  final String deletedBlogId = payload.oldRecord[BlogFields.id] as String;
-                  controller.add(BlogDeleted(deletedBlogId));
-                  break;
-
-                case PostgresChangeEvent.all:
-                  // Not emitted as a payload event, but required for exhaustiveness
-                  break;
-              }
-            } catch (e, stack) {
-              controller.addError(
-                ServerException(message: e.toString()),
-                stack,
-              );
-            }
-          },
-        );
-
-        channel.subscribe();
+                      case PostgresChangeEvent.all:
+                        // Required for exhaustive handling
+                        // but never emitted here.
+                        break;
+                    }
+                  } on Exception catch (e, stack) {
+                    controller.addError(
+                      ServerException(message: e.toString()),
+                      stack,
+                    );
+                  }
+                },
+              )
+              ..subscribe();
       },
       onCancel: () async {
         await controller.close();

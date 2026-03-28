@@ -1,15 +1,8 @@
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 
+/// A blog model.
 class BlogModel {
-  final String id;
-  final String posterId;
-  final String title;
-  final String content;
-  final String imageUrl;
-  final List<String> topics;
-  final DateTime updatedAt;
-  final String? posterName;
-
+  /// Creates a [BlogModel].
   BlogModel({
     required this.id,
     required this.posterId,
@@ -21,18 +14,7 @@ class BlogModel {
     this.posterName,
   });
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'id': id,
-      'poster_id': posterId,
-      'title': title,
-      'content': content,
-      'image_url': imageUrl,
-      'topics': topics,
-      'updated_at': updatedAt.toIso8601String(),
-    };
-  }
-
+  /// Creates a [BlogModel].
   factory BlogModel.fromJson(Map<String, dynamic> map) {
     return BlogModel(
       id: (map['id'] as String?) ?? '',
@@ -47,14 +29,67 @@ class BlogModel {
     );
   }
 
+  /// The id.
+  final String id;
+
+  /// The poster id.
+  final String posterId;
+
+  /// The title.
+  final String title;
+
+  /// The content.
+  final String content;
+
+  /// The image url.
+  final String imageUrl;
+
+  /// The topics.
+  final List<String> topics;
+
+  /// The updated at.
+  final DateTime updatedAt;
+
+  /// The poster name.
+  final String? posterName;
+
+  /// The to json.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'poster_id': posterId,
+      'title': title,
+      'content': content,
+      'image_url': imageUrl,
+      'topics': topics,
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  /// The copy with.
   BlogModel copyWith({
+    /// The id.
     String? id,
+
+    /// The poster id.
     String? posterId,
+
+    /// The title.
     String? title,
+
+    /// The content.
     String? content,
+
+    /// The image url.
     String? imageUrl,
+
+    /// The topics.
     List<String>? topics,
+
+    /// The updated at.
     DateTime? updatedAt,
+
+    /// The poster name.
     String? posterName,
   }) {
     return BlogModel(
@@ -69,6 +104,7 @@ class BlogModel {
     );
   }
 
+  /// The to entity.
   Blog toEntity() {
     return Blog(
       id: id,

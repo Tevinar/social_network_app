@@ -1,27 +1,35 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// A chat message card widget.
 class ChatMessageCard extends StatelessWidget {
-  final ChatMessage chatMessage;
-  final String authorName;
-  final bool isMe;
-
+  /// Creates a [ChatMessageCard].
   const ChatMessageCard({
-    super.key,
     required this.isMe,
     required this.chatMessage,
     required this.authorName,
+    super.key,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final Color bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
+  /// The chat message.
+  final ChatMessage chatMessage;
 
-    final Alignment alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
+  /// The author name.
+  final String authorName;
+
+  /// Whether the value bool.
+  final bool isMe;
+
+  @override
+  /// The build.
+  Widget build(BuildContext context) {
+    final bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
+
+    final alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
 
     final borderRadius = BorderRadius.only(
       topLeft: isMe ? const Radius.circular(16) : Radius.zero,
@@ -48,7 +56,9 @@ class ChatMessageCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!isMe && context.read<ChatEditorBloc>().state.chatMembers.length > 2)
+                  if (!isMe &&
+                      context.read<ChatEditorBloc>().state.chatMembers.length >
+                          2)
                     Text(
                       authorName,
                       style: Theme.of(context).textTheme.titleMedium,

@@ -1,15 +1,16 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// A get chat by members.
 class GetChatByMembers implements UseCase<Chat?, GetChatByMembersParams> {
-  final ChatRepository _chatRepository;
-
+  /// Creates a [GetChatByMembers].
   GetChatByMembers({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
+  final ChatRepository _chatRepository;
 
   @override
   Future<Either<Failure, Chat?>> call(GetChatByMembersParams params) {
@@ -17,8 +18,11 @@ class GetChatByMembers implements UseCase<Chat?, GetChatByMembersParams> {
   }
 }
 
+/// A get chat by members params.
 class GetChatByMembersParams {
-  final List<User> members;
-
+  /// Creates a [GetChatByMembersParams].
   GetChatByMembersParams({required this.members});
+
+  /// The members.
+  final List<User> members;
 }

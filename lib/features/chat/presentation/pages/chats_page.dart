@@ -1,19 +1,22 @@
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/router/routes/routes.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/chat/presentation/blocs/chats/'
+    'chats_bloc.dart';
+import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
 
+/// A chats page widget.
 class ChatsPage extends StatelessWidget {
+  /// Creates a [ChatsPage].
   const ChatsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: BlocBuilder<ChatsBloc, ChatsState>(
           builder: (context, state) {
             if (state is ChatsFailure) {
@@ -21,14 +24,14 @@ class ChatsPage extends StatelessWidget {
                 child: Text('Error loading chats : ${state.error}'),
               );
             }
-            // Show loading placeholders when chats are being fetched for the first time
+            // Show placeholders while the first page of chats is loading.
             else if (state is ChatsLoading && state.chats.isEmpty) {
               return const Center(child: Loader());
             } else {
               if (state.chats.isEmpty) {
                 return Center(
                   child: Text(
-                    'You don\'t have any chats. Start a new one!',
+                    "You don't have any chats. Start a new one!",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 );

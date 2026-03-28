@@ -10,7 +10,7 @@ import 'package:social_app/core/logging/app_logger.dart';
 void configureGlobalErrorHandling(AppLogger bootstrapLogger) {
   // Catches errors reported by the Flutter framework itself,
   // such as build, layout, and paint failures.
-  FlutterError.onError = (FlutterErrorDetails details) {
+  FlutterError.onError = (details) {
     bootstrapLogger.error(
       'Unhandled Flutter framework error',
       error: details.exception,
@@ -21,7 +21,7 @@ void configureGlobalErrorHandling(AppLogger bootstrapLogger) {
 
   // Catches uncaught top-level async/runtime errors
   // that happen outside Flutter framework callbacks.
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
+  PlatformDispatcher.instance.onError = (error, stackTrace) {
     bootstrapLogger.error(
       'Unhandled platform error',
       error: error,

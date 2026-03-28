@@ -1,15 +1,19 @@
-import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
-import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
-import 'package:social_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/router/routes/routes.dart';
+import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/utils/show_snackbar.dart';
+import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/blog/presentation/blocs/blogs/'
+    'blogs_bloc.dart';
+import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
+import 'package:social_app/features/blog/presentation/widgets/'
+    'blog_card_place_holder.dart';
 
+/// A blogs page widget.
 class BlogsPage extends StatelessWidget {
+  /// Creates a [BlogsPage].
   const BlogsPage({super.key});
 
   @override
@@ -38,15 +42,18 @@ class BlogsPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              final BlogsBloc blogsBloc = context.read<BlogsBloc>();
+              final blogsBloc = context.read<BlogsBloc>();
 
-              final bool? created = await const AddNewBlogPageRoute().push<bool>(context);
+              final created = await const AddNewBlogPageRoute().push<bool>(
+                context,
+              );
 
               if (created == true) {
                 await blogsBloc.scrollToTop();
+                // Refreshes the list size after a newly created blog is added.
                 blogsBloc.add(
                   RefreshBlogsView(),
-                ); // Usefull for keeping the itemCount of the listview updated after adding a new blog
+                );
               }
             },
 
@@ -59,14 +66,16 @@ class BlogsPage extends StatelessWidget {
           if (state is BlogsFailure) {
             return const Center(child: Text('Error loading blogs'));
           }
-          // Show loading placeholders when blogs are being fetched for the first time
+          // Show placeholders while the first page of blogs is loading.
           else if (state is BlogsLoading && state.blogs.isEmpty) {
             return SingleChildScrollView(
               child: Column(
                 children: List.generate(
                   4,
                   (index) => BlogCardPlaceholder(
-                    color: index % 2 == 0 ? AppPallete.gradient1 : AppPallete.gradient2,
+                    color: index.isEven
+                        ? AppPallete.gradient1
+                        : AppPallete.gradient2,
                   ),
                 ),
               ),
@@ -80,13 +89,15 @@ class BlogsPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 if (index == state.blogs.length) {
                   return const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16),
                     child: Loader(size: 30),
                   );
                 } else {
                   return BlogCard(
                     blog: state.blogs[index],
-                    color: index % 2 == 0 ? AppPallete.gradient1 : AppPallete.gradient2,
+                    color: index.isEven
+                        ? AppPallete.gradient1
+                        : AppPallete.gradient2,
                   );
                 }
               },

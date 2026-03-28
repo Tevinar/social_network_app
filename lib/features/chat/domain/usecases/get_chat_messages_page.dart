@@ -1,17 +1,20 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// A get chat messages page widget.
 class GetChatMessagesPage
     implements UseCase<List<ChatMessage>, GetChatMessagesPageParams> {
-  final ChatMessageRepository _chatMessageRepository;
+  /// Creates a [GetChatMessagesPage].
   GetChatMessagesPage({required ChatMessageRepository chatMessageRepository})
     : _chatMessageRepository = chatMessageRepository;
+  final ChatMessageRepository _chatMessageRepository;
 
   @override
   Future<Either<Failure, List<ChatMessage>>> call(
+    /// The params.
     GetChatMessagesPageParams params,
   ) {
     return _chatMessageRepository.getChatMessagesPage(
@@ -21,9 +24,14 @@ class GetChatMessagesPage
   }
 }
 
+/// A get chat messages page params.
 class GetChatMessagesPageParams {
-  final int pageNumber;
-  final String chatId;
-
+  /// Creates a [GetChatMessagesPageParams].
   GetChatMessagesPageParams({required this.pageNumber, required this.chatId});
+
+  /// The int.
+  final int pageNumber;
+
+  /// The chat id.
+  final String chatId;
 }

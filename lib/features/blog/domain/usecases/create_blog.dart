@@ -1,18 +1,22 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
-import 'package:fpdart/fpdart.dart';
 
+/// Validates blog input data and delegates blog creation to the repository.
 class CreateBlog implements UseCase<Blog, CreateBlogParams> {
-  final BlogRepository _blogRepository;
+  /// Creates a [CreateBlog].
   CreateBlog({required BlogRepository blogRepository})
     : _blogRepository = blogRepository;
 
+  /// Repository used to persist the new blog.
+  final BlogRepository _blogRepository;
+
   @override
+  /// Validates the request, then creates the blog if the data is valid.
   Future<Either<Failure, Blog>> call(CreateBlogParams params) async {
     if (params.image.path.isEmpty) {
       return left(const ValidationFailure('Image cannot be empty'));
@@ -42,13 +46,9 @@ class CreateBlog implements UseCase<Blog, CreateBlogParams> {
   }
 }
 
+/// Parameters required to create a new blog post.
 class CreateBlogParams {
-  final String posterId;
-  final String title;
-  final String content;
-  final File image;
-  final List<String> topics;
-
+  /// Creates a [CreateBlogParams].
   CreateBlogParams({
     required this.posterId,
     required this.title,
@@ -56,4 +56,19 @@ class CreateBlogParams {
     required this.image,
     required this.topics,
   });
+
+  /// Identifier of the user creating the blog.
+  final String posterId;
+
+  /// Blog title.
+  final String title;
+
+  /// Blog content body.
+  final String content;
+
+  /// Selected cover image file.
+  final File image;
+
+  /// Selected topics attached to the blog.
+  final List<String> topics;
 }

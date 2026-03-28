@@ -1,19 +1,16 @@
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/chat/domain/entities/chat.dart';
-import 'package:social_app/features/chat/domain/usecases/create_chat.dart';
-import 'package:social_app/features/chat/domain/usecases/get_chat_by_members.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/chat/domain/usecases/create_chat.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'get_chat_by_members.dart';
 
 part 'chat_editor_event.dart';
 part 'chat_editor_state.dart';
 
+/// A chat editor bloc.
 class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
-  final CreateChat _createChat;
-  final GetChatByMembers _getChatByMembers;
-
+  /// Creates a [ChatEditorBloc].
   ChatEditorBloc({
     required CreateChat createChat,
     required GetChatByMembers getChatByMembers,
@@ -24,12 +21,14 @@ class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
     on<AddChatFirstMessage>(_onAddChatFirstMessage);
     on<SelectChat>(_onSelectChat);
   }
+  final CreateChat _createChat;
+  final GetChatByMembers _getChatByMembers;
 
-  /// On chat addition, if chat does not exist, wait for the first message to be added to backend
-  /// If chat already exists, directly navigate to the chat page
+  /// When no chat exists yet, wait for the first backend message.
+  /// If one already exists, navigate directly to the chat page.
   Future<void> _onAddChat(AddChat event, Emitter<ChatEditorState> emit) async {
     emit(ChatEditorLoading(chatMembers: event.chatMembers));
-    final Either<Failure, Chat?> res = await _getChatByMembers.call(
+    final res = await _getChatByMembers.call(
       GetChatByMembersParams(members: event.chatMembers),
     );
 
@@ -58,7 +57,7 @@ class ChatEditorBloc extends Bloc<ChatEditorEvent, ChatEditorState> {
   ) async {
     emit(ChatEditorLoading(chatMembers: state.chatMembers));
 
-    final Either<Failure, Chat> res = await _createChat.call(
+    final res = await _createChat.call(
       CreateChatParams(
         members: state.chatMembers,
         firstMessageContent: event.firstMessageContent,

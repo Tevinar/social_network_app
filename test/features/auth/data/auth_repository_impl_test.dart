@@ -1,16 +1,18 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/data_sources/'
+    'auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:social_app/features/auth/data/repositories/'
+    'auth_repository_impl.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
@@ -21,7 +23,11 @@ void main() {
   late MockAppLogger logger;
   late AuthRepositoryImpl repository;
 
-  final userModel = UserModel(id: '123', email: 'test@test.com', name: 'Test');
+  const userModel = UserModel(
+    id: '123',
+    email: 'test@test.com',
+    name: 'Test',
+  );
 
   setUp(() async {
     await GetIt.I.reset();
@@ -39,7 +45,8 @@ void main() {
 
   group('signInWithEmailPassword', () {
     test(
-      'Given remote succeeds When signing in with email and password Then Right<User> is returned',
+      'Given remote succeeds when signing in with email and password, then '
+      'Right<User> is returned',
       () async {
         // Arrange
         when(
@@ -50,7 +57,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final Either<Failure, User> result = await repository.signInWithEmailPassword(
+        final result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -67,7 +74,8 @@ void main() {
     );
 
     test(
-      'Given remote throws When signing in with email and password Then Left<Failure> is returned',
+      'Given remote throws when signing in with email and password, then '
+      'Left<Failure> is returned',
       () async {
         // Arrange
         when(
@@ -78,7 +86,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'no internet'));
 
         // Act
-        final Either<Failure, User> result = await repository.signInWithEmailPassword(
+        final result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -95,7 +103,8 @@ void main() {
 
   group('signUpWithEmailPassword', () {
     test(
-      'Given remote succeeds When signing up with email and password Then Right<User> is returned',
+      'Given remote succeeds when signing up with email and password, then '
+      'Right<User> is returned',
       () async {
         // Arrange
         when(
@@ -107,7 +116,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
+        final result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -119,7 +128,8 @@ void main() {
     );
 
     test(
-      'Given remote throws When signing up with email and password Then Left<Failure> is returned',
+      'Given remote throws when signing up with email and password, then '
+      'Left<Failure> is returned',
       () async {
         // Arrange
         when(
@@ -131,7 +141,7 @@ void main() {
         ).thenThrow(const ServerException(message: 'error'));
 
         // Act
-        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
+        final result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -164,7 +174,7 @@ void main() {
         when(() => remote.signOut()).thenAnswer((_) async {});
 
         // Act
-        final Either<Failure, void> result = await repository.signOut();
+        final result = await repository.signOut();
 
         // Assert
         expect(result, isA<Right<Failure, void>>());
@@ -181,7 +191,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'offline'));
 
         // Act
-        final Either<Failure, void> result = await repository.signOut();
+        final result = await repository.signOut();
 
         // Assert
         expect(result, isA<Left<Failure, void>>());
@@ -195,7 +205,8 @@ void main() {
 
   group('authStateChanges', () {
     test(
-      'Given remote emits UserModel When listening to auth changes Then Right<User> is emitted',
+      'Given remote emits UserModel when listening to auth changes, then '
+      'Right<User> is emitted',
       () async {
         // Arrange
         when(
@@ -203,7 +214,7 @@ void main() {
         ).thenAnswer((_) => Stream.value(userModel));
 
         // Act
-        final Stream<Either<Failure, User?>> stream = repository.authStateChanges();
+        final stream = repository.authStateChanges();
 
         // Assert
         await expectLater(
@@ -220,7 +231,8 @@ void main() {
     );
 
     test(
-      'Given remote emits null When listening to auth changes Then Right(null) is emitted',
+      'Given remote emits null when listening to auth changes, then '
+      'Right(null) is emitted',
       () async {
         // Arrange
         when(
@@ -236,7 +248,8 @@ void main() {
     );
 
     test(
-      'Given remote stream throws When listening to auth changes Then Left<Failure> is emitted',
+      'Given remote stream throws when listening to auth changes, then '
+      'Left<Failure> is emitted',
       () async {
         // Arrange
         when(() => remote.authStateChanges()).thenAnswer(

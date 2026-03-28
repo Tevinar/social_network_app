@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
@@ -7,9 +10,6 @@ import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fpdart/fpdart.dart';
 
 part 'blogs_event.dart';
 part 'blogs_state.dart';
@@ -28,15 +28,6 @@ part 'blogs_state.dart';
 /// Manages the blog feed state, including pagination, loading states,
 /// and real-time updates to already loaded blogs.
 class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
-  final GetBlogsPage _getBlogsPage;
-  final GetBlogsCount _getBlogsCount;
-  final BlogRepository _repository;
-
-  // Listens to scroll position to trigger pagination when nearing the bottom
-  final ScrollController _scrollController = ScrollController();
-  // Subscription to passive blog change stream (insert/update/delete)
-  late final StreamSubscription<Either<Failure, BlogChange>> _blogChangeSub;
-
   /// Creates the BlogsBloc and immediately:
   /// - starts listening to scroll events for pagination
   /// - subscribes to real-time blog changes
@@ -58,6 +49,14 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
     add(LoadBlogsNextPage());
   }
+  final GetBlogsPage _getBlogsPage;
+  final GetBlogsCount _getBlogsCount;
+  final BlogRepository _repository;
+
+  // Listens to scroll position to trigger pagination when nearing the bottom
+  final ScrollController _scrollController = ScrollController();
+  // Subscription to passive blog change stream (insert/update/delete)
+  late final StreamSubscription<Either<Failure, BlogChange>> _blogChangeSub;
 
   @override
   Future<void> close() async {
@@ -80,7 +79,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   // Triggers pagination when the user scrolls close to the bottom of the list.
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadBlogsNextPage());
       }
@@ -94,7 +94,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
     _blogChangeSub = _repository.watchBlogChanges().listen((
-      Either<Failure, BlogChange> event,
+      event,
     ) {
       add(BlogChangeReceived(event));
     });
@@ -134,7 +134,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
             state.copyWith(
               blogs: state.blogs
                   .map(
-                    (blog) => blog.id == blogChange.blog.id ? blogChange.blog : blog,
+                    (blog) =>
+                        blog.id == blogChange.blog.id ? blogChange.blog : blog,
                   )
                   .toList(),
             ),
@@ -144,7 +145,9 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         if (blogChange is BlogDeleted) {
           emit(
             state.copyWith(
-              blogs: state.blogs.where((blog) => blog.id != blogChange.blogId).toList(),
+              blogs: state.blogs
+                  .where((blog) => blog.id != blogChange.blogId)
+                  .toList(),
               totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 1) - 1,
             ),
           );
@@ -167,7 +170,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     }
 
     // If we don't have more blogs to load, do nothing
-    if (state.blogs.length == state.totalBlogsInDatabase && state.totalBlogsInDatabase != 0) {
+    if (state.blogs.length == state.totalBlogsInDatabase &&
+        state.totalBlogsInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have blogs loading
@@ -183,7 +187,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         totalBlogsInDatabase: state.totalBlogsInDatabase,
       ),
     );
-    final Either<Failure, List<Blog>> result = await _getBlogsPage(
+    final result = await _getBlogsPage(
       state.pageNumber,
     );
     result.fold(
@@ -198,7 +202,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         );
       },
       (blogsNextPage) {
-        final List<Blog> newBlogs = [...state.blogs, ...blogsNextPage];
+        final newBlogs = <Blog>[...state.blogs, ...blogsNextPage];
         emit(
           BlogsSuccess(
             blogs: newBlogs,
@@ -210,11 +214,13 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     );
   }
 
+  /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
+  /// The scroll to top.
   Future<void> scrollToTop() async {
     await _scrollController.animateTo(
-      0.0,
+      0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
@@ -224,7 +230,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   ///
   /// This value is used to determine when pagination has reached the end.
   Future<void> _initializeBlogsCount(Emitter<BlogsState> emit) async {
-    final Either<Failure, int> result = await _getBlogsCount(NoParams());
+    final result = await _getBlogsCount(NoParams());
     result.fold(
       (error) {
         emit(

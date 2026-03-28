@@ -1,13 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'app_user_state.dart';
 
@@ -22,9 +22,7 @@ part 'app_user_state.dart';
 /// This cubit does NOT handle authentication flows (sign-in / sign-up).
 /// It only reflects session state and is safe to use across all features.
 class AppUserCubit extends Cubit<AppUserState> {
-  final UserSignOut _userSignOut;
-  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
-  final AuthRepository _authRepository;
+  /// Creates a [AppUserCubit].
   AppUserCubit({
     required UserSignOut userSignOut,
     required AuthRepository authRepository,
@@ -33,6 +31,9 @@ class AppUserCubit extends Cubit<AppUserState> {
        super(AppUserLoading()) {
     _subscribeToAuthStateChanges();
   }
+  final UserSignOut _userSignOut;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
+  final AuthRepository _authRepository;
 
   @override
   Future<void> close() async {
@@ -59,7 +60,7 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> signOut() async {
     emit(AppUserLoading());
 
-    final Either<Failure, void> result = await _userSignOut(NoParams());
+    final result = await _userSignOut(NoParams());
     result.fold(
       (failure) => emit(AppUserFailure(failure.message)),
       (_) => emit(AppUserSignedOut()),

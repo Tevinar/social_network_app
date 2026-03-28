@@ -6,7 +6,7 @@ import 'package:talker/talker.dart';
 /// Debug builds keep verbose logs, while release builds keep only warning and
 /// error logs to reduce noise.
 Talker createTalker() {
-  const LogLevel minimumLogLevel = kDebugMode ? LogLevel.debug : LogLevel.warning;
+  const minimumLogLevel = kDebugMode ? LogLevel.debug : LogLevel.warning;
 
   return Talker(
     logger: TalkerLogger(

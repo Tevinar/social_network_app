@@ -1,34 +1,43 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
-import 'package:social_app/features/chat/data/models/chat_message_model.dart';
+import 'package:social_app/features/chat/data/data_sources/'
+    'chat_message_remote_data_source.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:social_app/features/chat/domain/entities/'
+    'chat_message_change.dart';
+import 'package:social_app/features/chat/domain/repositories/'
+    'chat_message_repository.dart';
 
+/// A chat message repository impl.
 class ChatMessageRepositoryImpl implements ChatMessageRepository {
-  final ChatMessageRemoteDataSource chatMessageRemoteDataSource;
+  /// Creates a [ChatMessageRepositoryImpl].
   ChatMessageRepositoryImpl({required this.chatMessageRemoteDataSource});
+
+  /// The chat message remote data source.
+  final ChatMessageRemoteDataSource chatMessageRemoteDataSource;
 
   @override
   Future<Either<Failure, List<ChatMessage>>> getChatMessagesPage(
+    /// The page number.
     int pageNumber,
+
+    /// The chat id.
     String chatId,
   ) async {
     try {
-      final List<ChatMessageModel> chatMessageModels = await chatMessageRemoteDataSource
+      final chatMessageModels = await chatMessageRemoteDataSource
           .getChatMessagesPage(
             pageNumber,
             chatId,
           );
-      final List<ChatMessage> chatMessages = chatMessageModels
+      final chatMessages = chatMessageModels
           .map((chatModel) => chatModel.toEntity())
           .toList();
       return right(chatMessages);
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -45,10 +54,11 @@ class ChatMessageRepositoryImpl implements ChatMessageRepository {
   @override
   Future<Either<Failure, int>> getChatMessagesCount(String chatId) async {
     try {
-      final int chatMessagesCount = await chatMessageRemoteDataSource.getChatMessagesCount(chatId);
+      final chatMessagesCount = await chatMessageRemoteDataSource
+          .getChatMessagesCount(chatId);
       return right(chatMessagesCount);
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
@@ -69,12 +79,13 @@ class ChatMessageRepositoryImpl implements ChatMessageRepository {
           in chatMessageRemoteDataSource.watchChatMessageChanges()) {
         yield right(chatChange);
       }
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in ChatMessageRepositoryImpl.watchChatMessageChanges',
+          'Unexpected error in '
+          'ChatMessageRepositoryImpl.watchChatMessageChanges',
           error: error,
           stackTrace: stackTrace,
         );
@@ -95,8 +106,8 @@ class ChatMessageRepositoryImpl implements ChatMessageRepository {
         content: content,
       );
       return right(null);
-    } catch (error, stackTrace) {
-      final Failure failure = mapExceptionToFailure(error);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(

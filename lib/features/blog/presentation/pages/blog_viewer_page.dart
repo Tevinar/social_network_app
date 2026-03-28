@@ -1,15 +1,20 @@
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:flutter/material.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/calculate_reading_time.dart';
 import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:flutter/material.dart';
 
+/// A blog viewer page widget.
 class BlogViewerPage extends StatelessWidget {
+  /// Creates a [BlogViewerPage].
+  const BlogViewerPage({required this.blog, super.key});
+
+  /// The blog.
   final Blog blog;
-  const BlogViewerPage({super.key, required this.blog});
 
   @override
+  /// The build.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +32,7 @@ class BlogViewerPage extends StatelessWidget {
           return Scrollbar(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -48,7 +53,8 @@ class BlogViewerPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      '${formatToDay(blog.updatedAt)} . ${calculateReadingTime(blog.content)} min',
+                      '${formatToDay(blog.updatedAt)} . '
+                      '${calculateReadingTime(blog.content)} min',
                       style: const TextStyle(
                         color: AppPallete.greyColor,
                         fontSize: 16,

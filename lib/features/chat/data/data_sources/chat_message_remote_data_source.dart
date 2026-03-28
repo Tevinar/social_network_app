@@ -1,15 +1,19 @@
 import 'dart:async';
 
-import 'package:social_app/core/constants/supabase_schema/fields/chat_message_fields.dart';
+import 'package:social_app/core/constants/supabase_schema/fields/'
+    'chat_message_fields.dart';
 import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
 import 'package:social_app/core/constants/supabase_schema/tables.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/features/chat/data/models/chat_message_model.dart';
-import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
+import 'package:social_app/features/chat/domain/entities/'
+    'chat_message_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// A chat message remote data source.
 abstract interface class ChatMessageRemoteDataSource {
+  /// The post chat message.
   Future<void> postChatMessage({
     required String chatId,
     required String content,
@@ -28,10 +32,13 @@ abstract interface class ChatMessageRemoteDataSource {
   Stream<ChatMessageChange> watchChatMessageChanges();
 }
 
+/// A chat message remote data source impl.
 class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
-  SupabaseClient supabaseClient;
-
+  /// Creates a [ChatMessageRemoteDataSourceImpl].
   ChatMessageRemoteDataSourceImpl({required this.supabaseClient});
+
+  /// The supabase client.
+  SupabaseClient supabaseClient;
 
   @override
   Future<List<ChatMessageModel>> getChatMessagesPage(
@@ -39,11 +46,11 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
     String chatId,
   ) async {
     return guardRemoteDataSourceCall(() async {
-      const int pageSize = 20;
-      final int from = (pageNumber - 1) * pageSize;
-      final int to = from + pageSize - 1;
+      const pageSize = 20;
+      final from = (pageNumber - 1) * pageSize;
+      final to = from + pageSize - 1;
 
-      final List<Map<String, dynamic>> rawChatMessages = await supabaseClient
+      final rawChatMessages = await supabaseClient
           .from(Tables.chatMessages)
           .select()
           .eq(ChatMessageFields.chatId, chatId)
@@ -56,7 +63,7 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
   @override
   Future<int> getChatMessagesCount(String chatId) async {
     return guardRemoteDataSourceCall(() async {
-      final PostgrestResponse<PostgrestList> response = await supabaseClient
+      final response = await supabaseClient
           .from(Tables.chatMessages)
           .select()
           .eq(ChatMessageFields.chatId, chatId)
@@ -73,56 +80,58 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
 
     controller = StreamController<ChatMessageChange>(
       onListen: () {
-        channel = supabaseClient.realtime.channel(
-          '${SchemaTypes.public}:${Tables.chatMessages}',
-        );
+        channel =
+            supabaseClient.realtime.channel(
+                '${SchemaTypes.public}:${Tables.chatMessages}',
+              )
+              // No need to filter by chat here, as the RLS policies will
+              // ensure that only relevant changes are sent to the client.
+              ..onPostgresChanges(
+                event: PostgresChangeEvent.all,
+                schema: SchemaTypes.public,
+                table: Tables.chatMessages,
+                callback: (payload) async {
+                  try {
+                    switch (payload.eventType) {
+                      case PostgresChangeEvent.insert:
+                        controller.add(
+                          ChatMessageInserted(
+                            ChatMessageModel.fromJson(
+                              payload.newRecord,
+                            ).toEntity(),
+                          ),
+                        );
 
-        /// No need to filter by chat here, as the RLS policies will ensure that
-        /// only relevant changes are sent to the client.
-        channel.onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: SchemaTypes.public,
-          table: Tables.chatMessages,
-          callback: (payload) async {
-            try {
-              switch (payload.eventType) {
-                case PostgresChangeEvent.insert:
-                  controller.add(
-                    ChatMessageInserted(
-                      ChatMessageModel.fromJson(payload.newRecord).toEntity(),
-                    ),
-                  );
-                  break;
+                      case PostgresChangeEvent.update:
+                        controller.add(
+                          ChatMessageUpdated(
+                            ChatMessageModel.fromJson(
+                              payload.newRecord,
+                            ).toEntity(),
+                          ),
+                        );
 
-                case PostgresChangeEvent.update:
-                  controller.add(
-                    ChatMessageUpdated(
-                      ChatMessageModel.fromJson(payload.newRecord).toEntity(),
-                    ),
-                  );
-                  break;
+                      case PostgresChangeEvent.delete:
+                        final deletedMessageId =
+                            payload.oldRecord[ChatMessageFields.id] as String;
+                        controller.add(
+                          ChatMessageDeleted(deletedMessageId),
+                        );
 
-                case PostgresChangeEvent.delete:
-                  final String deletedMessageId = payload.oldRecord[ChatMessageFields.id] as String;
-                  controller.add(
-                    ChatMessageDeleted(deletedMessageId),
-                  );
-                  break;
-
-                case PostgresChangeEvent.all:
-                  // Not emitted as a payload event, but required for exhaustiveness
-                  break;
-              }
-            } catch (e, stack) {
-              controller.addError(
-                ServerException(message: e.toString()),
-                stack,
-              );
-            }
-          },
-        );
-
-        channel.subscribe();
+                      case PostgresChangeEvent.all:
+                        // Required for exhaustive handling
+                        // but never emitted here.
+                        break;
+                    }
+                  } on Exception catch (e, stack) {
+                    controller.addError(
+                      ServerException(message: e.toString()),
+                      stack,
+                    );
+                  }
+                },
+              )
+              ..subscribe();
       },
       onCancel: () async {
         await channel.unsubscribe();

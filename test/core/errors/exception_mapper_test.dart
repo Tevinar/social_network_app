@@ -1,16 +1,15 @@
 import 'dart:io';
 
-import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   group('guardRemoteDataSourceCall', () {
     test('returns value when call succeeds', () async {
       // Act
-      final int result = await guardRemoteDataSourceCall(() async {
+      final result = await guardRemoteDataSourceCall(() async {
         return 42;
       });
 

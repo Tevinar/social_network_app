@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// A initial loading page widget.
 class InitialLoadingPage extends StatelessWidget {
+  /// Creates a [InitialLoadingPage].
   const InitialLoadingPage({super.key});
 
   @override

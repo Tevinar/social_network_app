@@ -28,12 +28,20 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     add(LoadUsersNextPage());
   }
 
+  @override
+  Future<void> close() async {
+    try {
+      _scrollController.dispose();
+    } finally {
+      await super.close();
+    }
+  }
+
   // Add a listener to scrollController events
   // and fetch more users when reaching the bottom
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadUsersNextPage());
       }
@@ -49,8 +57,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     }
 
     // If we don't have more users to load, do nothing
-    if (state.users.length == state.totalUsersInDatabase &&
-        state.totalUsersInDatabase != 0) {
+    if (state.users.length == state.totalUsersInDatabase && state.totalUsersInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have users loading
@@ -81,7 +88,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         );
       },
       (usersNextPage) {
-        List<User> newUsers = [...state.users, ...usersNextPage];
+        final List<User> newUsers = [...state.users, ...usersNextPage];
         emit(
           UsersSuccess(
             users: newUsers,

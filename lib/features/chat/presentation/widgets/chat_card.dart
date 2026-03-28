@@ -15,26 +15,22 @@ class ChatCard extends StatelessWidget {
   String computeChatMembersNames(BuildContext context) {
     final List<User> chatMembersWithoutCurrentUser = chat.members
         .where(
-          (member) =>
-              member.id !=
-              (context.read<AppUserCubit>().state as AppUserSignedIn).user.id,
+          (member) => member.id != (context.read<AppUserCubit>().state as AppUserSignedIn).user.id,
         )
         .toList();
 
-    return chatMembersWithoutCurrentUser
-        .map((member) => member.name)
-        .join(', ');
+    return chatMembersWithoutCurrentUser.map((member) => member.name).join(', ');
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
+      onTap: () async {
         context.read<ChatEditorBloc>().add(
           SelectChat(chatId: chat.id, chatMembers: chat.members),
         );
-        const ChatMessagesPageRoute().push(context);
+        await const ChatMessagesPageRoute().push<void>(context);
       },
       child: Padding(
         padding: const EdgeInsetsGeometry.only(bottom: 20),

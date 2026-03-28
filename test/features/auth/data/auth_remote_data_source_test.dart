@@ -43,7 +43,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final result = await ds.signInWithEmailPassword(
+        final UserModel result = await ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -69,10 +69,10 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => AuthResponse(user: null));
+        ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final result = ds.signInWithEmailPassword(
+        final Future<UserModel> result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -94,7 +94,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final result = ds.signInWithEmailPassword(
+        final Future<UserModel> result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -109,37 +109,38 @@ void main() {
     test(
       'Given Supabase returns a user When signing up with email and password Then a UserModel is returned',
       () async {
-      // Arrange
-      final userJson = {
-        'id': '123',
-        'email': 'test@test.com',
-        'user_metadata': {'name': 'Test User'},
-      };
-      when(() => supabaseUser.toJson()).thenReturn(userJson);
-      when(
-        () => auth.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          data: any(named: 'data'),
-        ),
-      ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
+        // Arrange
+        final Map<String, Object> userJson = {
+          'id': '123',
+          'email': 'test@test.com',
+          'user_metadata': {'name': 'Test User'},
+        };
+        when(() => supabaseUser.toJson()).thenReturn(userJson);
+        when(
+          () => auth.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
-      // Act
-      final result = await ds.signUpWithEmailPassword(
-        email: 'test@test.com',
-        password: 'password',
-        name: 'Test User',
-      );
+        // Act
+        final UserModel result = await ds.signUpWithEmailPassword(
+          email: 'test@test.com',
+          password: 'password',
+          name: 'Test User',
+        );
 
-      // Assert
-      expect(
-        result,
-        isA<UserModel>()
-            .having((u) => u.id, 'id', '123')
-            .having((u) => u.name, 'name', 'Test User')
-            .having((u) => u.email, 'email', 'test@test.com'),
-      );
-    });
+        // Assert
+        expect(
+          result,
+          isA<UserModel>()
+              .having((u) => u.id, 'id', '123')
+              .having((u) => u.name, 'name', 'Test User')
+              .having((u) => u.email, 'email', 'test@test.com'),
+        );
+      },
+    );
 
     test(
       'Given Supabase returns null When signing up with email and password Then a ServerException is thrown',
@@ -151,10 +152,10 @@ void main() {
             password: any(named: 'password'),
             data: any(named: 'data'),
           ),
-        ).thenAnswer((_) async => AuthResponse(user: null));
+        ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final result = ds.signUpWithEmailPassword(
+        final Future<UserModel> result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -178,7 +179,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final result = ds.signUpWithEmailPassword(
+        final Future<UserModel> result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -209,7 +210,7 @@ void main() {
         when(() => auth.signOut()).thenThrow(Exception('Supabase error'));
 
         // Act
-        final result = ds.signOut();
+        final Future<void> result = ds.signOut();
 
         // Assert
         expect(result, throwsA(isA<ServerException>()));
@@ -235,7 +236,7 @@ void main() {
         ).thenReturn({'id': '123', 'email': 'test@test.com'});
 
         // Act
-        final stream = ds.authStateChanges();
+        final Stream<UserModel?> stream = ds.authStateChanges();
 
         // Assert
         await expectLater(
@@ -263,7 +264,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final stream = ds.authStateChanges();
+        final Stream<UserModel?> stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));
@@ -282,7 +283,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final stream = ds.authStateChanges();
+        final Stream<UserModel?> stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));

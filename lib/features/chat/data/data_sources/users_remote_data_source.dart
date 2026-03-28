@@ -28,9 +28,7 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
           .range(from, to)
           .order(ProfileFields.name, ascending: true);
 
-      return response
-          .map((Map<String, dynamic> json) => UserModel.fromProfileJson(json))
-          .toList();
+      return response.map(UserModel.fromProfileJson).toList();
     });
   }
 

@@ -7,11 +7,7 @@ class ImagePickerServiceImpl implements ImagePickerService {
   ImagePickerServiceImpl(this._picker);
 
   @override
-  Future<XFile?> pickFromGallery() async {
-    try {
-      return await _picker.pickImage(source: ImageSource.gallery);
-    } catch (_) {
-      return null;
-    }
+  Future<XFile?> pickFromGallery() {
+    return _picker.pickImage(source: ImageSource.gallery);
   }
 }

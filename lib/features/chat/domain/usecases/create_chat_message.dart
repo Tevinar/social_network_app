@@ -10,7 +10,7 @@ class CreateChatMessage implements UseCase<void, CreateChatMessageParams> {
     : _chatMessageRepository = chatMessageRepository;
 
   @override
-  Future<Either<Failure, dynamic>> call(params) {
+  Future<Either<Failure, dynamic>> call(CreateChatMessageParams params) {
     if (params.content.trim().isEmpty) {
       return Future.value(
         left(const ValidationFailure('Message cannot be empty')),

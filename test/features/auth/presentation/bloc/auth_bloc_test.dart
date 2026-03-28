@@ -52,8 +52,7 @@ void main() {
           authRepository: authRepository,
         );
       },
-      act: (bloc) =>
-          bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
+      act: (bloc) => bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
       expect: () => [AuthLoading(), AuthSignedIn(testUser)],
       verify: (_) {
         verify(
@@ -73,7 +72,7 @@ void main() {
       build: () {
         when(
           () => userSignIn(any()),
-        ).thenAnswer((_) async => const Left(NetworkFailure()));
+        ).thenAnswer((_) async => left(const NetworkFailure()));
 
         return AuthBloc(
           userSignIn: userSignIn,
@@ -81,8 +80,7 @@ void main() {
           authRepository: authRepository,
         );
       },
-      act: (bloc) =>
-          bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
+      act: (bloc) => bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
       expect: () => [
         AuthLoading(),
         const AuthFailure('No internet connection.'),
@@ -151,7 +149,7 @@ void main() {
       build: () {
         when(
           () => authRepository.authStateChanges(),
-        ).thenAnswer((_) => Stream.value(const Left(NetworkFailure())));
+        ).thenAnswer((_) => Stream.value(left(const NetworkFailure())));
 
         return AuthBloc(
           userSignIn: userSignIn,

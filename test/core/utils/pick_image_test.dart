@@ -17,8 +17,8 @@ void main() {
     GetIt.I.registerSingleton<ImagePickerService>(picker);
   });
 
-  tearDown(() {
-    GetIt.I.reset();
+  tearDown(() async {
+    await GetIt.I.reset();
   });
 
   test('returns File when picker returns XFile', () async {
@@ -27,7 +27,7 @@ void main() {
     when(() => picker.pickFromGallery()).thenAnswer((_) async => xFile);
 
     // Act
-    final result = await pickImage();
+    final File? result = await pickImage();
 
     // Assert
     expect(result, isA<File>());
@@ -39,7 +39,7 @@ void main() {
     when(() => picker.pickFromGallery()).thenAnswer((_) async => null);
 
     // Act
-    final result = await pickImage();
+    final File? result = await pickImage();
 
     // Assert
     expect(result, isNull);

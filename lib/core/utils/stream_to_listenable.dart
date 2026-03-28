@@ -1,26 +1,41 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 
 // for convert stream to listenable
 class StreamToListenable extends ChangeNotifier {
-  late final List<StreamSubscription> subscriptions;
+  late final List<StreamSubscription<void>> _subscriptions;
 
-  StreamToListenable(List<Stream> streams) {
-    subscriptions = [];
-    for (var stream in streams) {
-      var subscription = stream.asBroadcastStream().listen(
+  StreamToListenable(List<Stream<void>> streams) {
+    _subscriptions = streams.map((stream) {
+      return stream.asBroadcastStream().listen(
         (_) => notifyListeners(),
+        onError: (Object error, StackTrace stackTrace) {
+          appLogger.error(
+            'StreamToListenable source stream error',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
       );
-      subscriptions.add(subscription);
-    }
-    notifyListeners(); // To remove and see if it still works
+    }).toList();
+
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    for (var subscription in subscriptions) {
-      subscription.cancel();
+    for (final StreamSubscription<void> subscription in _subscriptions) {
+      unawaited(
+        subscription.cancel().catchError((Object error, StackTrace stackTrace) {
+          appLogger.error(
+            'Failed to cancel StreamToListenable subscription',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }),
+      );
     }
     super.dispose();
   }

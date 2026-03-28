@@ -5,7 +5,7 @@ final serviceLocator = GetIt.instance;
 Future<void> initDependencies() async {
   // Shared public config is committed for zero-config onboarding.
   await dotenv.load(fileName: 'assets/config/env.public');
-  Supabase supabase = await Supabase.initialize(
+  final Supabase supabase = await Supabase.initialize(
     url: Env.supabaseUrl,
     anonKey: Env.supabaseAnonKey,
   );
@@ -32,7 +32,7 @@ void _initApp() {
     ),
   );
   // logging
-  serviceLocator.registerLazySingleton(() => createTalker());
+  serviceLocator.registerLazySingleton(createTalker);
   serviceLocator.registerLazySingleton<AppLogger>(
     () => AppTalkerLogger(talker: serviceLocator()),
   );
@@ -40,13 +40,13 @@ void _initApp() {
 
 void _initCore() {
   // Connection checker
-  serviceLocator.registerLazySingleton(() => InternetConnection());
+  serviceLocator.registerLazySingleton(InternetConnection.new);
   serviceLocator.registerLazySingleton<ConnectionChecker>(
     () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
   );
 
   // Image picker service
-  serviceLocator.registerLazySingleton(() => ImagePicker());
+  serviceLocator.registerLazySingleton(ImagePicker.new);
   serviceLocator.registerLazySingleton<ImagePickerService>(
     () => ImagePickerServiceImpl(serviceLocator()),
   );
@@ -178,7 +178,7 @@ void _initChat() {
         repository: serviceLocator(),
       ),
     )
-    ..registerLazySingleton(
+    ..registerFactory(
       () => ChatMessagesBloc(
         getChatMessagesPage: serviceLocator(),
         getChatMessagesCount: serviceLocator(),

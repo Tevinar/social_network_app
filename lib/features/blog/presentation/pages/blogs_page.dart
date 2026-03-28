@@ -22,8 +22,8 @@ class BlogsPage extends StatelessWidget {
               return const Loader(size: 20);
             }
             return IconButton(
-              onPressed: () {
-                context.read<AppUserCubit>().signOut();
+              onPressed: () async {
+                await context.read<AppUserCubit>().signOut();
               },
               icon: const Icon(Icons.logout, size: 20),
             );
@@ -38,12 +38,12 @@ class BlogsPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              final blogsBloc = context.read<BlogsBloc>();
+              final BlogsBloc blogsBloc = context.read<BlogsBloc>();
 
-              final created = await const AddNewBlogPageRoute().push(context);
+              final bool? created = await const AddNewBlogPageRoute().push<bool>(context);
 
               if (created == true) {
-                blogsBloc.scrollToTop();
+                await blogsBloc.scrollToTop();
                 blogsBloc.add(
                   RefreshBlogsView(),
                 ); // Usefull for keeping the itemCount of the listview updated after adding a new blog
@@ -57,7 +57,7 @@ class BlogsPage extends StatelessWidget {
       body: BlocBuilder<BlogsBloc, BlogsState>(
         builder: (context, state) {
           if (state is BlogsFailure) {
-            return const Center(child: Text(('Error loading blogs')));
+            return const Center(child: Text('Error loading blogs'));
           }
           // Show loading placeholders when blogs are being fetched for the first time
           else if (state is BlogsLoading && state.blogs.isEmpty) {
@@ -66,9 +66,7 @@ class BlogsPage extends StatelessWidget {
                 children: List.generate(
                   4,
                   (index) => BlogCardPlaceholder(
-                    color: index % 2 == 0
-                        ? AppPallete.gradient1
-                        : AppPallete.gradient2,
+                    color: index % 2 == 0 ? AppPallete.gradient1 : AppPallete.gradient2,
                   ),
                 ),
               ),
@@ -88,9 +86,7 @@ class BlogsPage extends StatelessWidget {
                 } else {
                   return BlogCard(
                     blog: state.blogs[index],
-                    color: index % 2 == 0
-                        ? AppPallete.gradient1
-                        : AppPallete.gradient2,
+                    color: index % 2 == 0 ? AppPallete.gradient1 : AppPallete.gradient2,
                   );
                 }
               },

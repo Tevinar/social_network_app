@@ -60,10 +60,16 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   }
 
   @override
-  Future<void> close() {
-    _blogChangeSub.cancel();
-    _scrollController.dispose();
-    return super.close();
+  Future<void> close() async {
+    try {
+      await _blogChangeSub.cancel();
+    } finally {
+      try {
+        _scrollController.dispose();
+      } finally {
+        await super.close();
+      }
+    }
   }
 
   // Re-emit the current state to trigger rebuild
@@ -74,8 +80,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   // Triggers pagination when the user scrolls close to the bottom of the list.
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadBlogsNextPage());
       }
@@ -129,8 +134,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
             state.copyWith(
               blogs: state.blogs
                   .map(
-                    (blog) =>
-                        blog.id == blogChange.blog.id ? blogChange.blog : blog,
+                    (blog) => blog.id == blogChange.blog.id ? blogChange.blog : blog,
                   )
                   .toList(),
             ),
@@ -140,9 +144,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         if (blogChange is BlogDeleted) {
           emit(
             state.copyWith(
-              blogs: state.blogs
-                  .where((blog) => blog.id != blogChange.blogId)
-                  .toList(),
+              blogs: state.blogs.where((blog) => blog.id != blogChange.blogId).toList(),
               totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 1) - 1,
             ),
           );
@@ -165,8 +167,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     }
 
     // If we don't have more blogs to load, do nothing
-    if (state.blogs.length == state.totalBlogsInDatabase &&
-        state.totalBlogsInDatabase != 0) {
+    if (state.blogs.length == state.totalBlogsInDatabase && state.totalBlogsInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have blogs loading
@@ -197,7 +198,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         );
       },
       (blogsNextPage) {
-        List<Blog> newBlogs = [...state.blogs, ...blogsNextPage];
+        final List<Blog> newBlogs = [...state.blogs, ...blogsNextPage];
         emit(
           BlogsSuccess(
             blogs: newBlogs,
@@ -211,8 +212,8 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   ScrollController get scrollController => _scrollController;
 
-  void scrollToTop() {
-    _scrollController.animateTo(
+  Future<void> scrollToTop() async {
+    await _scrollController.animateTo(
       0.0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,

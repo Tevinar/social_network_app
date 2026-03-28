@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/core/constants/config/blog_config.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
@@ -28,20 +29,40 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   File? image;
   bool _isImagePickerLoading = false;
 
-  void selectImage() async {
+  Future<void> selectImage() async {
     if (_isImagePickerLoading) return;
+
     setState(() {
       _isImagePickerLoading = true;
     });
-    final pickedImage = await pickImage();
-    if (pickedImage != null) {
-      setState(() {
-        image = pickedImage;
-      });
+
+    try {
+      final File? pickedImage = await pickImage();
+
+      if (!mounted) return;
+
+      if (pickedImage != null) {
+        setState(() {
+          image = pickedImage;
+        });
+      }
+    } catch (error, stackTrace) {
+      appLogger.error(
+        'Failed to pick image from gallery',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        showSnackBar(context, 'Failed to pick image');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImagePickerLoading = false;
+        });
+      }
     }
-    setState(() {
-      _isImagePickerLoading = false;
-    });
   }
 
   void uploadBlog() {
@@ -56,7 +77,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    AppUserState state = context.read<AppUserCubit>().state;
+    final AppUserState state = context.read<AppUserCubit>().state;
     if (state is! AppUserSignedIn) {
       showSnackBar(context, 'You must be signed in to add a blog');
       return;
@@ -115,51 +136,50 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
             key: formKey,
             child: Column(
               children: [
-                image != null
-                    ? GestureDetector(
-                        onTap: () {
-                          selectImage();
-                        },
-                        child: SizedBox(
-                          height: 150,
-                          width: double.infinity,
-                          child: ClipRRect(
-                            borderRadius: BorderRadiusGeometry.circular(10),
-                            child: _isImagePickerLoading
-                                ? const Loader()
-                                : Image.file(image!, fit: BoxFit.cover),
-                          ),
-                        ),
-                      )
-                    : GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => selectImage(),
-                        child: DottedBorder(
-                          options: const RoundedRectDottedBorderOptions(
-                            dashPattern: [10, 4],
-                            color: AppPallete.borderColor,
-                            radius: Radius.circular(10),
-                            strokeCap: StrokeCap.round,
-                          ),
-                          child: SizedBox(
-                            height: 150,
-                            width: double.infinity,
-                            child: _isImagePickerLoading
-                                ? const Loader()
-                                : const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.folder_open, size: 40),
-                                      SizedBox(height: 15),
-                                      Text(
-                                        'Select your image',
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
+                if (image != null)
+                  GestureDetector(
+                    onTap: selectImage,
+                    child: SizedBox(
+                      height: 150,
+                      width: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadiusGeometry.circular(10),
+                        child: _isImagePickerLoading
+                            ? const Loader()
+                            : Image.file(image!, fit: BoxFit.cover),
                       ),
+                    ),
+                  )
+                else
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: selectImage,
+                    child: DottedBorder(
+                      options: const RoundedRectDottedBorderOptions(
+                        dashPattern: [10, 4],
+                        color: AppPallete.borderColor,
+                        radius: Radius.circular(10),
+                        strokeCap: StrokeCap.round,
+                      ),
+                      child: SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: _isImagePickerLoading
+                            ? const Loader()
+                            : const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.folder_open, size: 40),
+                                  SizedBox(height: 15),
+                                  Text(
+                                    'Select your image',
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ),
 
                 const SizedBox(height: 20),
                 SingleChildScrollView(

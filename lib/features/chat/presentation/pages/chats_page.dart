@@ -18,7 +18,7 @@ class ChatsPage extends StatelessWidget {
           builder: (context, state) {
             if (state is ChatsFailure) {
               return Center(
-                child: Text(('Error loading chats : ${state.error}')),
+                child: Text('Error loading chats : ${state.error}'),
               );
             }
             // Show loading placeholders when chats are being fetched for the first time
@@ -62,7 +62,7 @@ class ChatsPage extends StatelessWidget {
             ),
           ),
         ),
-        onPressed: () => const NewChatPageRoute().push(context),
+        onPressed: () => const NewChatPageRoute().push<void>(context),
         icon: const Icon(Icons.add_box_rounded, size: 25),
       ),
     );

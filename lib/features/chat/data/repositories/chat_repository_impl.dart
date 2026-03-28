@@ -22,38 +22,44 @@ class ChatRepositoryImpl implements ChatRepository {
     String firstMessageContent,
   ) async {
     try {
-      ChatModel chat = await chatRemoteDataSource.createChat(
-        members.map((e) => UserModel.fromEntity(e)).toList(),
+      final ChatModel chat = await chatRemoteDataSource.createChat(
+        members.map(UserModel.fromEntity).toList(),
         firstMessageContent,
       );
-      return Right(chat.toEntity());
+      return right(chat.toEntity());
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Error in create chat',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatRepositoryImpl.createChat',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return left(failure);
     }
   }
 
   @override
   Future<Either<Failure, List<Chat>>> getChatsPage(int pageNumber) async {
     try {
-      List<ChatModel> chatModels = await chatRemoteDataSource.getChatsPage(
+      final List<ChatModel> chatModels = await chatRemoteDataSource.getChatsPage(
         pageNumber,
       );
-      List<Chat> chats = chatModels
-          .map((chatModel) => chatModel.toEntity())
-          .toList();
-      return Right(chats);
+      final List<Chat> chats = chatModels.map((chatModel) => chatModel.toEntity()).toList();
+      return right(chats);
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to get chats page',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatRepositoryImpl.getChatsPage',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return left(failure);
     }
   }
 
@@ -63,29 +69,37 @@ class ChatRepositoryImpl implements ChatRepository {
       final int chatsCount = await chatRemoteDataSource.getChatsCount();
       return right(chatsCount);
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to get chats count',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatRepositoryImpl.getChatsCount',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return left(failure);
     }
   }
 
   @override
   Stream<Either<Failure, ChatChange>> watchChatChanges() async* {
     try {
-      await for (final chatChange in chatRemoteDataSource.watchChatChanges()) {
-        yield Right(chatChange);
+      await for (final ChatChange chatChange in chatRemoteDataSource.watchChatChanges()) {
+        yield right(chatChange);
       }
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to watch chat changes',
-        error: error,
-        stackTrace: stackTrace,
-      );
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatRepositoryImpl.watchChatChanges',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
       // Any unexpected stream error is translated into a Failure
-      yield left(mapExceptionToFailure(error));
+      yield left(failure);
     }
   }
 
@@ -93,16 +107,20 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, Chat?>> getChatByMembers(List<User> members) async {
     try {
       final ChatModel? chatModel = await chatRemoteDataSource.getChatByMembers(
-        members.map((e) => UserModel.fromEntity(e)).toList(),
+        members.map(UserModel.fromEntity).toList(),
       );
-      return Right(chatModel?.toEntity());
+      return right(chatModel?.toEntity());
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to get chat by members',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatRepositoryImpl.getChatByMembers',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return left(failure);
     }
   }
 }

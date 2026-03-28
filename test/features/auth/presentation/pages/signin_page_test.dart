@@ -50,7 +50,7 @@ void main() {
       expect(find.text('Sign In.'), findsOneWidget);
       expect(find.byType(TextFormField), findsNWidgets(2));
       expect(find.text('Sign In'), findsOneWidget);
-      final richText = tester.widget<RichText>(
+      final RichText richText = tester.widget<RichText>(
         find.byKey(const Key('signup_text')),
       );
       expect((richText.text as TextSpan).toPlainText(), contains('Sign Up'));

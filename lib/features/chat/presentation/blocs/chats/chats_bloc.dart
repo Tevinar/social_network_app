@@ -58,18 +58,23 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   }
 
   @override
-  Future<void> close() {
-    _chatChangeSub.cancel();
-    _scrollController.dispose();
-    return super.close();
+  Future<void> close() async {
+    try {
+      await _chatChangeSub.cancel();
+    } finally {
+      try {
+        _scrollController.dispose();
+      } finally {
+        await super.close();
+      }
+    }
   }
 
   // Add a listener to scrollController events
   // and fetch more chats when reaching the bottom
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadChatsNextPage());
       }
@@ -123,8 +128,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
             state.copyWith(
               chats: state.chats
                   .map(
-                    (chat) =>
-                        chat.id == chatChange.chat.id ? chatChange.chat : chat,
+                    (chat) => chat.id == chatChange.chat.id ? chatChange.chat : chat,
                   )
                   .toList(),
             ),
@@ -134,9 +138,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         if (chatChange is ChatDeleted) {
           emit(
             state.copyWith(
-              chats: state.chats
-                  .where((chat) => chat.id != chatChange.chatId)
-                  .toList(),
+              chats: state.chats.where((chat) => chat.id != chatChange.chatId).toList(),
               totalChatsInDatabase: (state.totalChatsInDatabase ?? 1) - 1,
             ),
           );
@@ -158,8 +160,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       await _initializeChatsCount(emit);
     }
     // If we don't have more chats to load, do nothing
-    if (state.chats.length == state.totalChatsInDatabase &&
-        state.totalChatsInDatabase != 0) {
+    if (state.chats.length == state.totalChatsInDatabase && state.totalChatsInDatabase != 0) {
       return;
     }
 
@@ -191,7 +192,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         );
       },
       (chatsNextPage) {
-        List<Chat> newChats = [...state.chats, ...chatsNextPage];
+        final List<Chat> newChats = [...state.chats, ...chatsNextPage];
         emit(
           ChatsSuccess(
             chats: newChats,

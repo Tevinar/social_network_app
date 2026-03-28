@@ -18,56 +18,69 @@ class ChatMessageRepositoryImpl implements ChatMessageRepository {
     String chatId,
   ) async {
     try {
-      List<ChatMessageModel> chatMessageModels =
-          await chatMessageRemoteDataSource.getChatMessagesPage(
+      final List<ChatMessageModel> chatMessageModels = await chatMessageRemoteDataSource
+          .getChatMessagesPage(
             pageNumber,
             chatId,
           );
-      List<ChatMessage> chatMessages = chatMessageModels
+      final List<ChatMessage> chatMessages = chatMessageModels
           .map((chatModel) => chatModel.toEntity())
           .toList();
-      return Right(chatMessages);
+      return right(chatMessages);
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to get chat messages page',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatMessageRepositoryImpl.getChatMessagesPage',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
   @override
   Future<Either<Failure, int>> getChatMessagesCount(String chatId) async {
     try {
-      final int chatMessagesCount = await chatMessageRemoteDataSource
-          .getChatMessagesCount(chatId);
+      final int chatMessagesCount = await chatMessageRemoteDataSource.getChatMessagesCount(chatId);
       return right(chatMessagesCount);
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to get chat messages count',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatMessageRepositoryImpl.getChatMessagesCount',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
     }
   }
 
   @override
   Stream<Either<Failure, ChatMessageChange>> watchChatMessageChanges() async* {
     try {
-      await for (final chatChange
+      await for (final ChatMessageChange chatChange
           in chatMessageRemoteDataSource.watchChatMessageChanges()) {
-        yield Right(chatChange);
+        yield right(chatChange);
       }
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to watch chat message changes',
-        error: error,
-        stackTrace: stackTrace,
-      );
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatMessageRepositoryImpl.watchChatMessageChanges',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
       // Any unexpected stream error is translated into a Failure
-      yield left(mapExceptionToFailure(error));
+      yield left(failure);
     }
   }
 
@@ -83,12 +96,16 @@ class ChatMessageRepositoryImpl implements ChatMessageRepository {
       );
       return right(null);
     } catch (error, stackTrace) {
-      appLogger.error(
-        'Failed to create chat message',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return left(mapExceptionToFailure(error));
+      final Failure failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in ChatMessageRepositoryImpl.createChatMessage',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return left(failure);
     }
   }
 }

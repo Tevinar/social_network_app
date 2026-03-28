@@ -45,12 +45,8 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     required String blogId,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      await supabaseClient.storage
-          .from(Buckets.blogImages)
-          .upload(blogId, image);
-      return supabaseClient.storage
-          .from(Buckets.blogImages)
-          .getPublicUrl(blogId);
+      await supabaseClient.storage.from(Buckets.blogImages).upload(blogId, image);
+      return supabaseClient.storage.from(Buckets.blogImages).getPublicUrl(blogId);
     });
   }
 
@@ -67,13 +63,15 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
           .range(from, to)
           .order(BlogFields.updatedAt, ascending: false);
 
-      return rawBlogs
-          .map(
-            (rawBlog) => BlogModel.fromJson(rawBlog).copyWith(
-              posterName: rawBlog[Tables.profiles][ProfileFields.name],
-            ),
-          )
-          .toList();
+      return rawBlogs.map(
+        (rawBlog) {
+          final Map<String, dynamic>? profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
+          final String? posterName = profile?[ProfileFields.name] as String?;
+          return BlogModel.fromJson(rawBlog).copyWith(
+            posterName: posterName,
+          );
+        },
+      ).toList();
     });
   }
 
@@ -166,7 +164,8 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
                   break;
 
                 case PostgresChangeEvent.delete:
-                  controller.add(BlogDeleted(payload.oldRecord[BlogFields.id]));
+                  final String deletedBlogId = payload.oldRecord[BlogFields.id] as String;
+                  controller.add(BlogDeleted(deletedBlogId));
                   break;
 
                 case PostgresChangeEvent.all:
@@ -185,6 +184,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         channel.subscribe();
       },
       onCancel: () async {
+        await controller.close();
         await channel.unsubscribe();
       },
     );

@@ -28,7 +28,6 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
 
     _messageController = TextEditingController();
     _currentUser = (context.read<AppUserCubit>().state as AppUserSignedIn).user;
-    //loadInitialChatMessagesPage(context.read<ChatEditorBloc>().state); TODO
   }
 
   @override

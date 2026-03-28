@@ -8,7 +8,8 @@ import 'package:social_app/core/logging/app_logger.dart';
 /// This is intended to run early during startup, before dependency injection is
 /// fully initialized, so unexpected bootstrap errors can still be logged.
 void configureGlobalErrorHandling(AppLogger bootstrapLogger) {
-  // Logs errors reported by the Flutter framework, such as build and layout failures.
+  // Catches errors reported by the Flutter framework itself,
+  // such as build, layout, and paint failures.
   FlutterError.onError = (FlutterErrorDetails details) {
     bootstrapLogger.error(
       'Unhandled Flutter framework error',
@@ -18,7 +19,8 @@ void configureGlobalErrorHandling(AppLogger bootstrapLogger) {
     FlutterError.presentError(details);
   };
 
-  // Logs uncaught top-level async/runtime errors outside the Flutter framework.
+  // Catches uncaught top-level async/runtime errors
+  // that happen outside Flutter framework callbacks.
   PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
     bootstrapLogger.error(
       'Unhandled platform error',
@@ -28,10 +30,7 @@ void configureGlobalErrorHandling(AppLogger bootstrapLogger) {
     return true;
   };
 
-  // Global `flutter_bloc` hook used to observe all blocs and cubits in the app.
-  //
-  // Assigning `Bloc.observer` installs a single `BlocObserver` instance that can
-  // react to lifecycle events such as bloc errors, state changes, transitions,
-  // and creation/closure events.
+  // Global flutter_bloc hook for observing all blocs and cubits.
+  // We use it mainly to log unexpected bloc-level errors in one place.
   Bloc.observer = AppBlocObserver(logger: bootstrapLogger);
 }

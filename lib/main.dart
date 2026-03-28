@@ -12,25 +12,25 @@ import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_edi
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   // Local logger available immediately during app startup, before GetIt and the
   // DI-backed `appLogger` are registered. This ensures bootstrap failures can
   // still be logged safely.
   final AppLogger bootstrapLogger = AppTalkerLogger(talker: createTalker());
 
-  configureGlobalErrorHandling(bootstrapLogger);
-
-  // Final safety net for uncaught async errors during startup and app execution.
+  // Final Dart-zone safety net for uncaught async errors
+  // during startup and app execution.
   await (runZonedGuarded<Future<void>>(
         () async {
+          WidgetsFlutterBinding.ensureInitialized();
+
+          configureGlobalErrorHandling(bootstrapLogger);
+
           await initDependencies();
 
           // Switch to the Dependency Injection (DI) backed logger after bootstrap.

@@ -1,10 +1,10 @@
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/router/routes/routes.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
+import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
 
 class ChatsPage extends StatelessWidget {
   const ChatsPage({super.key});
@@ -13,7 +13,7 @@ class ChatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: BlocBuilder<ChatsBloc, ChatsState>(
           builder: (context, state) {
             if (state is ChatsFailure) {
@@ -28,7 +28,7 @@ class ChatsPage extends StatelessWidget {
               if (state.chats.isEmpty) {
                 return Center(
                   child: Text(
-                    'You don\'t have any chats. Start a new one!',
+                    "You don't have any chats. Start a new one!",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 );

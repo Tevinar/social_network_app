@@ -2,15 +2,14 @@ part of 'blogs_bloc.dart';
 
 @immutable
 sealed class BlogsState {
-  final List<Blog> blogs;
-  final int pageNumber;
-  final int? totalBlogsInDatabase;
-
   const BlogsState({
     required this.blogs,
     required this.pageNumber,
     this.totalBlogsInDatabase,
   });
+  final List<Blog> blogs;
+  final int pageNumber;
+  final int? totalBlogsInDatabase;
 
   BlogsState copyWith({
     List<Blog>? blogs,
@@ -57,12 +56,11 @@ final class BlogsSuccess extends BlogsState {
 }
 
 final class BlogsFailure extends BlogsState {
-  final String error;
-
   const BlogsFailure({
     required this.error,
     required super.blogs,
     required super.pageNumber,
     super.totalBlogsInDatabase,
   });
+  final String error;
 }

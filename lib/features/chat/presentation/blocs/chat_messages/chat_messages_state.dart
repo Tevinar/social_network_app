@@ -2,17 +2,16 @@ part of 'chat_messages_bloc.dart';
 
 @immutable
 sealed class ChatMessagesState {
-  final String chatId;
-  final List<ChatMessage> chatMessages;
-  final int pageNumber;
-  final int? totalChatMessagesInDatabase;
-
   const ChatMessagesState({
     required this.chatId,
     required this.chatMessages,
     required this.pageNumber,
     this.totalChatMessagesInDatabase,
   });
+  final String chatId;
+  final List<ChatMessage> chatMessages;
+  final int pageNumber;
+  final int? totalChatMessagesInDatabase;
 
   ChatMessagesState copyWith({
     String? chatId,
@@ -68,8 +67,6 @@ final class ChatMessagesSuccess extends ChatMessagesState {
 }
 
 final class ChatMessagesFailure extends ChatMessagesState {
-  final String error;
-
   const ChatMessagesFailure({
     required super.chatId,
     required this.error,
@@ -77,4 +74,5 @@ final class ChatMessagesFailure extends ChatMessagesState {
     required super.pageNumber,
     super.totalChatMessagesInDatabase,
   });
+  final String error;
 }

@@ -1,7 +1,7 @@
-import 'package:social_app/core/errors/exceptions_mapper.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/core/constants/supabase_schema/fields/profile_fields.dart';
 import 'package:social_app/core/constants/supabase_schema/tables.dart';
+import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class UsersRemoteDataSource {
@@ -10,19 +10,18 @@ abstract interface class UsersRemoteDataSource {
 }
 
 class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
-  final SupabaseClient _supabaseClient;
-
   UsersRemoteDataSourceImpl({required SupabaseClient supabaseClient})
     : _supabaseClient = supabaseClient;
+  final SupabaseClient _supabaseClient;
 
   @override
   Future<List<UserModel>> getUsersPage(int pageNumber) async {
     return guardRemoteDataSourceCall(() async {
-      const int pageSize = 20;
-      final int from = (pageNumber - 1) * pageSize;
-      final int to = from + pageSize - 1;
+      const pageSize = 20;
+      final from = (pageNumber - 1) * pageSize;
+      final to = from + pageSize - 1;
 
-      final List<Map<String, dynamic>> response = await _supabaseClient
+      final response = await _supabaseClient
           .from(Tables.profiles)
           .select()
           .range(from, to)

@@ -10,7 +10,6 @@ final class BlogLoading extends BlogEditorState {}
 final class BlogUploadSuccess extends BlogEditorState {}
 
 final class BlogFailure extends BlogEditorState {
-  final String error;
-
   BlogFailure(this.error);
+  final String error;
 }

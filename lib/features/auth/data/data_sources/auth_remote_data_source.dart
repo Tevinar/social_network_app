@@ -26,9 +26,8 @@ abstract interface class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
-  final SupabaseClient _supabaseClient;
-
   const AuthRemoteDataSourceSupabaseImpl(this._supabaseClient);
+  final SupabaseClient _supabaseClient;
 
   @override
   Future<UserModel> signInWithEmailPassword({
@@ -36,7 +35,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      final AuthResponse response = await _supabaseClient.auth.signInWithPassword(
+      final response = await _supabaseClient.auth.signInWithPassword(
         password: password,
         email: email,
       );
@@ -54,7 +53,7 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      final AuthResponse response = await _supabaseClient.auth.signUp(
+      final response = await _supabaseClient.auth.signUp(
         password: password,
         email: email,
         data: {ProfileFields.name: name},
@@ -106,10 +105,12 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
   @override
   Stream<UserModel?> authStateChanges() {
     return _supabaseClient.auth.onAuthStateChange.map((data) {
-      final Session? session = data.session;
-      final User? supabaseUser = session?.user;
+      final session = data.session;
+      final supabaseUser = session?.user;
 
-      return supabaseUser == null ? null : UserModel.fromAuthJson(supabaseUser.toJson());
+      return supabaseUser == null
+          ? null
+          : UserModel.fromAuthJson(supabaseUser.toJson());
     });
   }
 }

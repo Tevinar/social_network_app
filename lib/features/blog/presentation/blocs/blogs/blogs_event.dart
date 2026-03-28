@@ -6,8 +6,8 @@ sealed class BlogsEvent {}
 final class LoadBlogsNextPage extends BlogsEvent {}
 
 final class BlogChangeReceived extends BlogsEvent {
-  final Either<Failure, BlogChange> blogChange;
   BlogChangeReceived(this.blogChange);
+  final Either<Failure, BlogChange> blogChange;
 }
 
 class RefreshBlogsView extends BlogsEvent {}

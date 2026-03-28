@@ -1,11 +1,11 @@
 part of 'init_dependencies.dart';
 
-final serviceLocator = GetIt.instance;
+final GetIt serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   // Shared public config is committed for zero-config onboarding.
   await dotenv.load(fileName: 'assets/config/env.public');
-  final Supabase supabase = await Supabase.initialize(
+  final supabase = await Supabase.initialize(
     url: Env.supabaseUrl,
     anonKey: Env.supabaseAnonKey,
   );

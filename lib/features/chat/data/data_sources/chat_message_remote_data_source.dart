@@ -29,9 +29,8 @@ abstract interface class ChatMessageRemoteDataSource {
 }
 
 class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
-  SupabaseClient supabaseClient;
-
   ChatMessageRemoteDataSourceImpl({required this.supabaseClient});
+  SupabaseClient supabaseClient;
 
   @override
   Future<List<ChatMessageModel>> getChatMessagesPage(
@@ -39,11 +38,11 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
     String chatId,
   ) async {
     return guardRemoteDataSourceCall(() async {
-      const int pageSize = 20;
-      final int from = (pageNumber - 1) * pageSize;
-      final int to = from + pageSize - 1;
+      const pageSize = 20;
+      final from = (pageNumber - 1) * pageSize;
+      final to = from + pageSize - 1;
 
-      final List<Map<String, dynamic>> rawChatMessages = await supabaseClient
+      final rawChatMessages = await supabaseClient
           .from(Tables.chatMessages)
           .select()
           .eq(ChatMessageFields.chatId, chatId)
@@ -56,7 +55,7 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
   @override
   Future<int> getChatMessagesCount(String chatId) async {
     return guardRemoteDataSourceCall(() async {
-      final PostgrestResponse<PostgrestList> response = await supabaseClient
+      final response = await supabaseClient
           .from(Tables.chatMessages)
           .select()
           .eq(ChatMessageFields.chatId, chatId)
@@ -92,7 +91,6 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
                       ChatMessageModel.fromJson(payload.newRecord).toEntity(),
                     ),
                   );
-                  break;
 
                 case PostgresChangeEvent.update:
                   controller.add(
@@ -100,14 +98,13 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
                       ChatMessageModel.fromJson(payload.newRecord).toEntity(),
                     ),
                   );
-                  break;
 
                 case PostgresChangeEvent.delete:
-                  final String deletedMessageId = payload.oldRecord[ChatMessageFields.id] as String;
+                  final deletedMessageId =
+                      payload.oldRecord[ChatMessageFields.id] as String;
                   controller.add(
                     ChatMessageDeleted(deletedMessageId),
                   );
-                  break;
 
                 case PostgresChangeEvent.all:
                   // Not emitted as a payload event, but required for exhaustiveness

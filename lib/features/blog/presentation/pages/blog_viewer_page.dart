@@ -1,13 +1,13 @@
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:flutter/material.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/calculate_reading_time.dart';
 import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:flutter/material.dart';
 
 class BlogViewerPage extends StatelessWidget {
+  const BlogViewerPage({required this.blog, super.key});
   final Blog blog;
-  const BlogViewerPage({super.key, required this.blog});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class BlogViewerPage extends StatelessWidget {
           return Scrollbar(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

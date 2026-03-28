@@ -1,25 +1,28 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/format_date.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatCard extends StatelessWidget {
+  const ChatCard({required this.chat, super.key});
   final Chat chat;
-  const ChatCard({super.key, required this.chat});
 
   String computeChatMembersNames(BuildContext context) {
-    final List<User> chatMembersWithoutCurrentUser = chat.members
+    final chatMembersWithoutCurrentUser = chat.members
         .where(
-          (member) => member.id != (context.read<AppUserCubit>().state as AppUserSignedIn).user.id,
+          (member) =>
+              member.id !=
+              (context.read<AppUserCubit>().state as AppUserSignedIn).user.id,
         )
         .toList();
 
-    return chatMembersWithoutCurrentUser.map((member) => member.name).join(', ');
+    return chatMembersWithoutCurrentUser
+        .map((member) => member.name)
+        .join(', ');
   }
 
   @override

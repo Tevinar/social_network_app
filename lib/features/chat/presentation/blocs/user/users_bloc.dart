@@ -1,22 +1,16 @@
 import 'dart:async';
 
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
-import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/usecases/usecase.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
+import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 
 part 'users_event.dart';
 part 'users_state.dart';
 
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
-  final ScrollController _scrollController = ScrollController();
-  final GetUsersPage _getUsersPage;
-  final GetUsersCount _getUsersCount;
-
   UsersBloc({
     required GetUsersPage getUsersPage,
     required GetUsersCount getUsersCount,
@@ -27,6 +21,9 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     on<LoadUsersNextPage>(_onLoadUsersNextPage);
     add(LoadUsersNextPage());
   }
+  final ScrollController _scrollController = ScrollController();
+  final GetUsersPage _getUsersPage;
+  final GetUsersCount _getUsersCount;
 
   @override
   Future<void> close() async {
@@ -41,7 +38,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   // and fetch more users when reaching the bottom
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadUsersNextPage());
       }
@@ -57,7 +55,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     }
 
     // If we don't have more users to load, do nothing
-    if (state.users.length == state.totalUsersInDatabase && state.totalUsersInDatabase != 0) {
+    if (state.users.length == state.totalUsersInDatabase &&
+        state.totalUsersInDatabase != 0) {
       return;
     }
     // Avoid emitting loading state if we already have users loading
@@ -73,7 +72,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         totalUsersInDatabase: state.totalUsersInDatabase,
       ),
     );
-    final Either<Failure, List<User>> result = await _getUsersPage(
+    final result = await _getUsersPage(
       state.pageNumber,
     );
     result.fold(
@@ -88,7 +87,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         );
       },
       (usersNextPage) {
-        final List<User> newUsers = [...state.users, ...usersNextPage];
+        final newUsers = <User>[...state.users, ...usersNextPage];
         emit(
           UsersSuccess(
             users: newUsers,
@@ -103,7 +102,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   ScrollController get scrollController => _scrollController;
 
   Future<void> _initializeUsersCount(Emitter<UsersState> emit) async {
-    final Either<Failure, int> result = await _getUsersCount(NoParams());
+    final result = await _getUsersCount(NoParams());
     result.fold(
       (error) {
         emit(

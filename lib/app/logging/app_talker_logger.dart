@@ -1,10 +1,9 @@
-import 'package:talker/talker.dart';
 import 'package:social_app/core/logging/app_logger.dart';
+import 'package:talker/talker.dart';
 
 class AppTalkerLogger implements AppLogger {
-  final Talker _talker;
-
   AppTalkerLogger({required Talker talker}) : _talker = talker;
+  final Talker _talker;
 
   @override
   void debug(String message, [Object? data]) {

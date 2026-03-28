@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:fpdart/fpdart.dart';
 
 abstract interface class BlogRepository {
   Future<Either<Failure, Blog>> createBlog({

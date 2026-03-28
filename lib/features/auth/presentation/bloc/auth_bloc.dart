@@ -1,14 +1,14 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fpdart/fpdart.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -23,10 +23,6 @@ part 'auth_state.dart';
 /// This bloc owns **authentication logic**, but not global session state.
 /// Global access to the current user is handled by `AppUserCubit`.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final UserSignUp _userSignUp;
-  final UserSignIn _userSignIn;
-  final AuthRepository _authRepository;
-  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,
@@ -41,6 +37,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     _subscribeToAuthStateChanges();
   }
+  final UserSignUp _userSignUp;
+  final UserSignIn _userSignIn;
+  final AuthRepository _authRepository;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
 
   @override
   Future<void> close() async {
@@ -71,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final Either<Failure, User> res = await _userSignUp(
+    final res = await _userSignUp(
       UserSignUpParams(
         name: event.name,
         email: event.email,
@@ -87,7 +87,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final Either<Failure, User> res = await _userSignIn(
+    final res = await _userSignIn(
       UserSignInParams(email: event.email, password: event.password),
     );
 

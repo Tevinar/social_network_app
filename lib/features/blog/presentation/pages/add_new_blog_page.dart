@@ -1,18 +1,18 @@
 import 'dart:io';
 
-import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/core/constants/config/blog_config.dart';
-import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/pick_image.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
-import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
-import 'package:social_app/features/blog/presentation/widgets/blog_editor.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/core/constants/config/blog_config.dart';
+import 'package:social_app/core/logging/app_logger.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/utils/pick_image.dart';
+import 'package:social_app/core/utils/show_snackbar.dart';
+import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
+import 'package:social_app/features/blog/presentation/widgets/blog_editor.dart';
 
 class AddNewBlogPage extends StatefulWidget {
   const AddNewBlogPage({super.key});
@@ -37,7 +37,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
     });
 
     try {
-      final File? pickedImage = await pickImage();
+      final pickedImage = await pickImage();
 
       if (!mounted) return;
 
@@ -77,7 +77,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    final AppUserState state = context.read<AppUserCubit>().state;
+    final state = context.read<AppUserCubit>().state;
     if (state is! AppUserSignedIn) {
       showSnackBar(context, 'You must be signed in to add a blog');
       return;
@@ -117,7 +117,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
             builder: (context, state) {
               if (state is BlogLoading) {
                 return const Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16),
                   child: Loader(size: 20),
                 );
               }
@@ -130,7 +130,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Form(
             key: formKey,

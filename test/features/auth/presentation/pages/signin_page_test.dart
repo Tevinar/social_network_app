@@ -1,10 +1,10 @@
-import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
 
 /// --------------------
 /// Mocks & fakes
@@ -50,7 +50,7 @@ void main() {
       expect(find.text('Sign In.'), findsOneWidget);
       expect(find.byType(TextFormField), findsNWidgets(2));
       expect(find.text('Sign In'), findsOneWidget);
-      final RichText richText = tester.widget<RichText>(
+      final richText = tester.widget<RichText>(
         find.byKey(const Key('signup_text')),
       );
       expect((richText.text as TextSpan).toPlainText(), contains('Sign Up'));

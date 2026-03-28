@@ -1,12 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NewChatPage extends StatefulWidget {
   const NewChatPage({super.key});
@@ -43,7 +43,9 @@ class _NewChatPageState extends State<NewChatPage> {
                   return const Loader(size: 30);
                 } else {
                   if (state.users[index].id ==
-                      (context.read<AppUserCubit>().state as AppUserSignedIn).user.id) {
+                      (context.read<AppUserCubit>().state as AppUserSignedIn)
+                          .user
+                          .id) {
                     return const SizedBox.shrink();
                   }
                   return CheckboxListTile(
@@ -58,7 +60,7 @@ class _NewChatPageState extends State<NewChatPage> {
                     checkColor: AppPallete.whiteColor,
                     activeColor: AppPallete.gradient1,
                     value: selectedUsers.contains(state.users[index]),
-                    onChanged: (bool? value) {
+                    onChanged: (value) {
                       setState(() {
                         if (value == true) {
                           selectedUsers.add(state.users[index]);
@@ -77,10 +79,11 @@ class _NewChatPageState extends State<NewChatPage> {
       floatingActionButton: selectedUsers.isEmpty
           ? null
           : Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
                 listener: (context, state) {
-                  if (state is ChatEditorWaitingForFirstMessage || state is ChatEditorLoaded) {
+                  if (state is ChatEditorWaitingForFirstMessage ||
+                      state is ChatEditorLoaded) {
                     const ChatMessagesPageRoute().pushReplacement(context);
                   }
                 },
@@ -88,8 +91,10 @@ class _NewChatPageState extends State<NewChatPage> {
                   return TextButton.icon(
                     onPressed: () {
                       if (state is! ChatEditorLoading) {
-                        final User currentUser =
-                            (context.read<AppUserCubit>().state as AppUserSignedIn).user;
+                        final currentUser =
+                            (context.read<AppUserCubit>().state
+                                    as AppUserSignedIn)
+                                .user;
                         selectedUsers.add(currentUser);
                         context.read<ChatEditorBloc>().add(
                           AddChat(chatMembers: selectedUsers),

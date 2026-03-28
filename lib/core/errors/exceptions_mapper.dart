@@ -1,8 +1,7 @@
 import 'dart:io';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:social_app/core/errors/exceptions.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<T> guardRemoteDataSourceCall<T>(Future<T> Function() call) async {
   try {

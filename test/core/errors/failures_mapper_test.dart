@@ -1,7 +1,7 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('mapExceptionToFailure', () {
@@ -12,7 +12,7 @@ void main() {
         const error = NetworkException(message: 'debug message');
 
         // Act
-        final Failure failure = mapExceptionToFailure(error);
+        final failure = mapExceptionToFailure(error);
 
         // Assert
         expect(failure, isA<NetworkFailure>());
@@ -26,7 +26,7 @@ void main() {
       const error = ServerException(message: 'Token expired', code: '401');
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnauthorizedFailure>());
@@ -40,7 +40,7 @@ void main() {
     test('ServerException with 403 → UnauthorizedFailure', () {
       const error = ServerException(message: 'Forbidden', code: '403');
 
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       expect(failure, isA<UnauthorizedFailure>());
     });
@@ -50,7 +50,7 @@ void main() {
       const error = ServerException(message: 'Resource not found', code: '404');
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<NotFoundFailure>());
@@ -66,7 +66,7 @@ void main() {
       );
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<ValidationFailure>());
@@ -85,7 +85,7 @@ void main() {
       );
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<ValidationFailure>());
@@ -101,7 +101,7 @@ void main() {
       );
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnexpectedFailure>());
@@ -114,7 +114,7 @@ void main() {
       final error = Exception('Some random exception');
 
       // Act
-      final Failure failure = mapExceptionToFailure(error);
+      final failure = mapExceptionToFailure(error);
 
       // Assert
       expect(failure, isA<UnexpectedFailure>());

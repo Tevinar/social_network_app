@@ -1,8 +1,8 @@
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
-import 'package:fpdart/fpdart.dart';
 
 abstract interface class ChatRepository {
   Future<Either<Failure, Chat>> createChat(

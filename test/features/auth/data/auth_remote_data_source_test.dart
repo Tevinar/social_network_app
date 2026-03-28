@@ -1,8 +1,8 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
@@ -43,7 +43,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final UserModel result = await ds.signInWithEmailPassword(
+        final result = await ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -72,7 +72,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final Future<UserModel> result = ds.signInWithEmailPassword(
+        final result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -94,7 +94,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<UserModel> result = ds.signInWithEmailPassword(
+        final result = ds.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -110,7 +110,7 @@ void main() {
       'Given Supabase returns a user When signing up with email and password Then a UserModel is returned',
       () async {
         // Arrange
-        final Map<String, Object> userJson = {
+        final userJson = <String, Object>{
           'id': '123',
           'email': 'test@test.com',
           'user_metadata': {'name': 'Test User'},
@@ -125,7 +125,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final UserModel result = await ds.signUpWithEmailPassword(
+        final result = await ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -155,7 +155,7 @@ void main() {
         ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final Future<UserModel> result = ds.signUpWithEmailPassword(
+        final result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -179,7 +179,7 @@ void main() {
         ).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<UserModel> result = ds.signUpWithEmailPassword(
+        final result = ds.signUpWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
           name: 'Test User',
@@ -192,16 +192,19 @@ void main() {
   });
 
   group('signOut', () {
-    test('Given Supabase signs out When signing out Then it completes', () async {
-      // Arrange
-      when(() => auth.signOut()).thenAnswer((_) async {});
+    test(
+      'Given Supabase signs out When signing out Then it completes',
+      () async {
+        // Arrange
+        when(() => auth.signOut()).thenAnswer((_) async {});
 
-      // Act
-      await ds.signOut();
+        // Act
+        await ds.signOut();
 
-      // Assert
-      verify(() => auth.signOut()).called(1);
-    });
+        // Assert
+        verify(() => auth.signOut()).called(1);
+      },
+    );
 
     test(
       'Given Supabase throws an exception When signing out Then a ServerException is thrown',
@@ -210,7 +213,7 @@ void main() {
         when(() => auth.signOut()).thenThrow(Exception('Supabase error'));
 
         // Act
-        final Future<void> result = ds.signOut();
+        final result = ds.signOut();
 
         // Assert
         expect(result, throwsA(isA<ServerException>()));
@@ -236,7 +239,7 @@ void main() {
         ).thenReturn({'id': '123', 'email': 'test@test.com'});
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(
@@ -264,7 +267,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));
@@ -283,7 +286,7 @@ void main() {
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final Stream<UserModel?> stream = ds.authStateChanges();
+        final stream = ds.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));

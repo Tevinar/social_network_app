@@ -2,15 +2,14 @@ part of 'users_bloc.dart';
 
 @immutable
 sealed class UsersState {
-  final List<User> users;
-  final int pageNumber;
-  final int? totalUsersInDatabase;
-
   const UsersState({
     required this.users,
     required this.pageNumber,
     this.totalUsersInDatabase,
   });
+  final List<User> users;
+  final int pageNumber;
+  final int? totalUsersInDatabase;
 }
 
 final class UsersLoading extends UsersState {
@@ -30,12 +29,11 @@ final class UsersSuccess extends UsersState {
 }
 
 final class UsersFailure extends UsersState {
-  final String error;
-
   const UsersFailure({
     required this.error,
     required super.users,
     required super.pageNumber,
     super.totalUsersInDatabase,
   });
+  final String error;
 }

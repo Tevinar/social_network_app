@@ -5,23 +5,21 @@ abstract class AuthEvent {}
 
 /// User intent: sign up
 final class AuthSignup extends AuthEvent {
+  AuthSignup({required this.name, required this.email, required this.password});
   final String name;
   final String email;
   final String password;
-
-  AuthSignup({required this.name, required this.email, required this.password});
 }
 
 /// User intent: sign in
 final class AuthSignIn extends AuthEvent {
+  AuthSignIn({required this.email, required this.password});
   final String email;
   final String password;
-
-  AuthSignIn({required this.email, required this.password});
 }
 
 /// Internal event: auth state changed from repository stream
 class _AuthStateChanged extends AuthEvent {
-  final Either<Failure, User?> authState;
   _AuthStateChanged(this.authState);
+  final Either<Failure, User?> authState;
 }

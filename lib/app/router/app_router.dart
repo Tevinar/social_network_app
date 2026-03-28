@@ -1,10 +1,10 @@
-import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/core/utils/stream_to_listenable.dart';
-import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/app/router/routes/routes.dart';
+import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/core/utils/stream_to_listenable.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -19,7 +19,7 @@ class AppRouter {
 
     //The top-level callback allows the app to redirect to a new location.
     redirect: (context, state) {
-      final AppUserState appUserState = context.read<AppUserCubit>().state;
+      final appUserState = context.read<AppUserCubit>().state;
 
       // If signed out and not on sign in page, redirect to sign in
       if (appUserState is AppUserSignedOut &&

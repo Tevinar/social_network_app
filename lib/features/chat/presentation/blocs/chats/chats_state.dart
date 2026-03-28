@@ -2,15 +2,14 @@ part of 'chats_bloc.dart';
 
 @immutable
 sealed class ChatsState {
-  final List<Chat> chats;
-  final int pageNumber;
-  final int? totalChatsInDatabase;
-
   const ChatsState({
     required this.chats,
     required this.pageNumber,
     this.totalChatsInDatabase,
   });
+  final List<Chat> chats;
+  final int pageNumber;
+  final int? totalChatsInDatabase;
 
   ChatsState copyWith({
     List<Chat>? chats,
@@ -57,12 +56,11 @@ final class ChatsSuccess extends ChatsState {
 }
 
 final class ChatsFailure extends ChatsState {
-  final String error;
-
   const ChatsFailure({
     required this.error,
     required super.chats,
     required super.pageNumber,
     super.totalChatsInDatabase,
   });
+  final String error;
 }

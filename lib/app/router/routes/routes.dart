@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:social_app/app/bootstrap/initial_loading_page.dart';
 import 'package:social_app/app/router/shell/app_shell.dart';
 import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
@@ -9,13 +11,10 @@ import 'package:social_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:social_app/features/chat/presentation/pages/chat_messages_page.dart';
 import 'package:social_app/features/chat/presentation/pages/chats_page.dart';
 import 'package:social_app/features/chat/presentation/pages/new_chat_page.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
-part 'routes.g.dart';
 
 part 'app_shell_routes.dart';
+part 'bootstrap_routes.dart';
 part 'features/auth_routes.dart';
 part 'features/blog_routes.dart';
-part 'bootstrap_routes.dart';
 part 'features/chat_routes.dart';
+part 'routes.g.dart';

@@ -1,27 +1,26 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatMessageCard extends StatelessWidget {
+  const ChatMessageCard({
+    required this.isMe,
+    required this.chatMessage,
+    required this.authorName,
+    super.key,
+  });
   final ChatMessage chatMessage;
   final String authorName;
   final bool isMe;
 
-  const ChatMessageCard({
-    super.key,
-    required this.isMe,
-    required this.chatMessage,
-    required this.authorName,
-  });
-
   @override
   Widget build(BuildContext context) {
-    final Color bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
+    final bubbleColor = isMe ? AppPallete.gradient1 : AppPallete.borderColor;
 
-    final Alignment alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
+    final alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
 
     final borderRadius = BorderRadius.only(
       topLeft: isMe ? const Radius.circular(16) : Radius.zero,
@@ -48,7 +47,9 @@ class ChatMessageCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!isMe && context.read<ChatEditorBloc>().state.chatMembers.length > 2)
+                  if (!isMe &&
+                      context.read<ChatEditorBloc>().state.chatMembers.length >
+                          2)
                     Text(
                       authorName,
                       style: Theme.of(context).textTheme.titleMedium,

@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
@@ -7,9 +10,6 @@ import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fpdart/fpdart.dart';
 
 part 'chats_event.dart';
 part 'chats_state.dart';
@@ -28,14 +28,6 @@ part 'chats_state.dart';
 /// Manages the chat feed state, including pagination, loading states,
 /// and real-time updates to already loaded chats.
 class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
-  final GetChatsPage _getChatsPage;
-  final GetChatsCount _getChatsCount;
-  final ChatRepository _repository;
-
-  final ScrollController _scrollController = ScrollController();
-
-  late final StreamSubscription<Either<Failure, ChatChange>> _chatChangeSub;
-
   /// Creates the ChatsBloc and immediately:
   /// - starts listening to scroll events for pagination
   /// - subscribes to real-time chat changes
@@ -56,6 +48,13 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
 
     add(LoadChatsNextPage());
   }
+  final GetChatsPage _getChatsPage;
+  final GetChatsCount _getChatsCount;
+  final ChatRepository _repository;
+
+  final ScrollController _scrollController = ScrollController();
+
+  late final StreamSubscription<Either<Failure, ChatChange>> _chatChangeSub;
 
   @override
   Future<void> close() async {
@@ -74,7 +73,8 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   // and fetch more chats when reaching the bottom
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
-      if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
         add(LoadChatsNextPage());
       }
@@ -88,7 +88,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
     _chatChangeSub = _repository.watchChatChanges().listen((
-      Either<Failure, ChatChange> event,
+      event,
     ) {
       add(ChatChangeReceived(event));
     });
@@ -128,7 +128,8 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
             state.copyWith(
               chats: state.chats
                   .map(
-                    (chat) => chat.id == chatChange.chat.id ? chatChange.chat : chat,
+                    (chat) =>
+                        chat.id == chatChange.chat.id ? chatChange.chat : chat,
                   )
                   .toList(),
             ),
@@ -138,7 +139,9 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         if (chatChange is ChatDeleted) {
           emit(
             state.copyWith(
-              chats: state.chats.where((chat) => chat.id != chatChange.chatId).toList(),
+              chats: state.chats
+                  .where((chat) => chat.id != chatChange.chatId)
+                  .toList(),
               totalChatsInDatabase: (state.totalChatsInDatabase ?? 1) - 1,
             ),
           );
@@ -160,7 +163,8 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       await _initializeChatsCount(emit);
     }
     // If we don't have more chats to load, do nothing
-    if (state.chats.length == state.totalChatsInDatabase && state.totalChatsInDatabase != 0) {
+    if (state.chats.length == state.totalChatsInDatabase &&
+        state.totalChatsInDatabase != 0) {
       return;
     }
 
@@ -177,7 +181,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         totalChatsInDatabase: state.totalChatsInDatabase,
       ),
     );
-    final Either<Failure, List<Chat>> result = await _getChatsPage(
+    final result = await _getChatsPage(
       state.pageNumber,
     );
     result.fold(
@@ -192,7 +196,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         );
       },
       (chatsNextPage) {
-        final List<Chat> newChats = [...state.chats, ...chatsNextPage];
+        final newChats = <Chat>[...state.chats, ...chatsNextPage];
         emit(
           ChatsSuccess(
             chats: newChats,
@@ -210,7 +214,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   ///
   /// This value is used to determine when pagination has reached the end.
   Future<void> _initializeChatsCount(Emitter<ChatsState> emit) async {
-    final Either<Failure, int> result = await _getChatsCount(NoParams());
+    final result = await _getChatsCount(NoParams());
     result.fold(
       (error) {
         emit(

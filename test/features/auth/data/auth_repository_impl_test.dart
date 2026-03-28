@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
@@ -8,9 +11,6 @@ import 'package:social_app/features/auth/data/data_sources/auth_remote_data_sour
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
@@ -50,7 +50,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final Either<Failure, User> result = await repository.signInWithEmailPassword(
+        final result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -78,7 +78,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'no internet'));
 
         // Act
-        final Either<Failure, User> result = await repository.signInWithEmailPassword(
+        final result = await repository.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
         );
@@ -107,7 +107,7 @@ void main() {
         ).thenAnswer((_) async => userModel);
 
         // Act
-        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
+        final result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -131,7 +131,7 @@ void main() {
         ).thenThrow(const ServerException(message: 'error'));
 
         // Act
-        final Either<Failure, User> result = await repository.signUpWithEmailPassword(
+        final result = await repository.signUpWithEmailPassword(
           name: 'Test',
           email: 'test@test.com',
           password: 'password',
@@ -164,7 +164,7 @@ void main() {
         when(() => remote.signOut()).thenAnswer((_) async {});
 
         // Act
-        final Either<Failure, void> result = await repository.signOut();
+        final result = await repository.signOut();
 
         // Assert
         expect(result, isA<Right<Failure, void>>());
@@ -181,7 +181,7 @@ void main() {
         ).thenThrow(const NetworkException(message: 'offline'));
 
         // Act
-        final Either<Failure, void> result = await repository.signOut();
+        final result = await repository.signOut();
 
         // Assert
         expect(result, isA<Left<Failure, void>>());
@@ -203,7 +203,7 @@ void main() {
         ).thenAnswer((_) => Stream.value(userModel));
 
         // Act
-        final Stream<Either<Failure, User?>> stream = repository.authStateChanges();
+        final stream = repository.authStateChanges();
 
         // Assert
         await expectLater(

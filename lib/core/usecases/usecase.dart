@@ -1,5 +1,5 @@
-import 'package:social_app/core/errors/failures.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failures.dart';
 
 //We create here a generic interface to avoid creating the same abstract class for each feature in the use cases sub-layer
 abstract interface class UseCase<SuccessType, Params> {

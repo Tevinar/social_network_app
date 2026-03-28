@@ -1,17 +1,17 @@
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/core/theme/app_pallete.dart';
+import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 class AuthGradientButton extends StatelessWidget {
-  final String buttonText;
-  final VoidCallback onPressed;
   const AuthGradientButton({
-    super.key,
     required this.buttonText,
     required this.onPressed,
+    super.key,
   });
+  final String buttonText;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {

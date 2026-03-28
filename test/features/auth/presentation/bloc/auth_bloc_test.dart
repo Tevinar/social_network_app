@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockUserSignIn extends Mock implements UserSignIn {}
 
@@ -52,7 +52,8 @@ void main() {
           authRepository: authRepository,
         );
       },
-      act: (bloc) => bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
+      act: (bloc) =>
+          bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
       expect: () => [AuthLoading(), AuthSignedIn(testUser)],
       verify: (_) {
         verify(
@@ -80,7 +81,8 @@ void main() {
           authRepository: authRepository,
         );
       },
-      act: (bloc) => bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
+      act: (bloc) =>
+          bloc.add(AuthSignIn(email: 'test@test.com', password: 'password')),
       expect: () => [
         AuthLoading(),
         const AuthFailure('No internet connection.'),

@@ -1,8 +1,9 @@
 sealed class Failure {
-  final String message; // user-facing (safe)
-  final String? debugMessage; // optional, internal
+  // optional, internal
 
   const Failure(this.message, {this.debugMessage});
+  final String message; // user-facing (safe)
+  final String? debugMessage;
 }
 
 class NetworkFailure extends Failure {

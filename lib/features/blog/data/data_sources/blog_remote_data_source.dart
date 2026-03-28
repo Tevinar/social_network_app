@@ -23,14 +23,13 @@ abstract interface class BlogRemoteDataSource {
 }
 
 class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
-  SupabaseClient supabaseClient;
-
   BlogRemoteDataSourceImpl({required this.supabaseClient});
+  SupabaseClient supabaseClient;
 
   @override
   Future<BlogModel> postBlog(BlogModel blog) async {
     return guardRemoteDataSourceCall(() async {
-      final List<Map<String, dynamic>> blogData = await supabaseClient
+      final blogData = await supabaseClient
           .from(Tables.blogs)
           .insert(blog.toJson())
           .select();
@@ -45,19 +44,23 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     required String blogId,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      await supabaseClient.storage.from(Buckets.blogImages).upload(blogId, image);
-      return supabaseClient.storage.from(Buckets.blogImages).getPublicUrl(blogId);
+      await supabaseClient.storage
+          .from(Buckets.blogImages)
+          .upload(blogId, image);
+      return supabaseClient.storage
+          .from(Buckets.blogImages)
+          .getPublicUrl(blogId);
     });
   }
 
   @override
   Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
     return guardRemoteDataSourceCall(() async {
-      const int pageSize = 20;
-      final int from = (pageNumber - 1) * pageSize;
-      final int to = from + pageSize - 1;
+      const pageSize = 20;
+      final from = (pageNumber - 1) * pageSize;
+      final to = from + pageSize - 1;
 
-      final List<Map<String, dynamic>> rawBlogs = await supabaseClient
+      final rawBlogs = await supabaseClient
           .from(Tables.blogs)
           .select('*, ${Tables.profiles} (${ProfileFields.name})')
           .range(from, to)
@@ -65,8 +68,8 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       return rawBlogs.map(
         (rawBlog) {
-          final Map<String, dynamic>? profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
-          final String? posterName = profile?[ProfileFields.name] as String?;
+          final profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
+          final posterName = profile?[ProfileFields.name] as String?;
           return BlogModel.fromJson(rawBlog).copyWith(
             posterName: posterName,
           );
@@ -153,7 +156,6 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
                       BlogModel.fromJson(payload.newRecord).toEntity(),
                     ),
                   );
-                  break;
 
                 case PostgresChangeEvent.update:
                   controller.add(
@@ -161,12 +163,11 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
                       BlogModel.fromJson(payload.newRecord).toEntity(),
                     ),
                   );
-                  break;
 
                 case PostgresChangeEvent.delete:
-                  final String deletedBlogId = payload.oldRecord[BlogFields.id] as String;
+                  final deletedBlogId =
+                      payload.oldRecord[BlogFields.id] as String;
                   controller.add(BlogDeleted(deletedBlogId));
-                  break;
 
                 case PostgresChangeEvent.all:
                   // Not emitted as a payload event, but required for exhaustiveness

@@ -1,12 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/utils/calculate_reading_time.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/app/router/routes/routes.dart';
-import 'package:flutter/material.dart';
 
 class BlogCard extends StatelessWidget {
+  const BlogCard({required this.blog, required this.color, super.key});
   final Blog blog;
   final Color color;
-  const BlogCard({super.key, required this.blog, required this.color});
 
   @override
   Widget build(BuildContext context) {

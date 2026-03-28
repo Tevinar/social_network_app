@@ -5,8 +5,6 @@ import 'package:social_app/core/logging/app_logger.dart';
 
 // for convert stream to listenable
 class StreamToListenable extends ChangeNotifier {
-  late final List<StreamSubscription<void>> _subscriptions;
-
   StreamToListenable(List<Stream<void>> streams) {
     _subscriptions = streams.map((stream) {
       return stream.asBroadcastStream().listen(
@@ -23,10 +21,11 @@ class StreamToListenable extends ChangeNotifier {
 
     notifyListeners();
   }
+  late final List<StreamSubscription<void>> _subscriptions;
 
   @override
   void dispose() {
-    for (final StreamSubscription<void> subscription in _subscriptions) {
+    for (final subscription in _subscriptions) {
       unawaited(
         subscription.cancel().catchError((Object error, StackTrace stackTrace) {
           appLogger.error(

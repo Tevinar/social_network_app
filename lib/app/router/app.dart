@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:social_app/app/router/app_router.dart';
 import 'package:social_app/core/theme/theme.dart';
-import 'package:flutter/material.dart';
 
 class SocialApp extends StatelessWidget {
   const SocialApp({super.key});

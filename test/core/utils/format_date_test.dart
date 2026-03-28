@@ -1,5 +1,5 @@
-import 'package:social_app/core/utils/format_date.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:social_app/core/utils/format_date.dart';
 
 void main() {
   group('formatToDay', () {
@@ -9,7 +9,7 @@ void main() {
       final today = DateTime(now.year, now.month, now.day, 10, 30);
 
       // Act
-      final String result = formatToDay(today);
+      final result = formatToDay(today);
 
       // Assert
       expect(result, 'Today');
@@ -18,7 +18,7 @@ void main() {
     test('returns Yesterday when date is yesterday', () {
       // Arrange
       final now = DateTime.now();
-      final DateTime yesterday = now.subtract(const Duration(days: 1));
+      final yesterday = now.subtract(const Duration(days: 1));
       final value = DateTime(
         yesterday.year,
         yesterday.month,
@@ -28,7 +28,7 @@ void main() {
       );
 
       // Act
-      final String result = formatToDay(value);
+      final result = formatToDay(value);
 
       // Assert
       expect(result, 'Yesterday');
@@ -39,7 +39,7 @@ void main() {
       final value = DateTime(2000, 1, 2, 5, 7);
 
       // Act
-      final String result = formatToDay(value);
+      final result = formatToDay(value);
 
       // Assert
       expect(result, '2 Jan, 2000');
@@ -52,7 +52,7 @@ void main() {
       final value = DateTime(2020, 1, 1, 5, 7);
 
       // Act
-      final String result = formatToHour(value);
+      final result = formatToHour(value);
 
       // Assert
       expect(result, '05:07');

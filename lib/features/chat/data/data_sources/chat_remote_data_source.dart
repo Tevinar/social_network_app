@@ -75,7 +75,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       return ChatModel(
-        id: chatMessageModel.id,
+        id: chatMessageModel.chatId,
         lastMessage: chatMessageModel,
         members: members,
       );

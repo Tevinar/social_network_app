@@ -36,7 +36,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     super.dispose();
   }
 
-  void loadInitialChatMessagesPage(ChatEditorState state) {
+  void loadInitialChatMessagesPage(BuildContext context, ChatEditorState state) {
     if (state is ChatEditorLoaded) {
       context.read<ChatMessagesBloc>().add(
         LoadInitialChatMessagesPage(state.chatId),
@@ -82,9 +82,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       },
 
       child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
-        listener: (context, state) {
-          loadInitialChatMessagesPage(state);
-        },
+        listener: loadInitialChatMessagesPage,
         builder: (context, chatEditorState) {
           return Scaffold(
             appBar: AppBar(

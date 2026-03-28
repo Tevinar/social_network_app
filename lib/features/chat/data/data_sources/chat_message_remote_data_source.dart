@@ -94,28 +94,38 @@ class ChatMessageRemoteDataSourceImpl implements ChatMessageRemoteDataSource {
                   try {
                     switch (payload.eventType) {
                       case PostgresChangeEvent.insert:
+                        final model = ChatMessageModel.fromJson(
+                          payload.newRecord,
+                        );
                         controller.add(
                           ChatMessageInserted(
-                            ChatMessageModel.fromJson(
-                              payload.newRecord,
-                            ).toEntity(),
+                            chatId: model.chatId,
+                            chatMessage: model.toEntity(),
                           ),
                         );
 
                       case PostgresChangeEvent.update:
+                        final model = ChatMessageModel.fromJson(
+                          payload.newRecord,
+                        );
+
                         controller.add(
                           ChatMessageUpdated(
-                            ChatMessageModel.fromJson(
-                              payload.newRecord,
-                            ).toEntity(),
+                            chatId: model.chatId,
+                            chatMessage: model.toEntity(),
                           ),
                         );
 
                       case PostgresChangeEvent.delete:
-                        final deletedMessageId =
-                            payload.oldRecord[ChatMessageFields.id] as String;
                         controller.add(
-                          ChatMessageDeleted(deletedMessageId),
+                          ChatMessageDeleted(
+                            chatId:
+                                payload.oldRecord[ChatMessageFields.chatId]
+                                    as String,
+                            chatMessageId:
+                                payload.oldRecord[ChatMessageFields.id]
+                                    as String,
+                          ),
                         );
 
                       case PostgresChangeEvent.all:

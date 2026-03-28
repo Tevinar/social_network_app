@@ -166,15 +166,34 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
         );
       },
       (chatMessageChange) {
+        final changedChatId = switch (chatMessageChange) {
+          ChatMessageInserted() => chatMessageChange.chatId,
+          ChatMessageUpdated() => chatMessageChange.chatId,
+          ChatMessageDeleted() => chatMessageChange.chatId,
+        };
+
+        // Ignore changes for other chats - they will be handled
+        // by their respective BLoCs
+        if (changedChatId != state.chatId) {
+          return;
+        }
+
         if (chatMessageChange is ChatMessageInserted) {
+          final messageAlreadyExists = state.chatMessages.any(
+            (chatMessage) => chatMessage.id == chatMessageChange.chatMessage.id,
+          );
+
           emit(
             state.copyWith(
-              chatMessages: [
-                chatMessageChange.chatMessage,
-                ...state.chatMessages,
-              ],
-              totalChatMessagesInDatabase:
-                  (state.totalChatMessagesInDatabase ?? 0) + 1,
+              chatMessages: messageAlreadyExists
+                  ? state.chatMessages
+                  : [
+                      chatMessageChange.chatMessage,
+                      ...state.chatMessages,
+                    ],
+              totalChatMessagesInDatabase: messageAlreadyExists
+                  ? state.totalChatMessagesInDatabase
+                  : (state.totalChatMessagesInDatabase ?? 0) + 1,
             ),
           );
         }
@@ -263,9 +282,13 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
         );
       },
       (chatsNextPage) {
-        final newChatMessages = <ChatMessage>[
+        final newChatMessages = [
           ...state.chatMessages,
-          ...chatsNextPage,
+          ...chatsNextPage.where(
+            (nextMessage) => state.chatMessages.every(
+              (existingMessage) => existingMessage.id != nextMessage.id,
+            ),
+          ),
         ];
         emit(
           ChatMessagesSuccess(

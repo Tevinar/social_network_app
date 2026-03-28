@@ -6,7 +6,10 @@ sealed class ChatMessageChange {}
 /// A chat message inserted.
 class ChatMessageInserted extends ChatMessageChange {
   /// Creates a [ChatMessageInserted].
-  ChatMessageInserted(this.chatMessage);
+  ChatMessageInserted({required this.chatId, required this.chatMessage});
+
+  /// The chat id.
+  final String chatId;
 
   /// The chat message.
   final ChatMessage chatMessage;
@@ -15,7 +18,10 @@ class ChatMessageInserted extends ChatMessageChange {
 /// A chat message updated.
 class ChatMessageUpdated extends ChatMessageChange {
   /// Creates a [ChatMessageUpdated].
-  ChatMessageUpdated(this.chatMessage);
+  ChatMessageUpdated({required this.chatId, required this.chatMessage});
+
+  /// The chat id.
+  final String chatId;
 
   /// The chat message.
   final ChatMessage chatMessage;
@@ -24,7 +30,10 @@ class ChatMessageUpdated extends ChatMessageChange {
 /// A chat message deleted.
 class ChatMessageDeleted extends ChatMessageChange {
   /// Creates a [ChatMessageDeleted].
-  ChatMessageDeleted(this.chatMessageId);
+  ChatMessageDeleted({required this.chatId, required this.chatMessageId});
+
+  /// The chat id.
+  final String chatId;
 
   /// The chat message id.
   final String chatMessageId;

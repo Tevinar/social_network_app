@@ -1,0 +1,15 @@
+{
+    "dart.runPubGetOnPubspecChanges": "always",
+    "dart.coverageExcludePatterns": [
+    "**/lib/app/bootstrap/**",
+    "**/lib/app/logging/**",
+    "**/lib/app/router/**",
+    "**/lib/core/config/**",
+    "**/lib/core/constants/**",
+    "**/lib/core/network/**",
+    "**/lib/core/services/**",
+    "**/lib/core/theme/**",
+    "**/lib/core/usecases/**",
+    "**/lib/core/widgets/**",
+  ],
+}

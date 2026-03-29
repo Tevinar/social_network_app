@@ -70,7 +70,6 @@ linux/flutter/generated_plugins.cmake
 
 # IDE files
 .idea/
-.vscode/
 *.iml
 
 # Local environment / data

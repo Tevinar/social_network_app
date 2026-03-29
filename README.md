@@ -1,179 +1,232 @@
 # Social App
 
-Application Flutter de reseau social connectee a Supabase, utilisant la Clean Architecture, structuree avec BLoC, `get_it` et une organisation par feature. Le projet couvre l'authentification, la publication de blogs avec image, ainsi qu'une messagerie en temps reel.
+A Flutter social application demo connected to Supabase.
 
-Note: le nom du repository et le package Dart du projet sont `social_app`.
+This project is designed with a structured architecture focused on
+maintainability, scalability, and clear separation of responsibilities.
 
-## Fonctionnalites
+## Overview
 
-- Authentification par email / mot de passe avec persistance de session via Supabase Auth
-- Redirection automatique selon l'etat de connexion
-- Creation de blogs avec image, contenu, titre et selection de sujets
-- Upload des images de blog dans Supabase Storage
-- Fil de blogs pagine avec infinite scroll
-- Synchronisation en temps reel des blogs via Supabase Realtime
-- Creation de conversations a partir d'une selection d'utilisateurs
-- Envoi et reception de messages en temps reel
-- Pagination des conversations et des messages
+Social App is a client application built with Flutter. It currently covers
+three main capabilities:
 
-## Stack technique
+- email/password authentication
+- blog publishing with image upload
+- real-time chat and messaging
 
-- Flutter / Dart
-- `flutter_bloc` pour la gestion d'etat
-- `get_it` pour l'injection de dependances
-- `go_router` + `go_router_builder` pour le routage type-safe
-- `supabase_flutter` pour l'auth, la base de donnees, le storage et le realtime
-- `fpdart` pour les `Either`
-- `talker` pour le logging
-- `image_picker`, `intl`, `internet_connection_checker_plus`
+The project is intended as a technical codebase
+organized around explicit architectural boundaries. It is suitable for learning
+and evolving a feature-based Flutter architecture with BLoC, dependency
+injection, and Supabase.
+
+This project solves the need for a single codebase that combines:
+
+- session-aware navigation
+- feature isolation
+- real-time updates
+- backend integration through clear infrastructure boundaries
+
+It is a mobile-first Flutter application, but the repository also includes the
+standard multi-platform Flutter targets.
+
+## Goals
+
+The main goals of the project are:
+
+- maintainability
+- scalability
+- readability
+- explicit boundaries
+- clear ownership of responsibilities
+- ease of testing
+- ease of evolution over time
+
+## Tech Stack
+
+### Core Technologies
+
+- Language: Dart
+- Framework: Flutter
+- Runtime: Flutter client runtime on supported platforms
+
+### Data / Persistence
+
+- Database: Supabase Postgres
+- Query layer: `supabase_flutter` / Supabase client APIs and RPC calls
+- Cache: no dedicated caching layer yet
+
+### Infrastructure
+
+- Hosting / Deployment: not automated in this repository; depends on the
+  Flutter target platform
+- CI/CD: not configured yet in the repository
+- Monitoring / Observability: local logging through Talker; no remote
+  monitoring sink configured yet
+
+### Testing
+
+- Unit testing: `flutter_test`, `bloc_test`, `mocktail`
+- Integration testing: limited / not formally structured yet
+- End-to-end testing: not configured yet
 
 ## Architecture
 
-Le projet suit une separation en couches par fonctionnalite:
+The project follows a feature-based structure with three top-level
+responsibility zones:
+
+- `core/` for passive shared technical building blocks
+- `app/` for application-wide orchestration
+- `features/` for business capabilities
+
+See [architecture.md](./architecture.md) for the complete architectural guide.
+
+## Project Structure
 
 ```text
-lib/
-  app/
-    bootstrap/
-    logging/
-    router/
-    services/
-    session/
-  core/
-    config/
-    constants/
-    errors/
-    logging/
-    network/
-    services/
-    theme/
-    usecases/
-    utils/
-    widgets/
-  features/
-    auth/
-      data/
-      domain/
-      presentation/
-    blog/
-      data/
-      domain/
-      presentation/
-    chat/
-      data/
-      domain/
-      presentation/
+project-root/
+  lib/
+    app/
+    core/
+    features/
+  assets/
+  test/
+  android/
+  ios/
+  web/
+  macos/
+  linux/
+  windows/
 ```
 
-Chaque feature isole:
+Main folders:
 
-- `data`: datasource distantes, modeles, repository implementations
-- `domain`: entites, contrats de repository, use cases
-- `presentation`: pages, widgets, blocs et etats UI
+- `lib/` contains the application source code
+- `assets/` contains static assets and public environment config
+- `test/` contains automated tests
+- platform folders contain the standard Flutter targets
 
-## Prerequis
+## Key Architectural Rules
 
-- Flutter SDK compatible avec `sdk: ^3.10.4`
-- Un projet Supabase configure
-- Une plateforme Flutter activee selon votre cible (`android`, `ios`, `web`, `macos`, `windows`, `linux`)
+The most important architectural rules are:
 
-## Installation
+- `core/` stays passive and feature-agnostic
+- `app/` coordinates global behavior without becoming a business layer
+- `features/` own business behavior
+- DTOs / transport models stay in feature `data/`
+- shared modules should remain small and intentional
+
+See [architecture.md](./architecture.md) for the detailed dependency and
+sharing rules.
+
+## Main Application Flow
+
+The main feature flow is:
+
+1. a user interacts with a page or widget
+2. a BLoC/Cubit in `presentation/` receives the intent
+3. the BLoC invokes a use case from `domain/`
+4. the use case delegates to a repository contract
+5. the repository implementation in `data/` performs the technical work
+6. data is mapped back into domain entities or failures
+7. the BLoC emits a new UI state
+
+Global coordination such as startup, routing, and session handling lives in
+`app/`.
+
+## Error Handling
+
+The error handling strategy is layered:
+
+- technical errors originate in infrastructure
+- repositories map them into `Failure` objects
+- presentation consumes safe results through `Either<Failure, T>`
+- global handlers act as a safety net for uncaught runtime errors
+
+## Shared Services
+
+Main shared and cross-cutting concerns include:
+
+- logging
+- configuration and environment access
+- connectivity checking
+- image picking abstraction
+- date / text formatting helpers
+- shared theme and UI primitives
+- ID generation
+
+## Testing Strategy
+
+### Test Levels
+
+- Unit tests
+- Integration tests where useful
+- Widget tests for targeted UI behavior
+- No end-to-end suite configured yet
+
+### Testing Principles
+
+- isolated logic should be tested with unit tests
+- repositories should be tested behind mocked data sources
+- BLoCs/Cubits should be tested behind mocked repositories or use cases
+- boundaries with external systems should be tested intentionally
+- coverage should focus on meaningful behavior, not just declarative wiring
+
+## Getting Started
+
+### Prerequisites
+
+You need:
+
+- Flutter SDK compatible with `sdk: ^3.10.4`
+- a working Flutter toolchain for your target platform
+- a Supabase project configured with the expected resources
+
+### Installation
 
 ```bash
+git clone <repository-url>
+cd social_app
 flutter pub get
 ```
 
-Le projet peut demarrer directement apres le clone grace au fichier versionne `assets/config/env.public`.
+### Configuration
 
-Si vous voulez surcharger la configuration localement sans rien commit, creez un fichier `.env` a la racine du projet:
+The repository includes `assets/config/env.public` for zero-config onboarding.
+
+For local overrides, create a `.env` file at the root of the project:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Puis lancez l'application avec:
+Then run the app with:
 
 ```bash
 flutter run --dart-define-from-file=.env
 ```
 
-Sans override local, un simple `flutter run` utilisera la configuration publique fournie par le repository.
+Supabase is expected to provide:
 
-## Configuration Supabase attendue
-
-L'application s'appuie sur les ressources suivantes:
-
-- Auth email / password active
-- Bucket Storage public `blog_images`
-- Tables:
-  - `profiles`
-  - `blogs`
-  - `chats`
-  - `chat_members`
-  - `chat_messages`
-- Fonctions RPC:
+- email/password authentication
+- a public `blog_images` storage bucket
+- the tables used by the project (`profiles`, `blogs`, `chats`,
+  `chat_members`, `chat_messages`)
+- the RPC functions:
   - `create_chat_with_members`
   - `get_chat_by_members`
-- Realtime active sur:
+- realtime enabled for:
   - `blogs`
   - `chats`
   - `chat_messages`
 
-Les noms sont references directement dans le code, il faut donc conserver cette convention ou adapter les constantes du dossier `lib/core/constants/supabase_schema`.
-
-Important: le code ne cree pas de ligne dans `profiles` apres inscription. Il faut donc prevoir cote Supabase un mecanisme de synchronisation entre `auth.users` et `profiles` (par exemple via un trigger PostgreSQL) afin que le nom de l'utilisateur soit disponible dans les blogs et la messagerie.
-
-Note: la configuration publique versionnee est adaptee a un usage de demo / onboarding. Pour un projet de production, gardez un backend dedie et des policies RLS strictes.
-
-### Champs utilises cote application
-
-`profiles`
-
-- `id`
-- `name`
-- `updated_at`
-
-`blogs`
-
-- `id`
-- `title`
-- `content`
-- `image_url`
-- `topics`
-- `poster_id`
-- `updated_at`
-
-`chats`
-
-- `id`
-- `last_message_id`
-- `last_message_at`
-
-`chat_members`
-
-- `chat_id`
-- `member_id`
-- `joined_at`
-
-`chat_messages`
-
-- `id`
-- `chat_id`
-- `author_id`
-- `content`
-- `created_at`
-- `updated_at`
-
-Le code suppose egalement des policies RLS coherentes, en particulier pour limiter l'acces aux conversations et aux messages de l'utilisateur connecte.
-
-## Lancer le projet
+### Run the Project
 
 ```bash
 flutter run
 ```
 
-Exemples:
+Examples:
 
 ```bash
 flutter run -d chrome
@@ -182,41 +235,105 @@ flutter run -d android
 flutter run --dart-define-from-file=.env
 ```
 
-## Commandes utiles
-
-Executer les tests:
+### Run Tests
 
 ```bash
 flutter test
 ```
 
-Regenerer les routes type-safe apres modification du routage:
+To generate coverage:
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+flutter test --coverage
 ```
 
-Lancer la generation en mode watch:
+### Run Lint / Static Analysis
 
 ```bash
-dart run build_runner watch --delete-conflicting-outputs
+flutter analyze
 ```
 
-## Parcours utilisateur principal
+### Format Code
 
-1. L'utilisateur cree un compte ou se connecte.
-2. La session globale est ecoutee par `AppUserCubit`.
-3. Une fois connecte, il accede au shell principal avec deux onglets:
-   - le fil de blogs
-   - la messagerie
-4. Il peut publier un blog avec image et sujets.
-5. Il peut ouvrir une conversation existante ou en creer une nouvelle.
-6. Les blogs, conversations et messages se mettent a jour en temps reel.
+```bash
+dart format .
+```
 
-## Tests presentes
+## Development Workflow
 
-Le projet contient deja une base de tests unitaires et widgets, notamment sur:
+Recommended workflow:
 
-- l'authentification
-- les repositories de la couche data
-- quelques utilitaires du dossier `core`
+1. create a branch from the base branch
+2. keep changes focused by topic
+3. run tests and analysis locally
+4. open a merge request / pull request
+5. request review
+6. merge after validation
+
+Suggested conventions:
+
+- prefer focused branches such as `fix/...`, `chore/...`, `feat/...`
+- prefer clear, focused commits
+- prefer merge requests that solve one coherent problem at a time
+
+## Conventions
+
+Practical conventions used in the project:
+
+- feature modules are organized into `data`, `domain`, and `presentation`
+- transport models live in `data/models`
+- external integration code lives behind explicit feature boundaries
+- app-wide coordination belongs in `app/`
+- passive shared technical code belongs in `core/`
+
+For the full architectural conventions, see [architecture.md](./architecture.md).
+
+## Runtime and Coordination Patterns
+
+The project relies on the following runtime patterns:
+
+- BLoC/Cubit for state management
+- `GoRouter` for navigation
+- `GetIt` for dependency composition
+- async repository calls for commands and queries
+- passive streams for real-time backend-driven updates
+
+Runtime coordination is split between feature-scoped BLoC/Cubit state and
+app-level coordination for session, startup, and routing.
+
+## Releases and Versioning
+
+The app version is currently managed through `pubspec.yaml`.
+
+There is no documented release workflow yet in the repository. Until one is
+introduced, version updates should remain explicit and intentional.
+
+## Roadmap
+
+Possible future improvements include:
+
+- stronger CI/CD automation
+- remote error monitoring / crash reporting
+- broader test coverage on key flows
+- additional feature growth on top of the current auth, blog, and chat modules
+
+## Contributing
+
+Contributors should:
+
+- keep changes focused
+- respect the `core / app / features` architecture
+- avoid introducing arbitrary cross-feature dependencies
+- run tests and checks before submitting changes
+- preserve explicit boundaries between presentation, domain, and data
+
+For major changes, align on the architectural direction before expanding shared
+modules or changing responsibility boundaries.
+
+## Additional Documentation
+
+- [architecture.md](./architecture.md)
+
+## License
+
+No license is specified yet in this repository.

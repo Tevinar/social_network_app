@@ -8,13 +8,32 @@ import 'package:social_app/features/blog/domain/entities/blog.dart';
 /// A blog viewer page widget.
 class BlogViewerPage extends StatelessWidget {
   /// Creates a [BlogViewerPage].
-  const BlogViewerPage({required this.blog, super.key});
+  const BlogViewerPage({
+    required this.blog,
+    this.imageProvider,
+    this.precacheImageCallback,
+    super.key,
+  });
 
   /// The blog.
   final Blog blog;
 
+  /// The image provider used to render the blog image.
+  ///
+  /// This is mainly useful in tests to avoid real network image loading.
+  final ImageProvider<Object>? imageProvider;
+
+  /// The callback used to precache the image before rendering the page body.
+  ///
+  /// This is mainly useful in tests to control or bypass image precaching.
+  final Future<void> Function(BuildContext, ImageProvider<Object>)?
+  precacheImageCallback;
+
+  ImageProvider<Object> get _resolvedImageProvider =>
+      imageProvider ?? NetworkImage(blog.imageUrl);
+
+  /// Builds the blog viewer page.
   @override
-  /// The build.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +43,9 @@ class BlogViewerPage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder(
-        future: precacheImage(NetworkImage(blog.imageUrl), context),
+        future:
+            precacheImageCallback?.call(context, _resolvedImageProvider) ??
+            precacheImage(_resolvedImageProvider, context),
         builder: (context, asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return const Loader();
@@ -63,7 +84,7 @@ class BlogViewerPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     ClipRRect(
                       borderRadius: BorderRadiusGeometry.circular(10),
-                      child: Image(image: NetworkImage(blog.imageUrl)),
+                      child: Image(image: _resolvedImageProvider),
                     ),
                     const SizedBox(height: 20),
                     Text(

@@ -6,8 +6,34 @@ import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
+  group('NetworkException', () {
+    test(
+      'given a NetworkException when toString is called then returns a '
+      'readable string representation',
+      () {
+      // Arrange
+      const exception = NetworkException(
+        message: 'No internet connection',
+        code: '408',
+      );
+
+      // Act
+      final result = exception.toString();
+
+      // Assert
+      expect(
+        result,
+        'NetworkException: No internet connection (code: 408)',
+      );
+      },
+    );
+  });
+
   group('guardRemoteDataSourceCall', () {
-    test('returns value when call succeeds', () async {
+    test(
+      'given a successful call when guardRemoteDataSourceCall is invoked '
+      'then returns the value',
+      () async {
       // Act
       final result = await guardRemoteDataSourceCall(() async {
         return 42;
@@ -15,10 +41,12 @@ void main() {
 
       // Assert
       expect(result, 42);
-    });
+      },
+    );
 
     test(
-      'translates PostgrestException into ServerException with code',
+      'given a PostgrestException when guardRemoteDataSourceCall is invoked '
+      'then throws ServerException with code',
       () async {
         // Arrange
         const exception = PostgrestException(
@@ -45,7 +73,10 @@ void main() {
       },
     );
 
-    test('translates SocketException into NetworkException', () async {
+    test(
+      'given a SocketException when guardRemoteDataSourceCall is invoked '
+      'then throws NetworkException',
+      () async {
       // Arrange
       const exception = SocketException('No internet');
 
@@ -67,9 +98,13 @@ void main() {
           ),
         ),
       );
-    });
+      },
+    );
 
-    test('translates unknown exception into ServerException', () async {
+    test(
+      'given an unknown exception when guardRemoteDataSourceCall is invoked '
+      'then throws ServerException',
+      () async {
       // Arrange
       final exception = Exception('Something weird');
 
@@ -91,6 +126,7 @@ void main() {
           ),
         ),
       );
-    });
+      },
+    );
   });
 }

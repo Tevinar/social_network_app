@@ -40,14 +40,6 @@ The project follows these principles:
 - passive shared foundations
 - pragmatic consistency over dogmatism
 
-In this interpretation of the architecture:
-
-- `core/` should stay passive and feature-agnostic
-- `app/` should orchestrate global behavior without owning feature business
-  logic
-- `features/` should own business behavior and remain as self-contained as
-  reasonably possible
-
 ---
 
 ## 3. High-Level Overview
@@ -63,12 +55,6 @@ At a high level, the project is organized like this:
 - the shared low-level foundation lives in `core/`
 - the application-wide coordination layer lives in `app/` and sits alongside
   feature modules rather than between every feature layer
-
-In short:
-
-- `core` = tools
-- `app` = orchestration
-- `features` = business capabilities
 
 ---
 
@@ -101,14 +87,8 @@ features/
       └── presentation/
 ```
 
-The intent of this structure is:
-
-- `core/` contains passive, reusable technical code
-- `app/` contains global application coordination
-- `features/` contains business behavior grouped by capability
-
-This is not a strict academic layering exercise. It is a practical structure
-used to keep the codebase understandable as it grows.
+This is a practical structure used to keep the codebase understandable as it
+grows, not a strict academic layering exercise.
 
 ---
 
@@ -339,6 +319,7 @@ architectural convention, not when it introduces app-specific behavior.
 ## 10. Testing Strategy
 
 The testing strategy should prioritize behavior over surface area.
+The current project baseline is 100% line coverage.
 
 Recommended focus:
 
@@ -356,7 +337,8 @@ Practical rules:
   testing priority as business behavior
 
 The goal is not to maximize coverage mechanically. The goal is to test the code
-that owns decisions and behavior.
+that owns decisions and behavior. In this project, the expectation is to keep
+that discipline while preserving the 100% coverage baseline over time.
 
 ---
 

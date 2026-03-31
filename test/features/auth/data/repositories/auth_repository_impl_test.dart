@@ -99,6 +99,42 @@ void main() {
         );
       },
     );
+
+    test(
+      'Given remote throws an unexpected exception when signing in with '
+      'email and password, then Left<Failure> is returned and the error is '
+      'logged',
+      () async {
+        // Arrange
+        when(
+          () => remote.signInWithEmailPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(const ServerException(message: 'unexpected sign-in error'));
+
+        // Act
+        final result = await repository.signInWithEmailPassword(
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        expect(result, isA<Left<Failure, User>>());
+        result.fold(
+          (failure) => expect(failure, isA<UnexpectedFailure>()),
+          (_) => fail('Expected failure'),
+        );
+
+        verify(
+          () => logger.error(
+            'Unexpected error in AuthRepositoryImpl.signInWithEmailPassword',
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
+      },
+    );
   });
 
   group('signUpWithEmailPassword', () {
@@ -201,6 +237,37 @@ void main() {
         );
       },
     );
+
+    test(
+      'Given remote throws an unexpected exception when signing out, then '
+      'Left<Failure> is returned and the error is logged',
+      () async {
+        // Arrange
+        when(
+          () => remote.signOut(),
+        ).thenThrow(
+          const ServerException(message: 'unexpected sign-out error'),
+        );
+
+        // Act
+        final result = await repository.signOut();
+
+        // Assert
+        expect(result, isA<Left<Failure, void>>());
+        result.fold(
+          (failure) => expect(failure, isA<UnexpectedFailure>()),
+          (_) => fail('Expected failure'),
+        );
+
+        verify(
+          () => logger.error(
+            'Unexpected error in AuthRepositoryImpl.signOut',
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
+      },
+    );
   });
 
   group('authStateChanges', () {
@@ -261,6 +328,30 @@ void main() {
           repository.authStateChanges(),
           emits(isA<Left<Failure, User?>>()),
         );
+      },
+    );
+
+    test(
+      'Given remote stream throws an unexpected exception when listening to '
+      'auth changes, then Left<Failure> is emitted and the error is logged',
+      () async {
+        // Arrange
+        when(() => remote.authStateChanges()).thenAnswer(
+          (_) => Stream.error(const ServerException(message: 'stream error')),
+        );
+
+        // Act
+        final stream = repository.authStateChanges();
+
+        // Assert
+        await expectLater(stream, emits(isA<Left<Failure, User?>>()));
+        verify(
+          () => logger.error(
+            'Unexpected error in AuthRepositoryImpl.authStateChanges',
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
       },
     );
   });

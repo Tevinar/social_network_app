@@ -8,10 +8,6 @@ import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:social_app/features/auth/presentation/pages/signup_page.dart';
 
-/// --------------------
-/// Mocks & fakes
-/// --------------------
-
 class MockAuthBloc extends Mock implements AuthBloc {}
 
 class FakeAuthEvent extends Fake implements AuthEvent {}
@@ -34,14 +30,14 @@ void main() {
     return MaterialApp(
       home: BlocProvider<AuthBloc>.value(
         value: authBloc,
-        child: const SignInPage(),
+        child: const SignUpPage(),
       ),
     );
   }
 
   Widget buildRoutableWidget() {
     final router = GoRouter(
-      initialLocation: '/sign-in',
+      initialLocation: '/sign-up',
       routes: [
         GoRoute(
           path: '/sign-in',
@@ -63,8 +59,8 @@ void main() {
     return MaterialApp.router(routerConfig: router);
   }
 
-  group('SignInPage', () {
-    testWidgets('renders sign-in form correctly', (tester) async {
+  group('SignUpPage', () {
+    testWidgets('renders sign-up form correctly', (tester) async {
       // Arrange
       when(() => authBloc.state).thenReturn(AuthSignedOut());
       whenListen(authBloc, Stream.value(AuthSignedOut()));
@@ -73,38 +69,42 @@ void main() {
       await tester.pumpWidget(buildTestableWidget());
 
       // Assert
-      expect(find.text('Sign In.'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(2));
-      expect(find.text('Sign In'), findsOneWidget);
-      final richText = tester.widget<RichText>(
-        find.byKey(const Key('signup_text')),
-      );
-      expect((richText.text as TextSpan).toPlainText(), contains('Sign Up'));
+      expect(find.text('Sign Up.'), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.byType(TextFormField), findsNWidgets(3));
+      expect(find.text('Sign Up'), findsOneWidget);
     });
 
-    testWidgets('dispatches AuthSignIn when form is submitted', (tester) async {
+    testWidgets('dispatches AuthSignup when form is submitted', (tester) async {
       // Arrange
       when(() => authBloc.state).thenReturn(AuthSignedOut());
       whenListen(authBloc, Stream.value(AuthSignedOut()));
 
       await tester.pumpWidget(buildTestableWidget());
 
-      // Fill form
       await tester.enterText(
         find.byType(TextFormField).at(0),
+        '  Test User  ',
+      );
+      await tester.enterText(
+        find.byType(TextFormField).at(1),
         '  test@test.com  ',
       );
-      await tester.enterText(find.byType(TextFormField).at(1), '  password  ');
+      await tester.enterText(
+        find.byType(TextFormField).at(2),
+        '  password  ',
+      );
 
       // Act
-      await tester.tap(find.text('Sign In'));
+      await tester.tap(find.text('Sign Up'));
       await tester.pump();
 
       // Assert
       verify(
         () => authBloc.add(
           any(
-            that: isA<AuthSignIn>()
+            that: isA<AuthSignup>()
+                .having((e) => e.name, 'name', 'Test User')
                 .having((e) => e.email, 'email', 'test@test.com')
                 .having((e) => e.password, 'password', 'password'),
           ),
@@ -113,7 +113,7 @@ void main() {
     });
 
     testWidgets(
-      'does not dispatch AuthSignIn when the form is invalid',
+      'does not dispatch AuthSignup when the form is invalid',
       (tester) async {
         // Arrange
         when(() => authBloc.state).thenReturn(AuthSignedOut());
@@ -122,10 +122,11 @@ void main() {
         await tester.pumpWidget(buildTestableWidget());
 
         // Act
-        await tester.tap(find.text('Sign In'));
+        await tester.tap(find.text('Sign Up'));
         await tester.pump();
 
         // Assert
+        expect(find.text('Name is missing!'), findsOneWidget);
         expect(find.text('Email is missing!'), findsOneWidget);
         expect(find.text('Password is missing!'), findsOneWidget);
         verifyNever(() => authBloc.add(any()));
@@ -139,20 +140,20 @@ void main() {
         authBloc,
         Stream.fromIterable([
           AuthSignedOut(),
-          const AuthFailure('Invalid credentials'),
+          const AuthFailure('Email already in use'),
         ]),
       );
 
       // Act
       await tester.pumpWidget(buildTestableWidget());
-      await tester.pump(); // process stream event
-      await tester.pump(const Duration(seconds: 1)); // snackbar animation
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       // Assert
-      expect(find.text('Invalid credentials'), findsOneWidget);
+      expect(find.text('Email already in use'), findsOneWidget);
     });
 
-    testWidgets('navigates to SignUpPage when footer is tapped', (
+    testWidgets('navigates to SignInPage when footer is tapped', (
       tester,
     ) async {
       // Arrange
@@ -162,11 +163,19 @@ void main() {
       await tester.pumpWidget(buildRoutableWidget());
 
       // Act
-      await tester.tap(find.byKey(const Key('signup_text')));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is RichText &&
+              (widget.text as TextSpan).toPlainText().contains(
+                'Already have an account ? Sign In',
+              ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.byType(SignUpPage), findsOneWidget);
+      expect(find.byType(SignInPage), findsOneWidget);
     });
   });
 }

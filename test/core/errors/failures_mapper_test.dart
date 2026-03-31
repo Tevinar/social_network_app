@@ -6,8 +6,8 @@ import 'package:social_app/core/errors/failures_mapper.dart';
 void main() {
   group('mapExceptionToFailure', () {
     test(
-      'NetworkException gives a NetworkFailure '
-      'with the correct message and debug message',
+      'given a NetworkException when mapExceptionToFailure is called then '
+      'returns NetworkFailure with the correct message and debug message',
       () {
         // Arrange
         const error = NetworkException(message: 'debug message');
@@ -22,7 +22,10 @@ void main() {
       },
     );
 
-    test('ServerException with 401 → UnauthorizedFailure', () {
+    test(
+      'given a ServerException with 401 when mapExceptionToFailure is called '
+      'then returns UnauthorizedFailure',
+      () {
       // Arrange
       const error = ServerException(message: 'Token expired', code: '401');
 
@@ -36,17 +39,25 @@ void main() {
         'Your session has expired. Please sign in again.',
       );
       expect(failure.debugMessage, 'Token expired');
-    });
+      },
+    );
 
-    test('ServerException with 403 → UnauthorizedFailure', () {
+    test(
+      'given a ServerException with 403 when mapExceptionToFailure is called '
+      'then returns UnauthorizedFailure',
+      () {
       const error = ServerException(message: 'Forbidden', code: '403');
 
       final failure = mapExceptionToFailure(error);
 
       expect(failure, isA<UnauthorizedFailure>());
-    });
+      },
+    );
 
-    test('ServerException with 404 → NotFoundFailure', () {
+    test(
+      'given a ServerException with 404 when mapExceptionToFailure is called '
+      'then returns NotFoundFailure',
+      () {
       // Arrange
       const error = ServerException(message: 'Resource not found', code: '404');
 
@@ -57,9 +68,13 @@ void main() {
       expect(failure, isA<NotFoundFailure>());
       expect(failure.message, 'Requested resource not found.');
       expect(failure.debugMessage, 'Resource not found');
-    });
+      },
+    );
 
-    test('ServerException with 23505 → ValidationFailure (duplicate)', () {
+    test(
+      'given a ServerException with 23505 when mapExceptionToFailure is '
+      'called then returns ValidationFailure for duplicate values',
+      () {
       // Arrange
       const error = ServerException(
         message: 'duplicate key value violates unique constraint',
@@ -76,9 +91,13 @@ void main() {
         failure.debugMessage,
         'duplicate key value violates unique constraint',
       );
-    });
+      },
+    );
 
-    test('ServerException with 23502 → ValidationFailure (missing field)', () {
+    test(
+      'given a ServerException with 23502 when mapExceptionToFailure is '
+      'called then returns ValidationFailure for missing field',
+      () {
       // Arrange
       const error = ServerException(
         message: 'null value in column',
@@ -92,9 +111,13 @@ void main() {
       expect(failure, isA<ValidationFailure>());
       expect(failure.message, 'Some required information is missing.');
       expect(failure.debugMessage, 'null value in column');
-    });
+      },
+    );
 
-    test('ServerException with unknown code → UnexpectedFailure', () {
+    test(
+      'given a ServerException with an unknown code when '
+      'mapExceptionToFailure is called then returns UnexpectedFailure',
+      () {
       // Arrange
       const error = ServerException(
         message: 'Weird backend error',
@@ -108,9 +131,13 @@ void main() {
       expect(failure, isA<UnexpectedFailure>());
       expect(failure.message, 'Something went wrong. Please try again.');
       expect(failure.debugMessage, 'Weird backend error');
-    });
+      },
+    );
 
-    test('Unknown exception type → UnexpectedFailure', () {
+    test(
+      'given an unknown exception when mapExceptionToFailure is called then '
+      'returns UnexpectedFailure',
+      () {
       // Arrange
       final error = Exception('Some random exception');
 
@@ -121,6 +148,7 @@ void main() {
       expect(failure, isA<UnexpectedFailure>());
       expect(failure.message, 'Something went wrong. Please try again.');
       expect(failure.debugMessage, error.toString());
-    });
+      },
+    );
   });
 }

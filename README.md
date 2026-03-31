@@ -63,22 +63,28 @@ The main goals of the project are:
 - Monitoring / Observability: local logging through Talker; no remote
   monitoring sink configured yet
 
-### Testing
+### Testing Tooling
 
-- Unit testing: `flutter_test`, `bloc_test`, `mocktail`
-- Integration testing: limited / not formally structured yet
-- End-to-end testing: not configured yet
+- `flutter_test`
+- `bloc_test`
+- `mocktail`
 
-## Architecture
+## Architecture Summary
 
-The project follows a feature-based structure with three top-level
-responsibility zones:
+The project uses a feature-based structure with three top-level responsibility
+zones:
 
 - `core/` for passive shared technical building blocks
 - `app/` for application-wide orchestration
-- `features/` for business capabilities
+- `features/` for business capabilities split into `data`, `domain`, and
+  `presentation`
 
-See [architecture.md](./architecture.md) for the complete architectural guide.
+At runtime, feature UI is coordinated with BLoC/Cubit, navigation is handled
+through `GoRouter`, dependencies are composed with `GetIt`, and repositories
+expose safe results through `Either<Failure, T>`.
+
+For the full architectural rules, dependency direction, testing conventions,
+and runtime coordination patterns, see [architecture.md](./architecture.md).
 
 ## Project Structure
 
@@ -105,71 +111,13 @@ Main folders:
 - `test/` contains automated tests
 - platform folders contain the standard Flutter targets
 
-## Key Architectural Rules
-
-The most important architectural rules are:
-
-- `core/` stays passive and feature-agnostic
-- `app/` coordinates global behavior without becoming a business layer
-- `features/` own business behavior
-- DTOs / transport models stay in feature `data/`
-- shared modules should remain small and intentional
-
-See [architecture.md](./architecture.md) for the detailed dependency and
-sharing rules.
-
-## Main Application Flow
-
-The main feature flow is:
-
-1. a user interacts with a page or widget
-2. a BLoC/Cubit in `presentation/` receives the intent
-3. the BLoC invokes a use case from `domain/`
-4. the use case delegates to a repository contract
-5. the repository implementation in `data/` performs the technical work
-6. data is mapped back into domain entities or failures
-7. the BLoC emits a new UI state
-
-Global coordination such as startup, routing, and session handling lives in
-`app/`.
-
-## Error Handling
-
-The error handling strategy is layered:
-
-- technical errors originate in infrastructure
-- repositories map them into `Failure` objects
-- presentation consumes safe results through `Either<Failure, T>`
-- global handlers act as a safety net for uncaught runtime errors
-
-## Shared Services
-
-Main shared and cross-cutting concerns include:
-
-- logging
-- configuration and environment access
-- connectivity checking
-- image picking abstraction
-- date / text formatting helpers
-- shared theme and UI primitives
-- ID generation
-
-## Testing Strategy
-
-### Test Levels
+## Testing and Quality
 
 - Unit tests
-- Integration tests where useful
 - Widget tests for targeted UI behavior
+- Integration tests where useful
 - No end-to-end suite configured yet
-
-### Testing Principles
-
-- isolated logic should be tested with unit tests
-- repositories should be tested behind mocked data sources
-- BLoCs/Cubits should be tested behind mocked repositories or use cases
-- boundaries with external systems should be tested intentionally
-- coverage should focus on meaningful behavior, not just declarative wiring
+- Current automated coverage baseline: 100% line coverage across the project
 
 ## Getting Started
 
@@ -276,31 +224,6 @@ Suggested conventions:
 - prefer clear, focused commits
 - prefer merge requests that solve one coherent problem at a time
 
-## Conventions
-
-Practical conventions used in the project:
-
-- feature modules are organized into `data`, `domain`, and `presentation`
-- transport models live in `data/models`
-- external integration code lives behind explicit feature boundaries
-- app-wide coordination belongs in `app/`
-- passive shared technical code belongs in `core/`
-
-For the full architectural conventions, see [architecture.md](./architecture.md).
-
-## Runtime and Coordination Patterns
-
-The project relies on the following runtime patterns:
-
-- BLoC/Cubit for state management
-- `GoRouter` for navigation
-- `GetIt` for dependency composition
-- async repository calls for commands and queries
-- passive streams for real-time backend-driven updates
-
-Runtime coordination is split between feature-scoped BLoC/Cubit state and
-app-level coordination for session, startup, and routing.
-
 ## Releases and Versioning
 
 The app version is currently managed through `pubspec.yaml`.
@@ -312,9 +235,8 @@ introduced, version updates should remain explicit and intentional.
 
 Possible future improvements include:
 
-- stronger CI/CD automation
+- CI/CD automation
 - remote error monitoring / crash reporting
-- broader test coverage on key flows
 - additional feature growth on top of the current auth, blog, and chat modules
 
 ## Contributing

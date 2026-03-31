@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
@@ -20,120 +22,39 @@ void main() {
   late MockSupabaseClient supabase;
   late MockGoTrueClient auth;
   late MockSupabaseUser supabaseUser;
-  late AuthRemoteDataSourceSupabaseImpl ds;
+  late AuthRemoteDataSourceSupabaseImpl dataSource;
 
   setUp(() {
     supabase = MockSupabaseClient();
     auth = MockGoTrueClient();
     supabaseUser = MockSupabaseUser();
-    ds = AuthRemoteDataSourceSupabaseImpl(supabase);
+    dataSource = AuthRemoteDataSourceSupabaseImpl(supabase);
     when(() => supabase.auth).thenReturn(auth);
   });
+
   group('signInWithEmailPassword', () {
     test(
-      'Given Supabase returns a user when signing in with email and password, '
-      'then a UserModel is returned',
+      'given an authenticated user when signInWithEmailPassword is called '
+      'then returns a UserModel',
       () async {
         // Arrange
-        final userJson = {'id': '123', 'email': 'test@test.com'};
-        when(() => supabaseUser.toJson()).thenReturn(userJson);
-        when(
-          () => auth.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
-
-        // Act
-        final result = await ds.signInWithEmailPassword(
-          email: 'test@test.com',
-          password: 'password',
-        );
-
-        // Assert
-        expect(
-          result,
-          isA<UserModel>()
-              .having((u) => u.id, 'id', '123')
-              .having((u) => u.name, 'name', '')
-              .having((u) => u.email, 'email', 'test@test.com'),
-        );
-      },
-    );
-
-    test(
-      'Given Supabase returns null when signing in with email and password, '
-      'then a ServerException is thrown',
-      () async {
-        // Arrange
-
-        when(
-          () => auth.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => AuthResponse());
-
-        // Act
-        final result = ds.signInWithEmailPassword(
-          email: 'test@test.com',
-          password: 'password',
-        );
-
-        // Assert
-        expect(result, throwsA(isA<ServerException>()));
-      },
-    );
-
-    test(
-      'Given Supabase throws an exception when signing in with email and '
-      'password, then a ServerException is thrown',
-      () async {
-        // Arrange
-        when(
-          () => auth.signInWithPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenThrow(Exception('Supabase error'));
-
-        // Act
-        final result = ds.signInWithEmailPassword(
-          email: 'test@test.com',
-          password: 'password',
-        );
-
-        // Assert
-        expect(result, throwsA(isA<ServerException>()));
-      },
-    );
-  });
-
-  group('signUpWithEmailPassword', () {
-    test(
-      'Given Supabase returns a user when signing up with email and password, '
-      'then a UserModel is returned',
-      () async {
-        // Arrange
-        final userJson = <String, Object>{
+        final userJson = <String, dynamic>{
           'id': '123',
           'email': 'test@test.com',
-          'user_metadata': {'name': 'Test User'},
+          'user_metadata': <String, dynamic>{'name': 'Test User'},
         };
         when(() => supabaseUser.toJson()).thenReturn(userJson);
         when(
-          () => auth.signUp(
+          () => auth.signInWithPassword(
             email: any(named: 'email'),
             password: any(named: 'password'),
-            data: any(named: 'data'),
           ),
         ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
 
         // Act
-        final result = await ds.signUpWithEmailPassword(
+        final result = await dataSource.signInWithEmailPassword(
           email: 'test@test.com',
           password: 'password',
-          name: 'Test User',
         );
 
         // Assert
@@ -148,8 +69,116 @@ void main() {
     );
 
     test(
-      'Given Supabase returns null when signing up with email and password, '
-      'then a ServerException is thrown',
+      'given no authenticated user when signInWithEmailPassword is called '
+      'then throws ServerException',
+      () async {
+        // Arrange
+        when(
+          () => auth.signInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => AuthResponse());
+
+        // Act
+        final result = dataSource.signInWithEmailPassword(
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        await expectLater(result, throwsA(isA<ServerException>()));
+      },
+    );
+
+    test(
+      'given an unexpected backend error when signInWithEmailPassword is '
+      'called then throws ServerException',
+      () async {
+        // Arrange
+        when(
+          () => auth.signInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception('error'));
+
+        // Act
+        final result = dataSource.signInWithEmailPassword(
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        await expectLater(result, throwsA(isA<ServerException>()));
+      },
+    );
+
+    test(
+      'given a network error when signInWithEmailPassword is called then '
+      'throws NetworkException',
+      () async {
+        // Arrange
+        when(
+          () => auth.signInWithPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(const SocketException('No internet'));
+
+        // Act
+        final result = dataSource.signInWithEmailPassword(
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        await expectLater(result, throwsA(isA<NetworkException>()));
+      },
+    );
+  });
+
+  group('signUpWithEmailPassword', () {
+    test(
+      'given an authenticated user when signUpWithEmailPassword is called '
+      'then returns a UserModel',
+      () async {
+        // Arrange
+        final userJson = <String, dynamic>{
+          'id': '123',
+          'email': 'test@test.com',
+          'user_metadata': <String, dynamic>{'name': 'Test User'},
+        };
+        when(() => supabaseUser.toJson()).thenReturn(userJson);
+        when(
+          () => auth.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer((_) async => AuthResponse(user: supabaseUser));
+
+        // Act
+        final result = await dataSource.signUpWithEmailPassword(
+          name: 'Test User',
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        expect(
+          result,
+          isA<UserModel>()
+              .having((u) => u.id, 'id', '123')
+              .having((u) => u.name, 'name', 'Test User')
+              .having((u) => u.email, 'email', 'test@test.com'),
+        );
+      },
+    );
+
+    test(
+      'given no authenticated user when signUpWithEmailPassword is called '
+      'then throws ServerException',
       () async {
         // Arrange
         when(
@@ -161,20 +190,20 @@ void main() {
         ).thenAnswer((_) async => AuthResponse());
 
         // Act
-        final result = ds.signUpWithEmailPassword(
+        final result = dataSource.signUpWithEmailPassword(
+          name: 'Test User',
           email: 'test@test.com',
           password: 'password',
-          name: 'Test User',
         );
 
         // Assert
-        expect(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<ServerException>()));
       },
     );
 
     test(
-      'Given Supabase throws an exception when signing up with email and '
-      'password, then a ServerException is thrown',
+      'given an unexpected backend error when signUpWithEmailPassword is '
+      'called then throws ServerException',
       () async {
         // Arrange
         when(
@@ -183,72 +212,115 @@ void main() {
             password: any(named: 'password'),
             data: any(named: 'data'),
           ),
-        ).thenThrow(Exception('Supabase error'));
+        ).thenThrow(Exception('error'));
 
         // Act
-        final result = ds.signUpWithEmailPassword(
+        final result = dataSource.signUpWithEmailPassword(
+          name: 'Test User',
           email: 'test@test.com',
           password: 'password',
-          name: 'Test User',
         );
 
         // Assert
-        expect(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<ServerException>()));
+      },
+    );
+
+    test(
+      'given a network error when signUpWithEmailPassword is called then '
+      'throws NetworkException',
+      () async {
+        // Arrange
+        when(
+          () => auth.signUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(const SocketException('No internet'));
+
+        // Act
+        final result = dataSource.signUpWithEmailPassword(
+          name: 'Test User',
+          email: 'test@test.com',
+          password: 'password',
+        );
+
+        // Assert
+        await expectLater(result, throwsA(isA<NetworkException>()));
       },
     );
   });
 
   group('signOut', () {
     test(
-      'Given Supabase signs out When signing out Then it completes',
+      'given signOut succeeds when signOut is called then completes',
       () async {
         // Arrange
         when(() => auth.signOut()).thenAnswer((_) async {});
 
         // Act
-        await ds.signOut();
+        final result = dataSource.signOut();
 
         // Assert
-        verify(() => auth.signOut()).called(1);
+        await expectLater(result, completes);
       },
     );
 
     test(
-      'Given Supabase throws an exception when signing out, then a '
-      'ServerException is thrown',
+      'given an unexpected backend error when signOut is called then throws '
+      'ServerException',
       () async {
         // Arrange
-        when(() => auth.signOut()).thenThrow(Exception('Supabase error'));
+        when(() => auth.signOut()).thenThrow(Exception('error'));
 
         // Act
-        final result = ds.signOut();
+        final result = dataSource.signOut();
 
         // Assert
-        expect(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<ServerException>()));
+      },
+    );
+
+    test(
+      'given a network error when signOut is called then throws '
+      'NetworkException',
+      () async {
+        // Arrange
+        when(
+          () => auth.signOut(),
+        ).thenThrow(const SocketException('No internet'));
+
+        // Act
+        final result = dataSource.signOut();
+
+        // Assert
+        await expectLater(result, throwsA(isA<NetworkException>()));
       },
     );
   });
 
   group('authStateChanges', () {
     test(
-      'Given Supabase emits an auth state with a user when listening to auth '
-      'changes, then a UserModel is returned',
+      'given an authenticated session when authStateChanges is listened to '
+      'then emits a UserModel',
       () async {
-        final authState = MockAuthState();
         // Arrange
+        final authState = MockAuthState();
+        final session = MockSession();
         when(
           () => auth.onAuthStateChange,
         ).thenAnswer((_) => Stream.value(authState));
-
-        final session = MockSession();
         when(() => authState.session).thenReturn(session);
         when(() => session.user).thenReturn(supabaseUser);
-        when(
-          () => supabaseUser.toJson(),
-        ).thenReturn({'id': '123', 'email': 'test@test.com'});
+        when(() => supabaseUser.toJson()).thenReturn(<String, dynamic>{
+          'id': '123',
+          'email': 'test@test.com',
+          'user_metadata': <String, dynamic>{'name': 'Test User'},
+        });
 
         // Act
-        final stream = ds.authStateChanges();
+        final stream = dataSource.authStateChanges();
 
         // Assert
         await expectLater(
@@ -256,7 +328,7 @@ void main() {
           emitsInOrder([
             isA<UserModel>()
                 .having((u) => u.id, 'id', '123')
-                .having((u) => u.name, 'name', '')
+                .having((u) => u.name, 'name', 'Test User')
                 .having((u) => u.email, 'email', 'test@test.com'),
             emitsDone,
           ]),
@@ -265,19 +337,18 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session when listening '
-      'to auth changes, then null is returned',
+      'given a null session when authStateChanges is listened to then emits '
+      'null',
       () async {
-        final authState = MockAuthState();
         // Arrange
+        final authState = MockAuthState();
         when(
           () => auth.onAuthStateChange,
         ).thenAnswer((_) => Stream.value(authState));
-
         when(() => authState.session).thenReturn(null);
 
         // Act
-        final stream = ds.authStateChanges();
+        final stream = dataSource.authStateChanges();
 
         // Assert
         await expectLater(stream, emitsInOrder([isNull, emitsDone]));
@@ -285,22 +356,19 @@ void main() {
     );
 
     test(
-      'Given Supabase emits an auth state with a null session when listening '
-      'to auth changes, then null is returned',
+      'given an upstream stream error when authStateChanges is listened to '
+      'then forwards the error',
       () async {
-        final authState = MockAuthState();
         // Arrange
         when(
           () => auth.onAuthStateChange,
-        ).thenAnswer((_) => Stream.value(authState));
-
-        when(() => authState.session).thenReturn(null);
+        ).thenAnswer((_) => Stream.error(Exception('stream error')));
 
         // Act
-        final stream = ds.authStateChanges();
+        final stream = dataSource.authStateChanges();
 
         // Assert
-        await expectLater(stream, emitsInOrder([isNull, emitsDone]));
+        await expectLater(stream, emitsError(isA<Exception>()));
       },
     );
   });

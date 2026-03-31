@@ -118,6 +118,44 @@ void main() {
         ),
       ),
       expect: () => [AuthLoading(), const AuthSignedIn(testUser)],
+      verify: (_) {
+        verify(
+          () => userSignUp(
+            any(
+              that: isA<UserSignUpParams>()
+                  .having((p) => p.name, 'name', 'Test User')
+                  .having((p) => p.email, 'email', 'test@test.com')
+                  .having((p) => p.password, 'password', 'password'),
+            ),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'Given sign-up fails when adding AuthSignup, then '
+      '[Loading, Failure] is emitted',
+      build: () {
+        when(
+          () => userSignUp(any()),
+        ).thenAnswer(
+          (_) async => left(const ValidationFailure('Invalid data')),
+        );
+
+        return AuthBloc(
+          userSignIn: userSignIn,
+          userSignUp: userSignUp,
+          authRepository: authRepository,
+        );
+      },
+      act: (bloc) => bloc.add(
+        AuthSignup(
+          name: 'Test User',
+          email: 'test@test.com',
+          password: 'password',
+        ),
+      ),
+      expect: () => [AuthLoading(), const AuthFailure('Invalid data')],
     );
   });
 

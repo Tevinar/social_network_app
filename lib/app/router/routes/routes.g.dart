@@ -8,11 +8,11 @@ part of 'routes.dart';
 
 List<RouteBase> get $appRoutes => [
   $appShellRouteData,
+  $initialLoadingPageRoute,
   $signInPageRoute,
   $signUpPageRoute,
   $addNewBlogPageRoute,
   $blogViewerPageRoute,
-  $initialLoadingPageRoute,
   $newChatPageRoute,
   $chatMessagesPageRoute,
 ];
@@ -64,6 +64,32 @@ mixin $ChatsPageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/chats');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $initialLoadingPageRoute => GoRouteData.$route(
+  path: '/initial-loading',
+  factory: $InitialLoadingPageRoute._fromState,
+);
+
+mixin $InitialLoadingPageRoute on GoRouteData {
+  static InitialLoadingPageRoute _fromState(GoRouterState state) =>
+      const InitialLoadingPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/initial-loading');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -181,32 +207,6 @@ mixin $BlogViewerPageRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
-}
-
-RouteBase get $initialLoadingPageRoute => GoRouteData.$route(
-  path: '/initial-loading',
-  factory: $InitialLoadingPageRoute._fromState,
-);
-
-mixin $InitialLoadingPageRoute on GoRouteData {
-  static InitialLoadingPageRoute _fromState(GoRouterState state) =>
-      const InitialLoadingPageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/initial-loading');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $newChatPageRoute => GoRouteData.$route(

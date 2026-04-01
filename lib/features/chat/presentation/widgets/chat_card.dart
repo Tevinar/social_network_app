@@ -61,7 +61,7 @@ class ChatCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        chat.lastMessage.updatedAt.day == DateTime.now().day
+                        isSameDay(chat.lastMessage.updatedAt, DateTime.now())
                             ? formatToHour(chat.lastMessage.updatedAt)
                             : formatToDay(chat.lastMessage.updatedAt),
                       ),

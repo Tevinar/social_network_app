@@ -4,7 +4,8 @@ DateTime _dateOnly(DateTime dateTime) {
   return DateTime(dateTime.year, dateTime.month, dateTime.day);
 }
 
-bool _isSameDay(DateTime a, DateTime b) {
+/// Checks if two [DateTime] objects represent the same calendar day.
+bool isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
@@ -15,9 +16,9 @@ String formatToDay(DateTime dateTime) {
   final yesterday = _dateOnly(now.subtract(const Duration(days: 1)));
   final value = _dateOnly(dateTime);
 
-  if (_isSameDay(value, today)) {
+  if (isSameDay(value, today)) {
     return 'Today';
-  } else if (_isSameDay(value, yesterday)) {
+  } else if (isSameDay(value, yesterday)) {
     return 'Yesterday';
   }
   return DateFormat('d MMM, yyyy').format(dateTime);

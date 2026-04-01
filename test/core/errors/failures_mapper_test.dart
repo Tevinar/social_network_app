@@ -26,19 +26,19 @@ void main() {
       'given a ServerException with 401 when mapExceptionToFailure is called '
       'then returns UnauthorizedFailure',
       () {
-      // Arrange
-      const error = ServerException(message: 'Token expired', code: '401');
+        // Arrange
+        const error = ServerException(message: 'Token expired', code: '401');
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<UnauthorizedFailure>());
-      expect(
-        failure.message,
-        'Your session has expired. Please sign in again.',
-      );
-      expect(failure.debugMessage, 'Token expired');
+        // Assert
+        expect(failure, isA<UnauthorizedFailure>());
+        expect(
+          failure.message,
+          'Your session has expired. Please sign in again.',
+        );
+        expect(failure.debugMessage, 'Token expired');
       },
     );
 
@@ -46,11 +46,11 @@ void main() {
       'given a ServerException with 403 when mapExceptionToFailure is called '
       'then returns UnauthorizedFailure',
       () {
-      const error = ServerException(message: 'Forbidden', code: '403');
+        const error = ServerException(message: 'Forbidden', code: '403');
 
-      final failure = mapExceptionToFailure(error);
+        final failure = mapExceptionToFailure(error);
 
-      expect(failure, isA<UnauthorizedFailure>());
+        expect(failure, isA<UnauthorizedFailure>());
       },
     );
 
@@ -58,16 +58,19 @@ void main() {
       'given a ServerException with 404 when mapExceptionToFailure is called '
       'then returns NotFoundFailure',
       () {
-      // Arrange
-      const error = ServerException(message: 'Resource not found', code: '404');
+        // Arrange
+        const error = ServerException(
+          message: 'Resource not found',
+          code: '404',
+        );
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<NotFoundFailure>());
-      expect(failure.message, 'Requested resource not found.');
-      expect(failure.debugMessage, 'Resource not found');
+        // Assert
+        expect(failure, isA<NotFoundFailure>());
+        expect(failure.message, 'Requested resource not found.');
+        expect(failure.debugMessage, 'Resource not found');
       },
     );
 
@@ -75,22 +78,22 @@ void main() {
       'given a ServerException with 23505 when mapExceptionToFailure is '
       'called then returns ValidationFailure for duplicate values',
       () {
-      // Arrange
-      const error = ServerException(
-        message: 'duplicate key value violates unique constraint',
-        code: '23505',
-      );
+        // Arrange
+        const error = ServerException(
+          message: 'duplicate key value violates unique constraint',
+          code: '23505',
+        );
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<ValidationFailure>());
-      expect(failure.message, 'This value already exists.');
-      expect(
-        failure.debugMessage,
-        'duplicate key value violates unique constraint',
-      );
+        // Assert
+        expect(failure, isA<ValidationFailure>());
+        expect(failure.message, 'This value already exists.');
+        expect(
+          failure.debugMessage,
+          'duplicate key value violates unique constraint',
+        );
       },
     );
 
@@ -98,19 +101,19 @@ void main() {
       'given a ServerException with 23502 when mapExceptionToFailure is '
       'called then returns ValidationFailure for missing field',
       () {
-      // Arrange
-      const error = ServerException(
-        message: 'null value in column',
-        code: '23502',
-      );
+        // Arrange
+        const error = ServerException(
+          message: 'null value in column',
+          code: '23502',
+        );
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<ValidationFailure>());
-      expect(failure.message, 'Some required information is missing.');
-      expect(failure.debugMessage, 'null value in column');
+        // Assert
+        expect(failure, isA<ValidationFailure>());
+        expect(failure.message, 'Some required information is missing.');
+        expect(failure.debugMessage, 'null value in column');
       },
     );
 
@@ -118,19 +121,19 @@ void main() {
       'given a ServerException with an unknown code when '
       'mapExceptionToFailure is called then returns UnexpectedFailure',
       () {
-      // Arrange
-      const error = ServerException(
-        message: 'Weird backend error',
-        code: '99999',
-      );
+        // Arrange
+        const error = ServerException(
+          message: 'Weird backend error',
+          code: '99999',
+        );
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, 'Something went wrong. Please try again.');
-      expect(failure.debugMessage, 'Weird backend error');
+        // Assert
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, 'Something went wrong. Please try again.');
+        expect(failure.debugMessage, 'Weird backend error');
       },
     );
 
@@ -138,16 +141,16 @@ void main() {
       'given an unknown exception when mapExceptionToFailure is called then '
       'returns UnexpectedFailure',
       () {
-      // Arrange
-      final error = Exception('Some random exception');
+        // Arrange
+        final error = Exception('Some random exception');
 
-      // Act
-      final failure = mapExceptionToFailure(error);
+        // Act
+        final failure = mapExceptionToFailure(error);
 
-      // Assert
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, 'Something went wrong. Please try again.');
-      expect(failure.debugMessage, error.toString());
+        // Assert
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, 'Something went wrong. Please try again.');
+        expect(failure.debugMessage, error.toString());
       },
     );
   });

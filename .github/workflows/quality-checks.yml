@@ -1,0 +1,115 @@
+name: Quality Checks
+
+# Cancel the running run if there is one in progress, to launch instead the current one
+concurrency:
+  group: quality-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Run this workflow on every pull request
+on:
+  pull_request:
+
+# quality-checks job
+jobs:
+  # Run the main quality checks on Ubuntu
+  code-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Download the repository code into the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Flutter and make Flutter commands available in the next steps
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Show Flutter version and related information
+      - name: Show Flutter version
+        run: flutter --version
+
+      # Download and resolve project dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Run code generation to rebuild all generated files from the current source code
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # Fail if code generation produced uncommitted changes, meaning generated files were out of date
+      - name: Check generated files are up to date
+        run: git diff --exit-code
+
+      # Ensure dependency resolution does not modify the committed lockfile
+      - name: Check lockfile consistency
+        run: git diff --exit-code pubspec.lock
+
+      # Fail if files are not properly formatted
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      # Run Flutter static analysis
+      - name: Run static analysis
+        run: flutter analyze
+
+      # Run unit and widget tests
+      - name: Run tests
+        run: flutter test
+
+  # Verify that the project can successfully compile into an Android app
+  android-build:
+    needs: quality-checks
+    runs-on: ubuntu-latest
+
+    steps:
+      # Download the repository code into the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Flutter and make Flutter commands available in the next steps
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Show Flutter version and related information
+      - name: Show Flutter version
+        run: flutter --version
+
+      # Download and resolve project dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Verify that the project can successfully compile into an Android app
+      - name: Verify Android build
+        run: flutter build apk --debug
+
+  # Verify that the project can successfully compile into an iOS app
+  ios-build:
+    needs: quality-checks
+    runs-on: macos-latest
+
+    steps:
+      # Download the repository code into the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Flutter and make Flutter commands available in the next steps
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Show Flutter version and related information
+      - name: Show Flutter version
+        run: flutter --version
+
+      # Download and resolve project dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Verify that the project can successfully compile into an iOS app
+      - name: Verify iOS build
+        run: flutter build ios --no-codesign

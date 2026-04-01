@@ -11,20 +11,20 @@ void main() {
       'given a NetworkException when toString is called then returns a '
       'readable string representation',
       () {
-      // Arrange
-      const exception = NetworkException(
-        message: 'No internet connection',
-        code: '408',
-      );
+        // Arrange
+        const exception = NetworkException(
+          message: 'No internet connection',
+          code: '408',
+        );
 
-      // Act
-      final result = exception.toString();
+        // Act
+        final result = exception.toString();
 
-      // Assert
-      expect(
-        result,
-        'NetworkException: No internet connection (code: 408)',
-      );
+        // Assert
+        expect(
+          result,
+          'NetworkException: No internet connection (code: 408)',
+        );
       },
     );
   });
@@ -34,13 +34,13 @@ void main() {
       'given a successful call when guardRemoteDataSourceCall is invoked '
       'then returns the value',
       () async {
-      // Act
-      final result = await guardRemoteDataSourceCall(() async {
-        return 42;
-      });
+        // Act
+        final result = await guardRemoteDataSourceCall(() async {
+          return 42;
+        });
 
-      // Assert
-      expect(result, 42);
+        // Assert
+        expect(result, 42);
       },
     );
 
@@ -77,27 +77,27 @@ void main() {
       'given a SocketException when guardRemoteDataSourceCall is invoked '
       'then throws NetworkException',
       () async {
-      // Arrange
-      const exception = SocketException('No internet');
+        // Arrange
+        const exception = SocketException('No internet');
 
-      // Act
-      Future<void> act() async {
-        await guardRemoteDataSourceCall(() async {
-          throw exception;
-        });
-      }
+        // Act
+        Future<void> act() async {
+          await guardRemoteDataSourceCall(() async {
+            throw exception;
+          });
+        }
 
-      // Assert
-      await expectLater(
-        act,
-        throwsA(
-          isA<NetworkException>().having(
-            (e) => e.message,
-            'message',
-            'No internet',
+        // Assert
+        await expectLater(
+          act,
+          throwsA(
+            isA<NetworkException>().having(
+              (e) => e.message,
+              'message',
+              'No internet',
+            ),
           ),
-        ),
-      );
+        );
       },
     );
 
@@ -105,27 +105,27 @@ void main() {
       'given an unknown exception when guardRemoteDataSourceCall is invoked '
       'then throws ServerException',
       () async {
-      // Arrange
-      final exception = Exception('Something weird');
+        // Arrange
+        final exception = Exception('Something weird');
 
-      // Act
-      Future<void> act() async {
-        await guardRemoteDataSourceCall(() async {
-          throw exception;
-        });
-      }
+        // Act
+        Future<void> act() async {
+          await guardRemoteDataSourceCall(() async {
+            throw exception;
+          });
+        }
 
-      // Assert
-      await expectLater(
-        act,
-        throwsA(
-          isA<ServerException>().having(
-            (e) => e.message,
-            'message',
-            exception.toString(),
+        // Assert
+        await expectLater(
+          act,
+          throwsA(
+            isA<ServerException>().having(
+              (e) => e.message,
+              'message',
+              exception.toString(),
+            ),
           ),
-        ),
-      );
+        );
       },
     );
   });

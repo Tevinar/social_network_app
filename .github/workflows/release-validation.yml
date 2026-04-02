@@ -1,0 +1,80 @@
+name: Release Validation
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: release-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Fetch the repository code for the workflow run.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install the Flutter SDK on the runner.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Download Dart and Flutter package dependencies.
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Build the Android release bundle (.aab).
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      # Upload the generated .aab as a workflow artifact and keep it for 7 days.
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab
+          path: build/app/outputs/bundle/release/*.aab
+          retention-days: 7
+
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      # Fetch the repository code for the workflow run.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install the Flutter SDK on the runner.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      # Download Dart and Flutter package dependencies.
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Install CocoaPods dependencies for the iOS project.
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+
+      # Build the iOS release without code signing.
+      - name: Build iOS release
+        run: flutter build ipa --release --no-codesign
+
+      # Upload the generated iOS archive if an .ipa was produced and keep it for 7 days.
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-ipa
+          path: build/ios/ipa/**
+          retention-days: 7

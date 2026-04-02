@@ -19,13 +19,14 @@ jobs:
     steps:
       # Fetch the repository code for the workflow run.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Install the Flutter SDK on the runner.
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.41.6
 
       # Download Dart and Flutter package dependencies.
       - name: Install dependencies
@@ -35,27 +36,20 @@ jobs:
       - name: Build Android App Bundle
         run: flutter build appbundle --release
 
-      # Upload the generated .aab as a workflow artifact and keep it for 7 days.
-      - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-release-aab
-          path: build/app/outputs/bundle/release/*.aab
-          retention-days: 7
-
   build-ios:
     runs-on: macos-latest
 
     steps:
       # Fetch the repository code for the workflow run.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Install the Flutter SDK on the runner.
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.41.6
 
       # Download Dart and Flutter package dependencies.
       - name: Install dependencies
@@ -70,11 +64,3 @@ jobs:
       # Build the iOS release without code signing.
       - name: Build iOS release
         run: flutter build ipa --release --no-codesign
-
-      # Upload the generated iOS archive if an .ipa was produced and keep it for 7 days.
-      - name: Upload iOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-release-ipa
-          path: build/ios/ipa/**
-          retention-days: 7

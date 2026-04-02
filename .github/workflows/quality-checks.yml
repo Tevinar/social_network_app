@@ -18,17 +18,14 @@ jobs:
     steps:
       # Download the repository code into the runner
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-
-      # Show Flutter version and related information
-      - name: Show Flutter version
-        run: flutter --version
+          flutter-version: 3.41.6
 
       # Download and resolve project dependencies
       - name: Install dependencies
@@ -66,17 +63,14 @@ jobs:
     steps:
       # Download the repository code into the runner
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-
-      # Show Flutter version and related information
-      - name: Show Flutter version
-        run: flutter --version
+          flutter-version: 3.41.6
 
       # Download and resolve project dependencies
       - name: Install dependencies
@@ -94,17 +88,14 @@ jobs:
     steps:
       # Download the repository code into the runner
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-
-      # Show Flutter version and related information
-      - name: Show Flutter version
-        run: flutter --version
+          flutter-version: 3.41.6
 
       # Download and resolve project dependencies
       - name: Install dependencies

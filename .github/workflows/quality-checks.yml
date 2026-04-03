@@ -4,10 +4,21 @@ name: Quality Checks
 concurrency:
   group: quality-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+  
+# Grant the workflow read-only access to repository contents.
+permissions:
+  # Allow the workflow to read the source code and metadata from the repository.
+  contents: read
 
-# Run this workflow on every pull request
+# Run this workflow on pull requests and on pushes to the main branch.
 on:
+  # Trigger the workflow whenever a pull request event occurs.
   pull_request:
+  # Trigger the workflow whenever code is pushed to main.
+  push:
+    # Limit push-based execution to the main branch only.
+    branches:
+      - main
 
 # quality-checks job
 jobs:

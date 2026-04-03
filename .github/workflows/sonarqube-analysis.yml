@@ -60,7 +60,12 @@ jobs:
         # Run build_runner and overwrite conflicting generated outputs if necessary.
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # Verify that the Flutter project successfully compiles before running the SonarQube analysis.
+      # Run unit and widget tests with coverage enabled to generate the LCOV report used by SonarQube.
+      - name: Run tests with coverage
+        # Generate the coverage/lcov.info report expected by SonarQube Cloud.
+        run: flutter test --coverage
+      
+        # Verify that the Flutter project successfully compiles before running the SonarQube analysis.
       - name: Build project
         # Build a debug Android APK to ensure the project compiles correctly in CI.
         run: flutter build apk --debug

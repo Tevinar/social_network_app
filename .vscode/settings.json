@@ -1,6 +1,7 @@
 {
     "dart.runPubGetOnPubspecChanges": "always",
     "dart.coverageExcludePatterns": [
+    "**/lib/main.dart",
     "**/lib/app/bootstrap/**",
     "**/lib/app/logging/**",
     "**/lib/app/router/**",
@@ -10,6 +11,11 @@
     "**/lib/core/services/**",
     "**/lib/core/theme/**",
     "**/lib/core/usecases/**",
+    "**/lib/core/utils/stream_to_listenable.dart",
     "**/lib/core/widgets/**",
   ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "tevinar-sonarqube-cloud",
+    "projectKey": "Tevinar_social_app"
+  },
 }

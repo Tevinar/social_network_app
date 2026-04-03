@@ -1,0 +1,74 @@
+# Define the display name of the workflow in GitHub Actions.
+name: SonarQube Analysis
+
+# Run this workflow on pull requests and on pushes to the main branch.
+on:
+  # Trigger the workflow whenever a pull request event occurs.
+  pull_request:
+  # Trigger the workflow whenever code is pushed to main.
+  push:
+    # Limit push-based execution to the main branch only.
+    branches:
+      - main
+
+# Prevent multiple SonarQube runs for the same PR or ref from running in parallel.
+concurrency:
+  # Group runs by pull request number when available, otherwise by Git ref.
+  group: sonarqube-${{ github.event.pull_request.number || github.ref }}
+  # Cancel any in-progress run in the same group when a new one starts.
+  cancel-in-progress: true
+
+# Grant the workflow read-only access to repository contents.
+permissions:
+  # Allow the workflow to read the source code and metadata from the repository.
+  contents: read
+
+# Declare the jobs executed by this workflow.
+jobs:
+  # Define the job responsible for running the SonarQube analysis.
+  sonarqube:
+    # Set the display name of this job in the GitHub Actions UI.
+    name: SonarQube
+    # Run this job on a GitHub-hosted Ubuntu runner.
+    runs-on: ubuntu-latest
+
+    # Declare the ordered list of steps executed inside this job.
+    steps:
+      # Download the repository code into the runner so the workflow can access the project files.
+      - name: Checkout repository
+        # Use the official GitHub checkout action to clone the repository into the runner.
+        uses: actions/checkout@v5
+        with:
+          # Fetch the full Git history to improve SonarQube analysis relevance and PR comparison accuracy.
+          fetch-depth: 0
+
+      # Install Flutter on the runner and make Flutter commands available in the next steps.
+      - name: Set up Flutter
+        # Use the Flutter setup action to install the Flutter SDK in the CI environment.
+        uses: subosito/flutter-action@v2
+        with:
+          # Install Flutter from the stable release channel.
+          channel: stable
+
+      # Download and resolve the Dart and Flutter dependencies required by the project.
+      - name: Install dependencies
+        # Run flutter pub get to fetch the project dependencies on the runner.
+        run: flutter pub get
+
+      # Rebuild all generated files so SonarQube analyzes code generated from the current source state.
+      - name: Run code generation
+        # Run build_runner and overwrite conflicting generated outputs if necessary.
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # Verify that the Flutter project successfully compiles before running the SonarQube analysis.
+      - name: Build project
+        # Build a debug Android APK to ensure the project compiles correctly in CI.
+        run: flutter build apk --debug
+
+      # Launch the SonarQube Cloud scan for this repository and this commit/PR.
+      - name: Run SonarQube scan
+        # Use the official SonarQube scan action to send analysis data to SonarQube Cloud.
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          # Provide the authentication token stored in GitHub Actions secrets to authorize the scan.
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

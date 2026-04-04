@@ -76,16 +76,21 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       return const Expanded(child: SizedBox());
     }
 
-    return BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
-      builder: (context, chatMessagesState) {
-        return Flexible(
-          child: _buildChatMessagesList(chatEditorState, chatMessagesState),
-        );
-      },
+    return Expanded(
+      child: BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
+        builder: (context, chatMessagesState) {
+          return _buildChatMessagesList(
+            context,
+            chatEditorState,
+            chatMessagesState,
+          );
+        },
+      ),
     );
   }
 
   Widget _buildChatMessagesList(
+    BuildContext context,
     ChatEditorLoaded chatEditorState,
     ChatMessagesState chatMessagesState,
   ) {

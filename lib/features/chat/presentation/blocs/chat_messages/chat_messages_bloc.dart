@@ -154,80 +154,112 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     Emitter<ChatMessagesState> emit,
   ) {
     event.chatMessageChange.fold(
-      (failure) {
-        emit(
-          ChatMessagesFailure(
-            chatId: state.chatId,
-            error: failure.message,
-            chatMessages: state.chatMessages,
-            pageNumber: state.pageNumber,
-            totalChatMessagesInDatabase: state.totalChatMessagesInDatabase,
-          ),
-        );
-      },
-      (chatMessageChange) {
-        final changedChatId = switch (chatMessageChange) {
-          ChatMessageInserted() => chatMessageChange.chatId,
-          ChatMessageUpdated() => chatMessageChange.chatId,
-          ChatMessageDeleted() => chatMessageChange.chatId,
-        };
+      (failure) => _emitChatChangeFailure(failure, emit),
+      (chatMessageChange) => _applyChatMessageChange(chatMessageChange, emit),
+    );
+  }
 
-        // Ignore changes for other chats - they will be handled
-        // by their respective BLoCs
-        if (changedChatId != state.chatId) {
-          return;
-        }
+  void _emitChatChangeFailure(
+    Failure failure,
+    Emitter<ChatMessagesState> emit,
+  ) {
+    emit(
+      ChatMessagesFailure(
+        chatId: state.chatId,
+        error: failure.message,
+        chatMessages: state.chatMessages,
+        pageNumber: state.pageNumber,
+        totalChatMessagesInDatabase: state.totalChatMessagesInDatabase,
+      ),
+    );
+  }
 
-        if (chatMessageChange is ChatMessageInserted) {
-          final messageAlreadyExists = state.chatMessages.any(
-            (chatMessage) => chatMessage.id == chatMessageChange.chatMessage.id,
-          );
+  void _applyChatMessageChange(
+    ChatMessageChange chatMessageChange,
+    Emitter<ChatMessagesState> emit,
+  ) {
+    // Ignore changes for other chats - they will be handled
+    // by their respective BLoCs
+    if (_chatIdOfChange(chatMessageChange) != state.chatId) {
+      return;
+    }
 
-          emit(
-            state.copyWith(
-              chatMessages: messageAlreadyExists
-                  ? state.chatMessages
-                  : [
-                      chatMessageChange.chatMessage,
-                      ...state.chatMessages,
-                    ],
-              totalChatMessagesInDatabase: messageAlreadyExists
-                  ? state.totalChatMessagesInDatabase
-                  : (state.totalChatMessagesInDatabase ?? 0) + 1,
-            ),
-          );
-        }
+    switch (chatMessageChange) {
+      case ChatMessageInserted():
+        _handleInsertedChatMessage(chatMessageChange, emit);
 
-        if (chatMessageChange is ChatMessageUpdated) {
-          emit(
-            state.copyWith(
-              chatMessages: state.chatMessages
-                  .map(
-                    (chatMessage) =>
-                        chatMessage.id == chatMessageChange.chatMessage.id
-                        ? chatMessageChange.chatMessage
-                        : chatMessage,
-                  )
-                  .toList(),
-            ),
-          );
-        }
+      case ChatMessageUpdated():
+        _handleUpdatedChatMessage(chatMessageChange, emit);
 
-        if (chatMessageChange is ChatMessageDeleted) {
-          emit(
-            state.copyWith(
-              chatMessages: state.chatMessages
-                  .where(
-                    (chatMessage) =>
-                        chatMessage.id != chatMessageChange.chatMessageId,
-                  )
-                  .toList(),
-              totalChatMessagesInDatabase:
-                  (state.totalChatMessagesInDatabase ?? 1) - 1,
-            ),
-          );
-        }
-      },
+      case ChatMessageDeleted():
+        _handleDeletedChatMessage(chatMessageChange, emit);
+    }
+  }
+
+  String _chatIdOfChange(ChatMessageChange chatMessageChange) {
+    return switch (chatMessageChange) {
+      ChatMessageInserted(:final chatId) => chatId,
+      ChatMessageUpdated(:final chatId) => chatId,
+      ChatMessageDeleted(:final chatId) => chatId,
+    };
+  }
+
+  void _handleInsertedChatMessage(
+    ChatMessageInserted chatMessageChange,
+    Emitter<ChatMessagesState> emit,
+  ) {
+    final messageAlreadyExists = state.chatMessages.any(
+      (chatMessage) => chatMessage.id == chatMessageChange.chatMessage.id,
+    );
+
+    emit(
+      state.copyWith(
+        chatMessages: messageAlreadyExists
+            ? state.chatMessages
+            : [
+                chatMessageChange.chatMessage,
+                ...state.chatMessages,
+              ],
+        totalChatMessagesInDatabase: messageAlreadyExists
+            ? state.totalChatMessagesInDatabase
+            : (state.totalChatMessagesInDatabase ?? 0) + 1,
+      ),
+    );
+  }
+
+  void _handleUpdatedChatMessage(
+    ChatMessageUpdated chatMessageChange,
+    Emitter<ChatMessagesState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        chatMessages: state.chatMessages
+            .map(
+              (chatMessage) =>
+                  chatMessage.id == chatMessageChange.chatMessage.id
+                  ? chatMessageChange.chatMessage
+                  : chatMessage,
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  void _handleDeletedChatMessage(
+    ChatMessageDeleted chatMessageChange,
+    Emitter<ChatMessagesState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        chatMessages: state.chatMessages
+            .where(
+              (chatMessage) =>
+                  chatMessage.id != chatMessageChange.chatMessageId,
+            )
+            .toList(),
+        totalChatMessagesInDatabase:
+            (state.totalChatMessagesInDatabase ?? 1) - 1,
+      ),
     );
   }
 

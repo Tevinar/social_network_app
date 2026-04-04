@@ -37,7 +37,201 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     super.dispose();
   }
 
-  void loadInitialChatMessagesPage(
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: _createChatMessagesBloc,
+      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
+        listener: _loadInitialChatMessagesPage,
+        builder: _buildPage,
+      ),
+    );
+  }
+
+  Widget _buildPage(BuildContext context, ChatEditorState chatEditorState) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_chatTitle(chatEditorState)),
+      ),
+      body: Column(
+        children: [
+          _buildMessagesSection(chatEditorState),
+          BlocBuilder<ChatEditorBloc, ChatEditorState>(
+            builder: _buildComposer,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _chatTitle(ChatEditorState chatEditorState) {
+    return chatEditorState.chatMembers
+        .where((member) => member.id != _currentUser.id)
+        .map((member) => member.name)
+        .join(', ');
+  }
+
+  Widget _buildMessagesSection(ChatEditorState chatEditorState) {
+    if (chatEditorState is! ChatEditorLoaded) {
+      return const Expanded(child: SizedBox());
+    }
+
+    return BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
+      builder: (context, chatMessagesState) {
+        return Flexible(
+          child: _buildChatMessagesList(chatEditorState, chatMessagesState),
+        );
+      },
+    );
+  }
+
+  Widget _buildChatMessagesList(
+    ChatEditorLoaded chatEditorState,
+    ChatMessagesState chatMessagesState,
+  ) {
+    return ListView.builder(
+      reverse: true,
+      controller: context.read<ChatMessagesBloc>().scrollController,
+      itemCount: _messageItemCount(chatMessagesState),
+      itemBuilder: (context, index) {
+        return _buildChatMessageListItem(
+          chatEditorState,
+          chatMessagesState,
+          index,
+        );
+      },
+    );
+  }
+
+  Widget _buildChatMessageListItem(
+    ChatEditorLoaded chatEditorState,
+    ChatMessagesState chatMessagesState,
+    int index,
+  ) {
+    if (index == chatMessagesState.chatMessages.length) {
+      return const Loader(size: 30);
+    }
+
+    final currentChatMessage = chatMessagesState.chatMessages[index];
+
+    return Column(
+      children: [
+        if (_shouldShowDateSeparator(chatMessagesState, index))
+          _buildDateSeparator(currentChatMessage.createdAt),
+        ChatMessageCard(
+          chatMessage: currentChatMessage,
+          authorName: _authorName(chatEditorState, currentChatMessage.authorId),
+          isMe: currentChatMessage.authorId == _currentUser.id,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSeparator(DateTime date) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Text(
+        formatToDay(date),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  int _messageItemCount(ChatMessagesState chatMessagesState) {
+    return chatMessagesState.chatMessages.length ==
+            chatMessagesState.totalChatMessagesInDatabase
+        ? chatMessagesState.chatMessages.length
+        : chatMessagesState.chatMessages.length + 1;
+  }
+
+  String _authorName(ChatEditorLoaded chatEditorState, String authorId) {
+    return chatEditorState.chatMembers
+        .firstWhere((member) => member.id == authorId)
+        .name;
+  }
+
+  bool _shouldShowDateSeparator(
+    ChatMessagesState chatMessagesState,
+    int index,
+  ) {
+    if (index == chatMessagesState.chatMessages.length - 1) {
+      return true;
+    }
+
+    final currentChatMessage = chatMessagesState.chatMessages[index];
+    final nextChatMessage = chatMessagesState.chatMessages[index + 1];
+
+    return !_isSameDay(currentChatMessage.createdAt, nextChatMessage.createdAt);
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Widget _buildComposer(BuildContext context, ChatEditorState state) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          spacing: 5,
+          children: [
+            Expanded(
+              child: TextField(
+                minLines: 1,
+                maxLines: 6,
+                textInputAction: TextInputAction.newline,
+                controller: _messageController,
+                decoration: InputDecoration(
+                  hintText: 'Type your message...',
+                  filled: true,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+              ),
+            ),
+            _buildSendButton(context, state),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSendButton(BuildContext context, ChatEditorState state) {
+    return IconButton.filled(
+      style: const ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(
+          AppPallete.gradient1,
+        ),
+      ),
+      onPressed: () => _sendMessage(context, state),
+      icon: state is ChatEditorLoading
+          ? const Loader()
+          : const Icon(
+              Icons.send,
+              color: AppPallete.whiteColor,
+            ),
+    );
+  }
+
+  ChatMessagesBloc _createChatMessagesBloc(BuildContext context) {
+    final chatEditorState = context.read<ChatEditorBloc>().state;
+
+    if (chatEditorState is! ChatEditorLoaded) {
+      return serviceLocator<ChatMessagesBloc>();
+    }
+
+    return serviceLocator<ChatMessagesBloc>()
+      ..add(LoadInitialChatMessagesPage(chatEditorState.chatId));
+  }
+
+  void _loadInitialChatMessagesPage(
     BuildContext context,
     ChatEditorState state,
   ) {
@@ -50,183 +244,38 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
 
   void _sendMessage(BuildContext context, ChatEditorState state) {
     final messageText = _messageController.text.trim();
-    if (state is ChatEditorLoaded) {
-      context.read<ChatMessagesBloc>().add(
-        AddChatMessage(state.chatId, messageText),
-      );
-      _messageController.clear();
-    } else if (state is ChatEditorWaitingForFirstMessage) {
-      final messageText = _messageController.text.trim();
-      if (messageText.isNotEmpty) {
-        // Dispatch an event to send the message
-        context.read<ChatEditorBloc>().add(
-          AddChatFirstMessage(firstMessageContent: messageText),
-        );
-        _messageController.clear();
-      }
+
+    if (messageText.isEmpty) {
+      return;
+    }
+
+    switch (state) {
+      case ChatEditorLoaded():
+        _sendLoadedChatMessage(context, state.chatId, messageText);
+
+      case ChatEditorWaitingForFirstMessage():
+        _sendFirstChatMessage(context, messageText);
+
+      default:
+        break;
     }
   }
 
-  bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+  void _sendLoadedChatMessage(
+    BuildContext context,
+    String chatId,
+    String messageText,
+  ) {
+    context.read<ChatMessagesBloc>().add(
+      AddChatMessage(chatId, messageText),
+    );
+    _messageController.clear();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final chatEditorState = context.read<ChatEditorBloc>().state;
-
-        if (chatEditorState is! ChatEditorLoaded) {
-          return serviceLocator<ChatMessagesBloc>();
-        } else {
-          return serviceLocator<ChatMessagesBloc>()
-            ..add(LoadInitialChatMessagesPage(chatEditorState.chatId));
-        }
-      },
-
-      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
-        listener: loadInitialChatMessagesPage,
-        builder: (context, chatEditorState) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                chatEditorState.chatMembers
-                    .where((member) => member.id != _currentUser.id)
-                    .map((member) => member.name)
-                    .join(', '),
-              ),
-            ),
-            body: Column(
-              children: [
-                if (chatEditorState is ChatEditorLoaded)
-                  BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
-                    builder: (context, chatMessagesState) {
-                      return Flexible(
-                        child: ListView.builder(
-                          reverse: true,
-                          controller: context
-                              .read<ChatMessagesBloc>()
-                              .scrollController,
-                          itemCount:
-                              chatMessagesState.chatMessages.length ==
-                                  chatMessagesState.totalChatMessagesInDatabase
-                              ? chatMessagesState.chatMessages.length
-                              : chatMessagesState.chatMessages.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index ==
-                                chatMessagesState.chatMessages.length) {
-                              return const Loader(size: 30);
-                            } else {
-                              final authorName = chatEditorState.chatMembers
-                                  .firstWhere(
-                                    (member) =>
-                                        member.id ==
-                                        chatMessagesState
-                                            .chatMessages[index]
-                                            .authorId,
-                                  )
-                                  .name;
-                              final currentChatMessage =
-                                  chatMessagesState.chatMessages[index];
-                              final showDateSeparator =
-                                  index ==
-                                      chatMessagesState.chatMessages.length -
-                                          1 ||
-                                  !isSameDay(
-                                    currentChatMessage.createdAt,
-                                    chatMessagesState
-                                        .chatMessages[index + 1]
-                                        .createdAt,
-                                  );
-                              return Column(
-                                children: [
-                                  if (showDateSeparator)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                      child: Text(
-                                        formatToDay(
-                                          currentChatMessage.createdAt,
-                                        ),
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ChatMessageCard(
-                                    chatMessage: currentChatMessage,
-                                    authorName: authorName,
-                                    isMe:
-                                        currentChatMessage.authorId ==
-                                        _currentUser.id,
-                                  ),
-                                ],
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  )
-                else
-                  const Expanded(child: SizedBox()),
-                BlocBuilder<ChatEditorBloc, ChatEditorState>(
-                  builder: (context, state) {
-                    return SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          spacing: 5,
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                minLines: 1,
-                                maxLines: 6,
-                                textInputAction: TextInputAction.newline,
-                                controller: _messageController,
-                                decoration: InputDecoration(
-                                  hintText: 'Type your message...',
-                                  filled: true,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            IconButton.filled(
-                              style: const ButtonStyle(
-                                backgroundColor: WidgetStatePropertyAll(
-                                  AppPallete.gradient1,
-                                ),
-                              ),
-                              onPressed: () =>
-                                  _messageController.value.text.isEmpty
-                                  ? {}
-                                  : _sendMessage(context, state),
-                              icon: state is ChatEditorLoading
-                                  ? const Loader()
-                                  : const Icon(
-                                      Icons.send,
-                                      color: AppPallete.whiteColor,
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+  void _sendFirstChatMessage(BuildContext context, String messageText) {
+    context.read<ChatEditorBloc>().add(
+      AddChatFirstMessage(firstMessageContent: messageText),
     );
+    _messageController.clear();
   }
 }

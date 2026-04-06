@@ -1,20 +1,26 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
 
+class MockAppUserCubit extends MockCubit<AppUserState>
+    implements AppUserCubit {}
+
 class MockBlogsBloc extends MockBloc<BlogsEvent, BlogsState>
     implements BlogsBloc {}
 
 void main() {
+  late MockAppUserCubit appUserCubit;
   late MockBlogsBloc blogsBloc;
   late ScrollController scrollController;
 
@@ -35,11 +41,13 @@ void main() {
 
   setUp(() async {
     await GetIt.I.reset();
+    appUserCubit = MockAppUserCubit();
     blogsBloc = MockBlogsBloc();
     scrollController = ScrollController();
 
     serviceLocator.registerFactory<BlogsBloc>(() => blogsBloc);
 
+    when(() => appUserCubit.signOut()).thenAnswer((_) async {});
     when(() => blogsBloc.scrollController).thenReturn(scrollController);
     when(() => blogsBloc.scrollToTop()).thenAnswer((_) async {});
     when(() => blogsBloc.close()).thenAnswer((_) async {});
@@ -52,18 +60,39 @@ void main() {
 
   Widget buildTestableWidget({
     required BlogsState blogsState,
+    AppUserState? appUserState,
   }) {
+    final resolvedAppUserState = appUserState ?? AppUserSignedOut();
+
+    when(() => appUserCubit.state).thenReturn(resolvedAppUserState);
+    whenListen(
+      appUserCubit,
+      Stream.value(resolvedAppUserState),
+      initialState: resolvedAppUserState,
+    );
     when(() => blogsBloc.state).thenReturn(blogsState);
     whenListen(blogsBloc, Stream.value(blogsState), initialState: blogsState);
 
-    return const MaterialApp(
-      home: BlogsPage(),
+    return MaterialApp(
+      home: BlocProvider<AppUserCubit>.value(
+        value: appUserCubit,
+        child: const BlogsPage(),
+      ),
     );
   }
 
   Widget buildRoutableWidget({
     required BlogsState blogsState,
+    AppUserState? appUserState,
   }) {
+    final resolvedAppUserState = appUserState ?? AppUserSignedOut();
+
+    when(() => appUserCubit.state).thenReturn(resolvedAppUserState);
+    whenListen(
+      appUserCubit,
+      Stream.value(resolvedAppUserState),
+      initialState: resolvedAppUserState,
+    );
     when(() => blogsBloc.state).thenReturn(blogsState);
     whenListen(blogsBloc, Stream.value(blogsState), initialState: blogsState);
 
@@ -72,7 +101,10 @@ void main() {
       routes: [
         GoRoute(
           path: '/blogs',
-          builder: (context, state) => const BlogsPage(),
+          builder: (context, state) => BlocProvider<AppUserCubit>.value(
+            value: appUserCubit,
+            child: const BlogsPage(),
+          ),
         ),
         GoRoute(
           path: '/add-new-blog',

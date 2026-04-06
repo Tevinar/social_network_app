@@ -25,6 +25,12 @@ class BlogsPage extends StatelessWidget {
         builder: (innerContext) {
           return Scaffold(
             appBar: AppBar(
+              leading: BlocConsumer<AppUserCubit, AppUserState>(
+                listener: (_, state) =>
+                    _onAppUserStateChanged(innerContext, state),
+                builder: (_, state) => _buildAppUserAction(innerContext, state),
+              ),
+              title: const Text('Blogs'),
               actions: [
                 IconButton(
                   onPressed: () => _openAddBlogPage(innerContext),
@@ -33,7 +39,7 @@ class BlogsPage extends StatelessWidget {
               ],
             ),
             body: BlocBuilder<BlogsBloc, BlogsState>(
-              builder: _buildBody,
+              builder: (_, state) => _buildBody(innerContext, state),
             ),
           );
         },

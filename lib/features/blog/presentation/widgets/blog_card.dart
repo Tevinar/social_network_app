@@ -18,7 +18,7 @@ class BlogCard extends StatelessWidget {
   /// The build.
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => BlogViewerPageRoute($extra: blog).push<void>(context),
+      onTap: () => BlogViewerPageRoute(blogId: blog.id).push<void>(context),
       child: Container(
         height: 200,
         margin: const EdgeInsets.all(16).copyWith(bottom: 0),

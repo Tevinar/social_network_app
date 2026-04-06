@@ -260,6 +260,50 @@ void main() {
     );
   });
 
+  group('getBlogById', () {
+    test(
+      'given remote succeeds when getBlogById is invoked then returns '
+      'Right<Blog>',
+      () async {
+        when(
+          () => remote.getBlogById(blogModel.id),
+        ).thenAnswer((_) async => blogModel);
+
+        final result = await repository.getBlogById(blogModel.id);
+
+        expect(result, isA<Right<Failure, dynamic>>());
+        result.fold(
+          (_) => fail('Expected success'),
+          (blog) {
+            expect(blog.id, blogModel.id);
+            expect(blog.title, blogModel.title);
+          },
+        );
+      },
+    );
+
+    test(
+      'given an unexpected exception when getBlogById is invoked then '
+      'returns Left and logs the error',
+      () async {
+        when(
+          () => remote.getBlogById(blogModel.id),
+        ).thenThrow(const ServerException(message: 'boom'));
+
+        final result = await repository.getBlogById(blogModel.id);
+
+        expect(result, isA<Left<Failure, dynamic>>());
+        verify(
+          () => logger.error(
+            'Unexpected error in BlogRepositoryImpl.getBlogById',
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
+      },
+    );
+  });
+
   group('watchBlogChanges', () {
     test(
       'given remote emits blog changes when watchBlogChanges is listened to '

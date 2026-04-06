@@ -108,6 +108,9 @@ void _initBlog() {
         getBlogsCount: serviceLocator(),
         repository: serviceLocator(),
       ),
+    )
+    ..registerCachedFactory(
+      () => BlogViewerBloc(blogRepository: serviceLocator()),
     );
 }
 

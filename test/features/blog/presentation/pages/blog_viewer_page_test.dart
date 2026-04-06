@@ -1,11 +1,21 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
+import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
 
 class _TestImageProvider extends ImageProvider<_TestImageProvider> {
@@ -38,7 +48,15 @@ class _TestImageProvider extends ImageProvider<_TestImageProvider> {
   }
 }
 
+class MockBlogsBloc extends MockBloc<BlogsEvent, BlogsState>
+    implements BlogsBloc {}
+
+class MockBlogRepository extends Mock implements BlogRepository {}
+
 void main() {
+  late MockBlogsBloc blogsBloc;
+  late MockBlogRepository blogRepository;
+
   final blog = Blog(
     id: 'blog-1',
     posterId: 'user-1',
@@ -50,36 +68,130 @@ void main() {
     posterName: 'Alice',
   );
 
+  setUp(() async {
+    await GetIt.I.reset();
+    blogsBloc = MockBlogsBloc();
+    blogRepository = MockBlogRepository();
+    serviceLocator.registerFactory<BlogViewerBloc>(
+      () => BlogViewerBloc(blogRepository: blogRepository),
+    );
+  });
+
+  tearDown(() async {
+    await GetIt.I.reset();
+  });
+
+  Widget buildTestableWidget({
+    required BlogsState blogsState,
+    required Widget child,
+  }) {
+    when(() => blogsBloc.state).thenReturn(blogsState);
+
+    return BlocProvider<BlogsBloc>.value(
+      value: blogsBloc,
+      child: MaterialApp(home: child),
+    );
+  }
+
   testWidgets(
-    'given a blog when BlogViewerPage is rendered then it shows a loader '
-    'before the content',
+    'given a matching blog in BlogsBloc when BlogViewerPage is rendered then '
+    'it shows a loader before the content',
     (tester) async {
-      // Act
+      final precacheCompleter = Completer<void>();
+
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SizedBox.shrink(),
+        buildTestableWidget(
+          blogsState: BlogsSuccess(
+            blogs: [blog],
+            pageNumber: 1,
+            totalBlogsInDatabase: 1,
+          ),
+          child: BlogViewerPage(
+            blogId: blog.id,
+            imageProvider: const _TestImageProvider(),
+            precacheImageCallback: (context, imageProvider) =>
+                precacheCompleter.future,
+          ),
         ),
       );
+
+      await tester.pump();
+
+      expect(find.byType(Loader), findsOneWidget);
+
+      precacheCompleter.complete();
+      await tester.pump();
+
+      expect(find.text('Title'), findsOneWidget);
+      expect(find.text('By Alice'), findsOneWidget);
+      expect(find.text(blog.content), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'given no matching cached blog when BlogViewerPage is rendered then it '
+    'fetches the blog by id and shows the content',
+    (tester) async {
+      final request = Completer<Either<Failure, Blog>>();
+
+      when(
+        () => blogRepository.getBlogById(blog.id),
+      ).thenAnswer((_) => request.future);
+
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlogViewerPage(
-            blog: blog,
+        buildTestableWidget(
+          blogsState: const BlogsSuccess(
+            blogs: [],
+            pageNumber: 1,
+            totalBlogsInDatabase: 0,
+          ),
+          child: BlogViewerPage(
+            blogId: blog.id,
             imageProvider: const _TestImageProvider(),
             precacheImageCallback: (context, imageProvider) async {},
           ),
         ),
       );
 
-      // Assert
-      expect(find.byType(Loader), findsOneWidget);
-
-      // Act
       await tester.pump();
 
-      // Assert
+      expect(find.byType(Loader), findsOneWidget);
+
+      request.complete(right(blog));
+      await tester.pump();
+      await tester.pump();
+
+      verify(() => blogRepository.getBlogById(blog.id)).called(1);
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('By Alice'), findsOneWidget);
-      expect(find.text(blog.content), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'given the blog fetch fails when BlogViewerPage is rendered then it '
+    'shows the failure message',
+    (tester) async {
+      when(() => blogRepository.getBlogById(blog.id)).thenAnswer(
+        (_) async => left(const ValidationFailure('Blog fetch failed')),
+      );
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          blogsState: const BlogsSuccess(
+            blogs: [],
+            pageNumber: 1,
+            totalBlogsInDatabase: 0,
+          ),
+          child: const BlogViewerPage(
+            blogId: 'blog-1',
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Blog fetch failed'), findsOneWidget);
     },
   );
 
@@ -88,14 +200,20 @@ void main() {
     'uses the default precacheImage future',
     (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlogViewerPage(
-            blog: blog,
+        buildTestableWidget(
+          blogsState: BlogsSuccess(
+            blogs: [blog],
+            pageNumber: 1,
+            totalBlogsInDatabase: 1,
+          ),
+          child: BlogViewerPage(
+            blogId: blog.id,
             imageProvider: const _TestImageProvider(),
           ),
         ),
       );
 
+      await tester.pump();
       expect(find.byType(Loader), findsOneWidget);
     },
   );
@@ -104,27 +222,35 @@ void main() {
     'given a previous route when the back button is tapped then '
     'BlogViewerPage pops',
     (tester) async {
-      // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => BlogViewerPage(
-                      blog: blog,
-                      imageProvider: const _TestImageProvider(),
-                      precacheImageCallback: (context, imageProvider) async {},
+        buildTestableWidget(
+          blogsState: BlogsSuccess(
+            blogs: [blog],
+            pageNumber: 1,
+            totalBlogsInDatabase: 1,
+          ),
+          child: Builder(
+            builder: (context) {
+              return Scaffold(
+                body: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => BlogViewerPage(
+                        blogId: blog.id,
+                        imageProvider: const _TestImageProvider(),
+                        precacheImageCallback:
+                            (context, imageProvider) async {},
+                      ),
                     ),
                   ),
+                  child: const Text('Open'),
                 ),
-                child: const Text('Open'),
-              ),
-            ),
+              );
+            },
           ),
         ),
       );
+
       await tester.tap(find.text('Open'));
       await tester.pump();
       await tester.pump();
@@ -132,7 +258,6 @@ void main() {
       await tester.tap(find.byIcon(Icons.arrow_back_ios));
       await tester.pumpAndSettle();
 
-      // Assert
       expect(find.byType(BlogViewerPage), findsNothing);
     },
   );

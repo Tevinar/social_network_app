@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
@@ -18,22 +19,24 @@ class BlogsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: BlocConsumer<AppUserCubit, AppUserState>(
-          builder: _buildAppUserAction,
-          listener: _onAppUserStateChanged,
-        ),
-        title: const Text('Blogs'),
-        actions: [
-          IconButton(
-            onPressed: () => _openAddBlogPage(context),
-            icon: const Icon(Icons.add_circle_outline),
-          ),
-        ],
-      ),
-      body: BlocBuilder<BlogsBloc, BlogsState>(
-        builder: _buildBody,
+    return BlocProvider(
+      create: (_) => serviceLocator<BlogsBloc>(),
+      child: Builder(
+        builder: (innerContext) {
+          return Scaffold(
+            appBar: AppBar(
+              actions: [
+                IconButton(
+                  onPressed: () => _openAddBlogPage(innerContext),
+                  icon: const Icon(Icons.add_circle_outline),
+                ),
+              ],
+            ),
+            body: BlocBuilder<BlogsBloc, BlogsState>(
+              builder: _buildBody,
+            ),
+          );
+        },
       ),
     );
   }

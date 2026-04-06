@@ -1,21 +1,31 @@
 part of 'blog_viewer_bloc.dart';
 
+/// The states of the [BlogViewerBloc].
 sealed class BlogViewerState {
   const BlogViewerState();
 }
 
+/// The initial state of the [BlogViewerBloc] before any action is taken.
 final class BlogViewerInitial extends BlogViewerState {}
 
+/// The loading state of the [BlogViewerBloc] while a blog is being fetched.
 final class BlogViewerLoading extends BlogViewerState {}
 
+/// The success state of the [BlogViewerBloc] when a blog is successfully
+/// loaded.
 final class BlogViewerSuccess extends BlogViewerState {
-  final Blog blog;
-
+  /// Creates a [BlogViewerSuccess] state with the loaded [blog].
   BlogViewerSuccess({required this.blog});
+
+  /// The loaded blog that can be displayed in the UI.
+  final Blog blog;
 }
 
+/// The failure state of the [BlogViewerBloc] when an error occurs.
 final class BlogViewerFailure extends BlogViewerState {
-  final String error;
-
+  /// Creates a [BlogViewerFailure] state with the given error message.
   BlogViewerFailure({required this.error});
+
+  /// The error message describing the failure.
+  final String error;
 }

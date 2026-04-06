@@ -24,6 +24,7 @@ import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_remote_data_source.dart';

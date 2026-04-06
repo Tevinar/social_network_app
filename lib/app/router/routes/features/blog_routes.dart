@@ -15,12 +15,13 @@ class AddNewBlogPageRoute extends GoRouteData with $AddNewBlogPageRoute {
 /// A route for blog viewer page.
 class BlogViewerPageRoute extends GoRouteData with $BlogViewerPageRoute {
   /// Creates a [BlogViewerPageRoute].
-  const BlogViewerPageRoute({required this.$extra});
+  const BlogViewerPageRoute({required this.blogId});
 
   /// The extra.
-  final Blog $extra;
+  final String blogId;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      BlogViewerPage(blog: $extra);
+  Widget build(BuildContext context, GoRouterState state) => BlogViewerPage(
+    blogId: blogId,
+  );
 }

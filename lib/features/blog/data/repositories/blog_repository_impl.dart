@@ -133,4 +133,24 @@ class BlogRepositoryImpl implements BlogRepository {
       yield left(mapExceptionToFailure(error));
     }
   }
+
+  @override
+  Future<Either<Failure, Blog>> getBlogById(String blogId) async {
+    try {
+      final blog = await blogRemoteDataSource.getBlogById(blogId);
+      return right(blog.toEntity());
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.getBlogById',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      return left(failure);
+    }
+  }
 }

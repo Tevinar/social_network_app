@@ -28,4 +28,7 @@ abstract interface class BlogRepository {
   /// so it is exposed directly from the repository instead of via a use case.
   /// Pagination and other command-based operations remain handled by use cases.
   Stream<Either<Failure, BlogChange>> watchBlogChanges();
+
+  /// Gets a blog by its ID.
+  Future<Either<Failure, Blog>> getBlogById(String blogId);
 }

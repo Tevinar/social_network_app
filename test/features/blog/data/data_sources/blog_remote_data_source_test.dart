@@ -202,6 +202,45 @@ void main() {
     );
   });
 
+  group('getBlogById', () {
+    test(
+      'given a blog id when getBlogById is called then it filters by id and '
+      'returns the mapped blog',
+      () async {
+        // Act
+        final result = await dataSource.getBlogById('blog-1');
+
+        // Assert
+        expect(
+          queryBuilder.selectedColumns,
+          '*, ${Tables.profiles} (${ProfileFields.name})',
+        );
+        expect(listBuilder.eqColumn, BlogFields.id);
+        expect(listBuilder.eqValue, 'blog-1');
+        expect(result.id, 'blog-1');
+        expect(result.title, 'Title');
+        expect(result.posterName, 'Alice');
+      },
+    );
+
+    test(
+      'given a network error when getBlogById is called then throws '
+      'NetworkException',
+      () async {
+        // Arrange
+        when(
+          () => supabaseClient.from(Tables.blogs),
+        ).thenThrow(const SocketException('offline'));
+
+        // Act
+        final result = dataSource.getBlogById('blog-1');
+
+        // Assert
+        await expectLater(result, throwsA(isA<NetworkException>()));
+      },
+    );
+  });
+
   group('watchBlogChanges', () {
     test(
       'given an insert payload when watchBlogChanges is listened to then '

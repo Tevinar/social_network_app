@@ -31,6 +31,9 @@ abstract interface class BlogRemoteDataSource {
 
   /// The watch blog changes.
   Stream<BlogChange> watchBlogChanges();
+
+  /// The get blog by ID.
+  Future<BlogModel> getBlogById(String blogId);
 }
 
 /// A blog remote data source impl.
@@ -206,5 +209,23 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     );
 
     return controller.stream;
+  }
+
+  @override
+  Future<BlogModel> getBlogById(String blogId) {
+    return guardRemoteDataSourceCall(() async {
+      final blogData = await supabaseClient
+          .from(Tables.blogs)
+          .select('*, ${Tables.profiles} (${ProfileFields.name})')
+          .eq(BlogFields.id, blogId)
+          .single();
+
+      final profile = blogData[Tables.profiles] as Map<String, dynamic>?;
+      final posterName = profile?[ProfileFields.name] as String?;
+
+      return BlogModel.fromJson(blogData).copyWith(
+        posterName: posterName,
+      );
+    });
   }
 }

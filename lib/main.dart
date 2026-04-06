@@ -13,8 +13,6 @@ import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/'
     'blog_editor_bloc.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/'
-    'blogs_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
     'chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/'
@@ -47,7 +45,6 @@ void main() async {
                 BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
                 BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
                 BlocProvider(create: (_) => serviceLocator<BlogEditorBloc>()),
-                BlocProvider(create: (_) => serviceLocator<BlogsBloc>()),
                 BlocProvider(create: (_) => serviceLocator<ChatEditorBloc>()),
                 BlocProvider(create: (_) => serviceLocator<UsersBloc>()),
                 BlocProvider(create: (_) => serviceLocator<ChatsBloc>()),

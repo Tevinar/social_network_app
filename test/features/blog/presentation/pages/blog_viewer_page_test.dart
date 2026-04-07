@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
@@ -13,9 +11,8 @@ import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
 
 class _TestImageProvider extends ImageProvider<_TestImageProvider> {
@@ -48,14 +45,10 @@ class _TestImageProvider extends ImageProvider<_TestImageProvider> {
   }
 }
 
-class MockBlogsBloc extends MockBloc<BlogsEvent, BlogsState>
-    implements BlogsBloc {}
-
-class MockBlogRepository extends Mock implements BlogRepository {}
+class MockGetBlogById extends Mock implements GetBlogById {}
 
 void main() {
-  late MockBlogsBloc blogsBloc;
-  late MockBlogRepository blogRepository;
+  late MockGetBlogById getBlogById;
 
   final blog = Blog(
     id: 'blog-1',
@@ -70,10 +63,10 @@ void main() {
 
   setUp(() async {
     await GetIt.I.reset();
-    blogsBloc = MockBlogsBloc();
-    blogRepository = MockBlogRepository();
+    getBlogById = MockGetBlogById();
+    when(() => getBlogById(any())).thenAnswer((_) async => right(blog));
     serviceLocator.registerFactory<BlogViewerBloc>(
-      () => BlogViewerBloc(blogRepository: blogRepository),
+      () => BlogViewerBloc(getBlogById: getBlogById),
     );
   });
 
@@ -81,31 +74,18 @@ void main() {
     await GetIt.I.reset();
   });
 
-  Widget buildTestableWidget({
-    required BlogsState blogsState,
-    required Widget child,
-  }) {
-    when(() => blogsBloc.state).thenReturn(blogsState);
-
-    return BlocProvider<BlogsBloc>.value(
-      value: blogsBloc,
-      child: MaterialApp(home: child),
-    );
+  Widget buildTestableWidget({required Widget child}) {
+    return MaterialApp(home: child);
   }
 
   testWidgets(
-    'given a matching blog in BlogsBloc when BlogViewerPage is rendered then '
-    'it shows a loader before the content',
+    'given a blog is fetched when BlogViewerPage is rendered then it shows '
+    'a loader during image precache before the content',
     (tester) async {
       final precacheCompleter = Completer<void>();
 
       await tester.pumpWidget(
         buildTestableWidget(
-          blogsState: BlogsSuccess(
-            blogs: [blog],
-            pageNumber: 1,
-            totalBlogsInDatabase: 1,
-          ),
           child: BlogViewerPage(
             blogId: blog.id,
             imageProvider: const _TestImageProvider(),
@@ -116,11 +96,12 @@ void main() {
       );
 
       await tester.pump();
+      await tester.pump();
 
       expect(find.byType(Loader), findsOneWidget);
 
       precacheCompleter.complete();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('By Alice'), findsOneWidget);
@@ -129,22 +110,15 @@ void main() {
   );
 
   testWidgets(
-    'given no matching cached blog when BlogViewerPage is rendered then it '
-    'fetches the blog by id and shows the content',
+    'given the fetch is pending when BlogViewerPage is rendered then it '
+    'fetches the blog by id and then shows the content',
     (tester) async {
       final request = Completer<Either<Failure, Blog>>();
 
-      when(
-        () => blogRepository.getBlogById(blog.id),
-      ).thenAnswer((_) => request.future);
+      when(() => getBlogById(blog.id)).thenAnswer((_) => request.future);
 
       await tester.pumpWidget(
         buildTestableWidget(
-          blogsState: const BlogsSuccess(
-            blogs: [],
-            pageNumber: 1,
-            totalBlogsInDatabase: 0,
-          ),
           child: BlogViewerPage(
             blogId: blog.id,
             imageProvider: const _TestImageProvider(),
@@ -154,14 +128,13 @@ void main() {
       );
 
       await tester.pump();
-
-      expect(find.byType(Loader), findsOneWidget);
+      expect(find.byType(Loader), findsNothing);
+      expect(find.text('Title'), findsNothing);
 
       request.complete(right(blog));
-      await tester.pump();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      verify(() => blogRepository.getBlogById(blog.id)).called(1);
+      verify(() => getBlogById(blog.id)).called(1);
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('By Alice'), findsOneWidget);
     },
@@ -171,17 +144,12 @@ void main() {
     'given the blog fetch fails when BlogViewerPage is rendered then it '
     'shows the failure message',
     (tester) async {
-      when(() => blogRepository.getBlogById(blog.id)).thenAnswer(
+      when(() => getBlogById(blog.id)).thenAnswer(
         (_) async => left(const ValidationFailure('Blog fetch failed')),
       );
 
       await tester.pumpWidget(
         buildTestableWidget(
-          blogsState: const BlogsSuccess(
-            blogs: [],
-            pageNumber: 1,
-            totalBlogsInDatabase: 0,
-          ),
           child: const BlogViewerPage(
             blogId: 'blog-1',
           ),
@@ -197,15 +165,10 @@ void main() {
 
   testWidgets(
     'given no precache callback when BlogViewerPage is rendered then it '
-    'uses the default precacheImage future',
+    'shows a loader while the default precacheImage future resolves',
     (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          blogsState: BlogsSuccess(
-            blogs: [blog],
-            pageNumber: 1,
-            totalBlogsInDatabase: 1,
-          ),
           child: BlogViewerPage(
             blogId: blog.id,
             imageProvider: const _TestImageProvider(),
@@ -214,6 +177,9 @@ void main() {
       );
 
       await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
       expect(find.byType(Loader), findsOneWidget);
     },
   );
@@ -224,11 +190,6 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         buildTestableWidget(
-          blogsState: BlogsSuccess(
-            blogs: [blog],
-            pageNumber: 1,
-            totalBlogsInDatabase: 1,
-          ),
           child: Builder(
             builder: (context) {
               return Scaffold(

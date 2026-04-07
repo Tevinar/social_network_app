@@ -7,9 +7,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_page.dart';
+import 'package:social_app/features/chat/domain/usecases/watch_chat_changes.dart';
 
 part 'chats_event.dart';
 part 'chats_state.dart';
@@ -18,7 +18,7 @@ part 'chats_state.dart';
 ///
 /// This bloc combines:
 /// - pagination via use cases (`GetChatsPage`, `GetChatsCount`)
-/// - real-time chat updates via a passive repository stream
+/// - real-time chat updates via a stream use case
 /// - infinite scrolling driven by a `ScrollController`
 ///
 /// Chat changes (insert/update/delete) are received through a stream and
@@ -35,10 +35,10 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   ChatsBloc({
     required GetChatsPage getChatsPage,
     required GetChatsCount getChatsCount,
-    required ChatRepository repository,
+    required WatchChatChanges watchChatChanges,
   }) : _getChatsPage = getChatsPage,
        _getChatsCount = getChatsCount,
-       _repository = repository,
+       _watchChatChanges = watchChatChanges,
        super(const ChatsLoading(chats: [], pageNumber: 1)) {
     on<LoadChatsNextPage>(_onLoadChatsNextPage);
     on<ChatChangeReceived>(_onChatChangeReceived);
@@ -50,7 +50,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   }
   final GetChatsPage _getChatsPage;
   final GetChatsCount _getChatsCount;
-  final ChatRepository _repository;
+  final WatchChatChanges _watchChatChanges;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -87,7 +87,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   /// ensure that all state updates go through the BLoC event pipeline
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
-    _chatChangeSub = _repository.watchChatChanges().listen((
+    _chatChangeSub = _watchChatChanges(const NoParams()).listen((
       event,
     ) {
       add(ChatChangeReceived(event));
@@ -215,7 +215,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   ///
   /// This value is used to determine when pagination has reached the end.
   Future<void> _initializeChatsCount(Emitter<ChatsState> emit) async {
-    final result = await _getChatsCount(NoParams());
+    final result = await _getChatsCount(const NoParams());
     result.fold(
       (error) {
         emit(

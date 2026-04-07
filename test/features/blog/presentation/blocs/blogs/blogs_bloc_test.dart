@@ -9,21 +9,21 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_blog_changes.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 
 class MockGetBlogsPage extends Mock implements GetBlogsPage {}
 
 class MockGetBlogsCount extends Mock implements GetBlogsCount {}
 
-class MockBlogRepository extends Mock implements BlogRepository {}
+class MockWatchBlogChanges extends Mock implements WatchBlogChanges {}
 
 void main() {
   late MockGetBlogsPage getBlogsPage;
   late MockGetBlogsCount getBlogsCount;
-  late MockBlogRepository repository;
+  late MockWatchBlogChanges watchBlogChanges;
   late StreamController<Either<Failure, BlogChange>> blogChangeController;
 
   final blog = Blog(
@@ -58,16 +58,16 @@ void main() {
   );
 
   setUpAll(() {
-    registerFallbackValue(NoParams());
+    registerFallbackValue(const NoParams());
   });
 
   setUp(() {
     getBlogsPage = MockGetBlogsPage();
     getBlogsCount = MockGetBlogsCount();
-    repository = MockBlogRepository();
+    watchBlogChanges = MockWatchBlogChanges();
     blogChangeController = StreamController<Either<Failure, BlogChange>>();
 
-    when(() => repository.watchBlogChanges()).thenAnswer(
+    when(() => watchBlogChanges(any())).thenAnswer(
       (_) => blogChangeController.stream,
     );
   });
@@ -87,7 +87,7 @@ void main() {
       final bloc = BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
       addTearDown(bloc.close);
 
@@ -105,7 +105,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     expect: () => [
@@ -141,7 +141,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     expect: () => [
@@ -165,7 +165,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     expect: () => [
@@ -184,7 +184,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -205,7 +205,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsLoading(
@@ -226,7 +226,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -254,7 +254,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -282,7 +282,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -309,7 +309,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -338,7 +338,7 @@ void main() {
       return BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
     },
     seed: () => BlogsSuccess(
@@ -364,7 +364,7 @@ void main() {
       final bloc = BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
       addTearDown(bloc.close);
 
@@ -398,7 +398,7 @@ void main() {
       final bloc = BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
       addTearDown(bloc.close);
 
@@ -435,7 +435,7 @@ void main() {
       final bloc = BlogsBloc(
         getBlogsPage: getBlogsPage,
         getBlogsCount: getBlogsCount,
-        repository: repository,
+        watchBlogChanges: watchBlogChanges,
       );
       addTearDown(bloc.close);
 

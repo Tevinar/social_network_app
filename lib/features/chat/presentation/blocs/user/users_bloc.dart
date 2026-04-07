@@ -105,7 +105,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   ScrollController get scrollController => _scrollController;
 
   Future<void> _initializeUsersCount(Emitter<UsersState> emit) async {
-    final result = await _getUsersCount(NoParams());
+    final result = await _getUsersCount(const NoParams());
     result.fold(
       (error) {
         emit(

@@ -22,7 +22,7 @@ void main() {
   const user2 = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
 
   setUpAll(() {
-    registerFallbackValue(NoParams());
+    registerFallbackValue(const NoParams());
   });
 
   setUp(() {

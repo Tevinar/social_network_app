@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -18,7 +19,7 @@ part 'auth_state.dart';
 /// Responsibilities:
 /// - handle user intents (sign up, sign in)
 /// - execute auth use cases
-/// - react to auth session changes from the repository
+/// - react to auth session changes from a stream use case
 ///
 /// This bloc owns **authentication logic**, but not global session state.
 /// Global access to the current user is handled by `AppUserCubit`.
@@ -27,10 +28,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,
-    required AuthRepository authRepository,
-  }) : _authRepository = authRepository,
-       _userSignUp = userSignUp,
+    required WatchAuthStateChanges watchAuthStateChanges,
+  }) : _userSignUp = userSignUp,
        _userSignIn = userSignIn,
+       _watchAuthStateChanges = watchAuthStateChanges,
        super(AuthLoading()) {
     on<AuthSignup>(_onAuthSignUp);
     on<AuthSignIn>(_onAuthSignIn);
@@ -40,7 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
   final UserSignUp _userSignUp;
   final UserSignIn _userSignIn;
-  final AuthRepository _authRepository;
+  final WatchAuthStateChanges _watchAuthStateChanges;
   late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
 
   @override
@@ -65,7 +66,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _subscribeToAuthStateChanges() {
-    _authStateChangesSub = _authRepository.authStateChanges().listen(
+    _authStateChangesSub = _watchAuthStateChanges(const NoParams()).listen(
       (event) => add(_AuthStateChanged(event)),
     );
   }

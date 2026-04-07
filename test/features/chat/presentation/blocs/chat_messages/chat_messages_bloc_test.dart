@@ -6,26 +6,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/create_chat_message.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chat_messages_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chat_messages_page.dart';
+import 'package:social_app/features/chat/domain/usecases/watch_chat_message_changes.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 
 class MockGetChatMessagesPage extends Mock implements GetChatMessagesPage {}
 
 class MockGetChatMessagesCount extends Mock implements GetChatMessagesCount {}
 
-class MockChatMessageRepository extends Mock implements ChatMessageRepository {}
+class MockWatchChatMessageChanges extends Mock
+    implements WatchChatMessageChanges {}
 
 class MockCreateChatMessage extends Mock implements CreateChatMessage {}
 
 void main() {
   late MockGetChatMessagesPage getChatMessagesPage;
   late MockGetChatMessagesCount getChatMessagesCount;
-  late MockChatMessageRepository repository;
+  late MockWatchChatMessageChanges watchChatMessageChanges;
   late MockCreateChatMessage createChatMessage;
   late StreamController<Either<Failure, ChatMessageChange>>
   chatMessageChangeController;
@@ -53,6 +55,7 @@ void main() {
   );
 
   setUpAll(() {
+    registerFallbackValue(const NoParams());
     registerFallbackValue(
       GetChatMessagesPageParams(pageNumber: 1, chatId: 'chat-1'),
     );
@@ -64,12 +67,12 @@ void main() {
   setUp(() {
     getChatMessagesPage = MockGetChatMessagesPage();
     getChatMessagesCount = MockGetChatMessagesCount();
-    repository = MockChatMessageRepository();
+    watchChatMessageChanges = MockWatchChatMessageChanges();
     createChatMessage = MockCreateChatMessage();
     chatMessageChangeController =
         StreamController<Either<Failure, ChatMessageChange>>();
 
-    when(() => repository.watchChatMessageChanges()).thenAnswer(
+    when(() => watchChatMessageChanges(any())).thenAnswer(
       (_) => chatMessageChangeController.stream,
     );
   });
@@ -85,7 +88,7 @@ void main() {
       final bloc = ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
       addTearDown(bloc.close);
@@ -111,7 +114,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -157,7 +160,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -194,7 +197,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -221,7 +224,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -251,7 +254,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -275,7 +278,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -307,7 +310,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -335,7 +338,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -370,7 +373,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -402,7 +405,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -437,7 +440,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -469,7 +472,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -493,7 +496,7 @@ void main() {
       return ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
     },
@@ -524,7 +527,7 @@ void main() {
       final bloc = ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
       addTearDown(bloc.close);
@@ -572,7 +575,7 @@ void main() {
       final bloc = ChatMessagesBloc(
         getChatMessagesPage: getChatMessagesPage,
         getChatMessagesCount: getChatMessagesCount,
-        repository: repository,
+        watchChatMessageChanges: watchChatMessageChanges,
         createChatMessage: createChatMessage,
       );
       addTearDown(bloc.close);

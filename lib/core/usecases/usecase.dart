@@ -11,5 +11,15 @@ abstract interface class UseCase<SuccessType, Params> {
   // A `call` method lets the instance itself be invoked like a function.
 }
 
+/// A stream use case.
+// ignore: one_member_abstracts
+abstract interface class StreamUseCase<Output, Params> {
+  /// Executes the stream use case.
+  Stream<Output> call(Params params);
+}
+
 /// A no params.
-class NoParams {}
+class NoParams {
+  /// Creates a [NoParams].
+  const NoParams();
+}

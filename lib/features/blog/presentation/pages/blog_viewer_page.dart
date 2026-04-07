@@ -7,7 +7,6 @@ import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 
 /// A blog viewer page widget.
 class BlogViewerPage extends StatelessWidget {
@@ -48,7 +47,9 @@ class BlogViewerPage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) => serviceLocator<BlogViewerBloc>(),
-        child: _loadBlogContent(context),
+        child: Builder(
+          builder: _loadBlogContent,
+        ),
       ),
     );
   }
@@ -60,7 +61,6 @@ class BlogViewerPage extends StatelessWidget {
           context.read<BlogViewerBloc>().add(
             LoadBlog(
               blogId: blogId,
-              blogs: context.read<BlogsBloc>().state.blogs,
             ),
           );
           return const SizedBox();

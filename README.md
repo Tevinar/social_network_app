@@ -11,7 +11,7 @@ Social App is a client application built with Flutter. It currently covers
 three main capabilities:
 
 - email/password authentication
-- blog publishing with image upload
+- real-time blog publishing with image upload
 - real-time chat and messaging
 
 The project is intended as a technical codebase
@@ -26,8 +26,7 @@ This project solves the need for a single codebase that combines:
 - real-time updates
 - backend integration through clear infrastructure boundaries
 
-It is a mobile-first Flutter application, but the repository also includes the
-standard multi-platform Flutter targets.
+It is a mobile-first Flutter application, but the repository also includes the standard multi-platform Flutter targets.
 
 ## Goals
 
@@ -47,7 +46,6 @@ The main goals of the project are:
 
 - Language: Dart
 - Framework: Flutter
-- Runtime: Flutter client runtime on supported platforms
 
 ### Data / Persistence
 
@@ -59,7 +57,16 @@ The main goals of the project are:
 
 - Hosting / Deployment: not automated in this repository; depends on the
   Flutter target platform
-- CI/CD: not configured yet in the repository
+- CI: GitHub actions are defined for:
+  - automatic package updates
+  - code generation verification
+  - formating
+  - static analysis
+  - run of unit and widget tests
+  - test build validation
+  - release build validation
+  - SonarQube Analysis
+- CD: not configured yet in the repository
 - Monitoring / Observability: local logging through Talker; no remote
   monitoring sink configured yet
 
@@ -115,8 +122,6 @@ Main folders:
 
 - Unit tests
 - Widget tests for targeted UI behavior
-- Integration tests where useful
-- No end-to-end suite configured yet
 - Current automated coverage baseline: 100% line coverage across the project
 
 ## Getting Started
@@ -126,8 +131,6 @@ Main folders:
 You need:
 
 - Flutter SDK compatible with `sdk: ^3.10.4`
-- a working Flutter toolchain for your target platform
-- a Supabase project configured with the expected resources
 
 ### Installation
 
@@ -177,7 +180,6 @@ flutter run
 Examples:
 
 ```bash
-flutter run -d chrome
 flutter run -d ios
 flutter run -d android
 flutter run --dart-define-from-file=.env
@@ -215,8 +217,7 @@ Recommended workflow:
 2. keep changes focused by topic
 3. run tests and analysis locally
 4. open a merge request / pull request
-5. request review
-6. merge after validation
+5. merge after workflows validation
 
 Suggested conventions:
 
@@ -228,29 +229,14 @@ Suggested conventions:
 
 The app version is currently managed through `pubspec.yaml`.
 
-There is no documented release workflow yet in the repository. Until one is
-introduced, version updates should remain explicit and intentional.
+There is no documented release workflow yet in the repository. Until one is introduced, version updates should remain explicit and intentional.
 
 ## Roadmap
 
 Possible future improvements include:
 
-- CI/CD automation
+- CD automation
 - remote error monitoring / crash reporting
-- additional feature growth on top of the current auth, blog, and chat modules
-
-## Contributing
-
-Contributors should:
-
-- keep changes focused
-- respect the `core / app / features` architecture
-- avoid introducing arbitrary cross-feature dependencies
-- run tests and checks before submitting changes
-- preserve explicit boundaries between presentation, domain, and data
-
-For major changes, align on the architectural direction before expanding shared
-modules or changing responsibility boundaries.
 
 ## Additional Documentation
 
@@ -258,4 +244,8 @@ modules or changing responsibility boundaries.
 
 ## License
 
-No license is specified yet in this repository.
+This repository is shared as a personal portfolio and demo project.
+
+No open-source license is granted. All rights are reserved.
+
+You may view the code for evaluation and learning purposes, but you may not copy, modify, distribute, or use any part of this project in your own work without prior written permission.

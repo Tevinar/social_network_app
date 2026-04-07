@@ -19,32 +19,12 @@ class BlogViewerBloc extends Bloc<BlogViewerEvent, BlogViewerState> {
   final GetBlogById _getBlogById;
 
   Future<void> _loadBlog(LoadBlog event, Emitter<BlogViewerState> emit) async {
-    Blog? cachedBlog;
-    for (final blog in event.blogs ?? const <Blog>[]) {
-      if (blog.id == event.blogId) {
-        cachedBlog = blog;
-        break;
-      }
-    }
+    final result = await _getBlogById(event.blogId);
 
-    if (cachedBlog != null) {
-      emit(BlogViewerSuccess(blog: cachedBlog));
-      return;
-    }
-
-    // the case is only relevant for deep linking where the blogs page is not
-    // loaded before the viewer page
-    if (event.blogId != null) {
-      emit(BlogViewerLoading());
-      final result = await _getBlogById(event.blogId!);
-
-      result.fold(
-        (failure) => emit(BlogViewerFailure(error: failure.message)),
-        (blog) => emit(BlogViewerSuccess(blog: blog)),
-      );
-      return;
-    }
-
-    emit(BlogViewerFailure(error: 'Blog not found'));
+    result.fold(
+      (failure) => emit(BlogViewerFailure(error: failure.message)),
+      (blog) => emit(BlogViewerSuccess(blog: blog)),
+    );
+    return;
   }
 }

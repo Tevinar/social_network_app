@@ -116,7 +116,7 @@ void _initBlog() {
         watchBlogChanges: serviceLocator(),
       ),
     )
-    ..registerCachedFactory(
+    ..registerFactory(
       () => BlogViewerBloc(getBlogById: serviceLocator()),
     );
 }

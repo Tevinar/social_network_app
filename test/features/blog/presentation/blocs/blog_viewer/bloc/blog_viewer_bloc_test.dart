@@ -39,30 +39,16 @@ void main() {
   );
 
   blocTest<BlogViewerBloc, BlogViewerState>(
-    'given a matching cached blog when LoadBlog is added then it emits '
-    'BlogViewerSuccess without fetching',
-    build: () => BlogViewerBloc(getBlogById: getBlogById),
-    act: (bloc) => bloc.add(LoadBlog(blogId: blog.id, blogs: [blog])),
-    expect: () => [
-      isA<BlogViewerSuccess>().having((state) => state.blog, 'blog', blog),
-    ],
-    verify: (_) {
-      verifyNever(() => getBlogById(any()));
-    },
-  );
-
-  blocTest<BlogViewerBloc, BlogViewerState>(
-    'given no matching cached blog when LoadBlog is added then it emits '
-    'loading and fetched success',
+    'given fetching by id succeeds when LoadBlog is added then it emits '
+    'BlogViewerSuccess',
     build: () {
       when(() => getBlogById(blog.id)).thenAnswer(
         (_) async => right<Failure, Blog>(blog),
       );
       return BlogViewerBloc(getBlogById: getBlogById);
     },
-    act: (bloc) => bloc.add(LoadBlog(blogId: 'blog-1', blogs: [])),
+    act: (bloc) => bloc.add(LoadBlog(blogId: blog.id)),
     expect: () => [
-      isA<BlogViewerLoading>(),
       isA<BlogViewerSuccess>().having((state) => state.blog, 'blog', blog),
     ],
     verify: (_) {
@@ -72,34 +58,23 @@ void main() {
 
   blocTest<BlogViewerBloc, BlogViewerState>(
     'given fetching by id fails when LoadBlog is added then it emits '
-    'loading and failure',
+    'failure',
     build: () {
       when(() => getBlogById(blog.id)).thenAnswer(
         (_) async => left(const ValidationFailure('Blog fetch failed')),
       );
       return BlogViewerBloc(getBlogById: getBlogById);
     },
-    act: (bloc) => bloc.add(LoadBlog(blogId: 'blog-1', blogs: [])),
+    act: (bloc) => bloc.add(LoadBlog(blogId: blog.id)),
     expect: () => [
-      isA<BlogViewerLoading>(),
       isA<BlogViewerFailure>().having(
         (state) => state.error,
         'error',
         'Blog fetch failed',
       ),
     ],
-  );
-
-  blocTest<BlogViewerBloc, BlogViewerState>(
-    'given no blog id when LoadBlog is added then it emits BlogViewerFailure',
-    build: () => BlogViewerBloc(getBlogById: getBlogById),
-    act: (bloc) => bloc.add(LoadBlog(blogs: const [])),
-    expect: () => [
-      isA<BlogViewerFailure>().having(
-        (state) => state.error,
-        'error',
-        'Blog not found',
-      ),
-    ],
+    verify: (_) {
+      verify(() => getBlogById(blog.id)).called(1);
+    },
   );
 }

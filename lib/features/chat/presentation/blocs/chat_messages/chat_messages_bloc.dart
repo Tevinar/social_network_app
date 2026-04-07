@@ -4,17 +4,18 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/entities/'
     'chat_message_change.dart';
-import 'package:social_app/features/chat/domain/repositories/'
-    'chat_message_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/'
     'create_chat_message.dart';
 import 'package:social_app/features/chat/domain/usecases/'
     'get_chat_messages_count.dart';
 import 'package:social_app/features/chat/domain/usecases/'
     'get_chat_messages_page.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'watch_chat_message_changes.dart';
 
 part 'chat_messages_event.dart';
 part 'chat_messages_state.dart';
@@ -23,7 +24,7 @@ part 'chat_messages_state.dart';
 ///
 /// This bloc combines:
 /// - pagination via use cases (`GetChatMessagesPage`, `GetChatMessagesCount`)
-/// - real-time chatMessages updates via a passive repository stream
+/// - real-time chatMessages updates via a stream use case
 /// - infinite scrolling driven by a `ScrollController`
 ///
 /// Chat changes (insert/update/delete) are received through a stream and
@@ -40,11 +41,11 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   ChatMessagesBloc({
     required GetChatMessagesPage getChatMessagesPage,
     required GetChatMessagesCount getChatMessagesCount,
-    required ChatMessageRepository repository,
+    required WatchChatMessageChanges watchChatMessageChanges,
     required CreateChatMessage createChatMessage,
   }) : _getChatMessagesPage = getChatMessagesPage,
        _getChatMessagesCount = getChatMessagesCount,
-       _repository = repository,
+       _watchChatMessageChanges = watchChatMessageChanges,
        _createChatMessage = createChatMessage,
        super(
          const ChatMessagesLoading(chatId: '', chatMessages: [], pageNumber: 1),
@@ -59,7 +60,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   }
   final GetChatMessagesPage _getChatMessagesPage;
   final GetChatMessagesCount _getChatMessagesCount;
-  final ChatMessageRepository _repository;
+  final WatchChatMessageChanges _watchChatMessageChanges;
   final CreateChatMessage _createChatMessage;
 
   final ScrollController _scrollController = ScrollController();
@@ -98,7 +99,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   /// ensure that all state updates go through the BLoC event pipeline
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
-    _chatMessageChangeSub = _repository.watchChatMessageChanges().listen((
+    _chatMessageChangeSub = _watchChatMessageChanges(const NoParams()).listen((
       event,
     ) {
       add(ChatMessageChangeReceived(event));

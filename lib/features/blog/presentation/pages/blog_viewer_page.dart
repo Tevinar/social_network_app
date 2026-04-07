@@ -48,7 +48,11 @@ class BlogViewerPage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) => serviceLocator<BlogViewerBloc>(),
-        child: _loadBlogContent(context),
+        child: Builder(
+          builder: (innerContext) {
+            return _loadBlogContent(innerContext);
+          },
+        ),
       ),
     );
   }

@@ -4,13 +4,13 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
 
-class MockBlogRepository extends Mock implements BlogRepository {}
+class MockGetBlogById extends Mock implements GetBlogById {}
 
 void main() {
-  late MockBlogRepository blogRepository;
+  late MockGetBlogById getBlogById;
 
   final blog = Blog(
     id: 'blog-1',
@@ -24,14 +24,14 @@ void main() {
   );
 
   setUp(() {
-    blogRepository = MockBlogRepository();
+    getBlogById = MockGetBlogById();
   });
 
   test(
     'given the bloc is created when reading state then state is '
     'BlogViewerInitial',
     () {
-      final bloc = BlogViewerBloc(blogRepository: blogRepository);
+      final bloc = BlogViewerBloc(getBlogById: getBlogById);
       addTearDown(bloc.close);
 
       expect(bloc.state, isA<BlogViewerInitial>());
@@ -41,13 +41,13 @@ void main() {
   blocTest<BlogViewerBloc, BlogViewerState>(
     'given a matching cached blog when LoadBlog is added then it emits '
     'BlogViewerSuccess without fetching',
-    build: () => BlogViewerBloc(blogRepository: blogRepository),
+    build: () => BlogViewerBloc(getBlogById: getBlogById),
     act: (bloc) => bloc.add(LoadBlog(blogId: blog.id, blogs: [blog])),
     expect: () => [
       isA<BlogViewerSuccess>().having((state) => state.blog, 'blog', blog),
     ],
     verify: (_) {
-      verifyNever(() => blogRepository.getBlogById(any()));
+      verifyNever(() => getBlogById(any()));
     },
   );
 
@@ -55,10 +55,10 @@ void main() {
     'given no matching cached blog when LoadBlog is added then it emits '
     'loading and fetched success',
     build: () {
-      when(
-        () => blogRepository.getBlogById(blog.id),
-      ).thenAnswer((_) async => right<Failure, Blog>(blog));
-      return BlogViewerBloc(blogRepository: blogRepository);
+      when(() => getBlogById(blog.id)).thenAnswer(
+        (_) async => right<Failure, Blog>(blog),
+      );
+      return BlogViewerBloc(getBlogById: getBlogById);
     },
     act: (bloc) => bloc.add(LoadBlog(blogId: 'blog-1', blogs: [])),
     expect: () => [
@@ -66,7 +66,7 @@ void main() {
       isA<BlogViewerSuccess>().having((state) => state.blog, 'blog', blog),
     ],
     verify: (_) {
-      verify(() => blogRepository.getBlogById(blog.id)).called(1);
+      verify(() => getBlogById(blog.id)).called(1);
     },
   );
 
@@ -74,10 +74,10 @@ void main() {
     'given fetching by id fails when LoadBlog is added then it emits '
     'loading and failure',
     build: () {
-      when(() => blogRepository.getBlogById(blog.id)).thenAnswer(
+      when(() => getBlogById(blog.id)).thenAnswer(
         (_) async => left(const ValidationFailure('Blog fetch failed')),
       );
-      return BlogViewerBloc(blogRepository: blogRepository);
+      return BlogViewerBloc(getBlogById: getBlogById);
     },
     act: (bloc) => bloc.add(LoadBlog(blogId: 'blog-1', blogs: [])),
     expect: () => [
@@ -92,7 +92,7 @@ void main() {
 
   blocTest<BlogViewerBloc, BlogViewerState>(
     'given no blog id when LoadBlog is added then it emits BlogViewerFailure',
-    build: () => BlogViewerBloc(blogRepository: blogRepository),
+    build: () => BlogViewerBloc(getBlogById: getBlogById),
     act: (bloc) => bloc.add(LoadBlog(blogs: const [])),
     expect: () => [
       isA<BlogViewerFailure>().having(

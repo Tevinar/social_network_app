@@ -6,8 +6,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
 
 part 'app_user_state.dart';
 
@@ -15,7 +15,7 @@ part 'app_user_state.dart';
 /// to the entire application.
 ///
 /// Responsibilities:
-/// - listen to `AuthRepository.authStateChanges()`
+/// - listen to `WatchAuthStateChanges`
 /// - expose whether a user is signed in or signed out
 /// - provide a global `signOut()` intent
 ///
@@ -25,15 +25,15 @@ class AppUserCubit extends Cubit<AppUserState> {
   /// Creates a [AppUserCubit].
   AppUserCubit({
     required UserSignOut userSignOut,
-    required AuthRepository authRepository,
+    required WatchAuthStateChanges watchAuthStateChanges,
   }) : _userSignOut = userSignOut,
-       _authRepository = authRepository,
+       _watchAuthStateChanges = watchAuthStateChanges,
        super(AppUserLoading()) {
     _subscribeToAuthStateChanges();
   }
   final UserSignOut _userSignOut;
   late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
-  final AuthRepository _authRepository;
+  final WatchAuthStateChanges _watchAuthStateChanges;
 
   @override
   Future<void> close() async {
@@ -45,7 +45,9 @@ class AppUserCubit extends Cubit<AppUserState> {
   }
 
   void _subscribeToAuthStateChanges() {
-    _authStateChangesSub = _authRepository.authStateChanges().listen((event) {
+    _authStateChangesSub = _watchAuthStateChanges(const NoParams()).listen((
+      event,
+    ) {
       event.fold((failure) => emit(AppUserFailure(failure.message)), (user) {
         if (user == null) {
           emit(AppUserSignedOut());
@@ -60,7 +62,7 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> signOut() async {
     emit(AppUserLoading());
 
-    final result = await _userSignOut(NoParams());
+    final result = await _userSignOut(const NoParams());
     result.fold(
       (failure) => emit(AppUserFailure(failure.message)),
       (_) => emit(AppUserSignedOut()),

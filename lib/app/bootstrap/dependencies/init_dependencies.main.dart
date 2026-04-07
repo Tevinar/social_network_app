@@ -30,8 +30,8 @@ void _initApp() {
   serviceLocator
     ..registerLazySingleton(
       () => AppUserCubit(
-        authRepository: serviceLocator(),
         userSignOut: serviceLocator(),
+        watchAuthStateChanges: serviceLocator(),
       ),
     )
     // logging
@@ -72,12 +72,15 @@ void _initAuth() {
     ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))
     ..registerLazySingleton(() => UserSignIn(authRepositoy: serviceLocator()))
     ..registerLazySingleton(() => UserSignOut(authRepository: serviceLocator()))
+    ..registerLazySingleton(
+      () => WatchAuthStateChanges(authRepository: serviceLocator()),
+    )
     // BLoC
     ..registerLazySingleton(
       () => AuthBloc(
         userSignUp: serviceLocator(),
         userSignIn: serviceLocator(),
-        authRepository: serviceLocator(),
+        watchAuthStateChanges: serviceLocator(),
       ),
     );
 }
@@ -94,11 +97,15 @@ void _initBlog() {
     )
     // Usecases
     ..registerLazySingleton(() => CreateBlog(blogRepository: serviceLocator()))
+    ..registerLazySingleton(() => GetBlogById(serviceLocator()))
     ..registerLazySingleton(
       () => GetBlogsPage(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(
       () => GetBlogsCount(blogRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => WatchBlogChanges(blogRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
@@ -106,11 +113,11 @@ void _initBlog() {
       () => BlogsBloc(
         getBlogsPage: serviceLocator(),
         getBlogsCount: serviceLocator(),
-        repository: serviceLocator(),
+        watchBlogChanges: serviceLocator(),
       ),
     )
     ..registerCachedFactory(
-      () => BlogViewerBloc(blogRepository: serviceLocator()),
+      () => BlogViewerBloc(getBlogById: serviceLocator()),
     );
 }
 
@@ -164,6 +171,12 @@ void _initChat() {
     ..registerLazySingleton(
       () => GetChatByMembers(chatRepository: serviceLocator()),
     )
+    ..registerLazySingleton(
+      () => WatchChatChanges(chatRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => WatchChatMessageChanges(chatMessageRepository: serviceLocator()),
+    )
     // BLoC
     ..registerLazySingleton(
       () => ChatEditorBloc(
@@ -181,14 +194,14 @@ void _initChat() {
       () => ChatsBloc(
         getChatsPage: serviceLocator(),
         getChatsCount: serviceLocator(),
-        repository: serviceLocator(),
+        watchChatChanges: serviceLocator(),
       ),
     )
     ..registerFactory(
       () => ChatMessagesBloc(
         getChatMessagesPage: serviceLocator(),
         getChatMessagesCount: serviceLocator(),
-        repository: serviceLocator(),
+        watchChatMessageChanges: serviceLocator(),
         createChatMessage: serviceLocator(),
       ),
     );

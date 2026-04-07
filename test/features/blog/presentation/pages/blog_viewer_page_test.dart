@@ -13,7 +13,7 @@ import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
@@ -51,11 +51,11 @@ class _TestImageProvider extends ImageProvider<_TestImageProvider> {
 class MockBlogsBloc extends MockBloc<BlogsEvent, BlogsState>
     implements BlogsBloc {}
 
-class MockBlogRepository extends Mock implements BlogRepository {}
+class MockGetBlogById extends Mock implements GetBlogById {}
 
 void main() {
   late MockBlogsBloc blogsBloc;
-  late MockBlogRepository blogRepository;
+  late MockGetBlogById getBlogById;
 
   final blog = Blog(
     id: 'blog-1',
@@ -71,9 +71,9 @@ void main() {
   setUp(() async {
     await GetIt.I.reset();
     blogsBloc = MockBlogsBloc();
-    blogRepository = MockBlogRepository();
+    getBlogById = MockGetBlogById();
     serviceLocator.registerFactory<BlogViewerBloc>(
-      () => BlogViewerBloc(blogRepository: blogRepository),
+      () => BlogViewerBloc(getBlogById: getBlogById),
     );
   });
 
@@ -134,9 +134,7 @@ void main() {
     (tester) async {
       final request = Completer<Either<Failure, Blog>>();
 
-      when(
-        () => blogRepository.getBlogById(blog.id),
-      ).thenAnswer((_) => request.future);
+      when(() => getBlogById(blog.id)).thenAnswer((_) => request.future);
 
       await tester.pumpWidget(
         buildTestableWidget(
@@ -161,7 +159,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      verify(() => blogRepository.getBlogById(blog.id)).called(1);
+      verify(() => getBlogById(blog.id)).called(1);
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('By Alice'), findsOneWidget);
     },
@@ -171,7 +169,7 @@ void main() {
     'given the blog fetch fails when BlogViewerPage is rendered then it '
     'shows the failure message',
     (tester) async {
-      when(() => blogRepository.getBlogById(blog.id)).thenAnswer(
+      when(() => getBlogById(blog.id)).thenAnswer(
         (_) async => left(const ValidationFailure('Blog fetch failed')),
       );
 

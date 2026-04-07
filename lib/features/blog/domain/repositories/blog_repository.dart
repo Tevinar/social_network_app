@@ -24,9 +24,7 @@ abstract interface class BlogRepository {
 
   /// Emits domain-level blog change events (insert/update/delete).
   ///
-  /// This is a passive, reactive data stream (not a user-triggered action),
-  /// so it is exposed directly from the repository instead of via a use case.
-  /// Pagination and other command-based operations remain handled by use cases.
+  /// This is a passive, reactive data stream (not a user-triggered action).
   Stream<Either<Failure, BlogChange>> watchBlogChanges();
 
   /// Gets a blog by its ID.

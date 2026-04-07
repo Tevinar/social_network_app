@@ -7,9 +7,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_blog_changes.dart';
 
 part 'blogs_event.dart';
 part 'blogs_state.dart';
@@ -18,7 +18,7 @@ part 'blogs_state.dart';
 ///
 /// This bloc combines:
 /// - pagination via use cases (`GetBlogsPage`, `GetBlogsCount`)
-/// - real-time blog updates via a passive repository stream
+/// - real-time blog updates via a stream use case
 /// - infinite scrolling driven by a `ScrollController`
 ///
 /// Blog changes (insert/update/delete) are received through a stream and
@@ -35,10 +35,10 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   BlogsBloc({
     required GetBlogsPage getBlogsPage,
     required GetBlogsCount getBlogsCount,
-    required BlogRepository repository,
+    required WatchBlogChanges watchBlogChanges,
   }) : _getBlogsPage = getBlogsPage,
        _getBlogsCount = getBlogsCount,
-       _repository = repository,
+       _watchBlogChanges = watchBlogChanges,
        super(const BlogsLoading(blogs: [], pageNumber: 1)) {
     on<LoadBlogsNextPage>(_onLoadBlogsNextPage);
     on<BlogChangeReceived>(_onBlogChangeReceived);
@@ -51,7 +51,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   }
   final GetBlogsPage _getBlogsPage;
   final GetBlogsCount _getBlogsCount;
-  final BlogRepository _repository;
+  final WatchBlogChanges _watchBlogChanges;
 
   // Listens to scroll position to trigger pagination when nearing the bottom
   final ScrollController _scrollController = ScrollController();
@@ -93,7 +93,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   /// ensure that all state updates go through the BLoC event pipeline
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
-    _blogChangeSub = _repository.watchBlogChanges().listen((
+    _blogChangeSub = _watchBlogChanges(const NoParams()).listen((
       event,
     ) {
       add(BlogChangeReceived(event));
@@ -230,7 +230,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   ///
   /// This value is used to determine when pagination has reached the end.
   Future<void> _initializeBlogsCount(Emitter<BlogsState> emit) async {
-    final result = await _getBlogsCount(NoParams());
+    final result = await _getBlogsCount(const NoParams());
     result.fold(
       (error) {
         emit(

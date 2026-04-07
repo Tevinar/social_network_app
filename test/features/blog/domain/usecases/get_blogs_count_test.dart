@@ -26,7 +26,7 @@ void main() {
       ).thenAnswer((_) async => right<Failure, int>(4));
 
       // Act
-      final result = await usecase(NoParams());
+      final result = await usecase(const NoParams());
 
       // Assert
       expect(result, right<Failure, int>(4));

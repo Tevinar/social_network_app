@@ -5,38 +5,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/repositories/'
-    'auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 class MockUserSignIn extends Mock implements UserSignIn {}
 
 class MockUserSignUp extends Mock implements UserSignUp {}
 
-class MockAuthRepository extends Mock implements AuthRepository {}
+class MockWatchAuthStateChanges extends Mock implements WatchAuthStateChanges {}
 
 void main() {
   late MockUserSignIn userSignIn;
   late MockUserSignUp userSignUp;
-  late MockAuthRepository authRepository;
+  late MockWatchAuthStateChanges watchAuthStateChanges;
 
   const testUser = User(id: '123', name: 'Test User', email: 'test@test.com');
 
   setUp(() {
     userSignIn = MockUserSignIn();
     userSignUp = MockUserSignUp();
-    authRepository = MockAuthRepository();
+    watchAuthStateChanges = MockWatchAuthStateChanges();
 
     // Default: auth stream emits nothing
     when(
-      () => authRepository.authStateChanges(),
+      () => watchAuthStateChanges(any()),
     ).thenAnswer((_) => const Stream.empty());
   });
 
   setUpAll(() {
+    registerFallbackValue(const NoParams());
     registerFallbackValue(UserSignInParams(email: '', password: ''));
     registerFallbackValue(UserSignUpParams(name: '', email: '', password: ''));
   });
@@ -53,7 +54,7 @@ void main() {
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       act: (bloc) =>
@@ -83,7 +84,7 @@ void main() {
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       act: (bloc) =>
@@ -107,7 +108,7 @@ void main() {
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       act: (bloc) => bloc.add(
@@ -145,7 +146,7 @@ void main() {
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       act: (bloc) => bloc.add(
@@ -165,13 +166,13 @@ void main() {
       'then SignedOut is emitted',
       build: () {
         when(
-          () => authRepository.authStateChanges(),
+          () => watchAuthStateChanges(any()),
         ).thenAnswer((_) => Stream.value(const Right(null)));
 
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       expect: () => [AuthSignedOut()],
@@ -182,13 +183,13 @@ void main() {
       'stream, then SignedIn is emitted',
       build: () {
         when(
-          () => authRepository.authStateChanges(),
+          () => watchAuthStateChanges(any()),
         ).thenAnswer((_) => Stream.value(const Right(testUser)));
 
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       expect: () => [const AuthSignedIn(testUser)],
@@ -199,13 +200,13 @@ void main() {
       'stream, then Failure is emitted',
       build: () {
         when(
-          () => authRepository.authStateChanges(),
+          () => watchAuthStateChanges(any()),
         ).thenAnswer((_) => Stream.value(left(const NetworkFailure())));
 
         return AuthBloc(
           userSignIn: userSignIn,
           userSignUp: userSignUp,
-          authRepository: authRepository,
+          watchAuthStateChanges: watchAuthStateChanges,
         );
       },
       expect: () => [const AuthFailure('No internet connection.')],

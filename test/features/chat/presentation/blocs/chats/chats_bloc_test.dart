@@ -11,21 +11,21 @@ import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_page.dart';
+import 'package:social_app/features/chat/domain/usecases/watch_chat_changes.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 
 class MockGetChatsPage extends Mock implements GetChatsPage {}
 
 class MockGetChatsCount extends Mock implements GetChatsCount {}
 
-class MockChatRepository extends Mock implements ChatRepository {}
+class MockWatchChatChanges extends Mock implements WatchChatChanges {}
 
 void main() {
   late MockGetChatsPage getChatsPage;
   late MockGetChatsCount getChatsCount;
-  late MockChatRepository repository;
+  late MockWatchChatChanges watchChatChanges;
   late StreamController<Either<Failure, ChatChange>> chatChangeController;
 
   const user1 = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
@@ -62,16 +62,16 @@ void main() {
   );
 
   setUpAll(() {
-    registerFallbackValue(NoParams());
+    registerFallbackValue(const NoParams());
   });
 
   setUp(() {
     getChatsPage = MockGetChatsPage();
     getChatsCount = MockGetChatsCount();
-    repository = MockChatRepository();
+    watchChatChanges = MockWatchChatChanges();
     chatChangeController = StreamController<Either<Failure, ChatChange>>();
 
-    when(() => repository.watchChatChanges()).thenAnswer(
+    when(() => watchChatChanges(any())).thenAnswer(
       (_) => chatChangeController.stream,
     );
   });
@@ -89,7 +89,7 @@ void main() {
       final bloc = ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
       addTearDown(bloc.close);
 
@@ -106,7 +106,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     expect: () => [
@@ -129,7 +129,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     expect: () => [
@@ -153,7 +153,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     expect: () => [
@@ -172,7 +172,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsSuccess(
@@ -193,7 +193,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsLoading(
@@ -214,7 +214,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsSuccess(
@@ -242,7 +242,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsSuccess(
@@ -266,7 +266,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsSuccess(
@@ -293,7 +293,7 @@ void main() {
       return ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
     },
     seed: () => ChatsSuccess(
@@ -319,7 +319,7 @@ void main() {
       final bloc = ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
       addTearDown(bloc.close);
 
@@ -350,7 +350,7 @@ void main() {
       final bloc = ChatsBloc(
         getChatsPage: getChatsPage,
         getChatsCount: getChatsCount,
-        repository: repository,
+        watchChatChanges: watchChatChanges,
       );
       addTearDown(bloc.close);
 

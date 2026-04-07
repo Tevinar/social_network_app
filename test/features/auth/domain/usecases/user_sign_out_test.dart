@@ -28,7 +28,7 @@ void main() {
         ).thenAnswer((_) async => const Right<Failure, void>(null));
 
         // Act
-        final result = await userSignOut(NoParams());
+        final result = await userSignOut(const NoParams());
 
         // Assert
         expect(result, isA<Right<Failure, void>>());
@@ -46,7 +46,7 @@ void main() {
         ).thenAnswer((_) async => left(const UnauthorizedFailure()));
 
         // Act
-        final result = await userSignOut(NoParams());
+        final result = await userSignOut(const NoParams());
 
         // Assert
         expect(result, isA<Left<Failure, void>>());

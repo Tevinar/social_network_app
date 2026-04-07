@@ -6,16 +6,16 @@ import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
 
 class MockUserSignOut extends Mock implements UserSignOut {}
 
-class MockAuthRepository extends Mock implements AuthRepository {}
+class MockWatchAuthStateChanges extends Mock implements WatchAuthStateChanges {}
 
 void main() {
   late MockUserSignOut mockUserSignOut;
-  late MockAuthRepository mockAuthRepository;
+  late MockWatchAuthStateChanges mockWatchAuthStateChanges;
 
   const testUser = User(
     id: '123',
@@ -24,15 +24,15 @@ void main() {
   );
 
   setUpAll(() {
-    registerFallbackValue(NoParams());
+    registerFallbackValue(const NoParams());
   });
 
   setUp(() {
     mockUserSignOut = MockUserSignOut();
-    mockAuthRepository = MockAuthRepository();
+    mockWatchAuthStateChanges = MockWatchAuthStateChanges();
 
     when(
-      () => mockAuthRepository.authStateChanges(),
+      () => mockWatchAuthStateChanges(any()),
     ).thenAnswer((_) => const Stream.empty());
   });
 
@@ -43,7 +43,7 @@ void main() {
       // Arrange
       final appUserCubit = AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
       addTearDown(appUserCubit.close);
 
@@ -58,13 +58,13 @@ void main() {
     build: () {
       // Arrange
       when(
-        () => mockAuthRepository.authStateChanges(),
+        () => mockWatchAuthStateChanges(any()),
       ).thenAnswer((_) => Stream.value(const Right(null)));
 
       // Act
       return AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
     },
     expect: () => [
@@ -79,13 +79,13 @@ void main() {
     build: () {
       // Arrange
       when(
-        () => mockAuthRepository.authStateChanges(),
+        () => mockWatchAuthStateChanges(any()),
       ).thenAnswer((_) => Stream.value(const Right(testUser)));
 
       // Act
       return AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
     },
     expect: () => [
@@ -104,13 +104,13 @@ void main() {
       const failure = NetworkFailure();
       // Arrange
       when(
-        () => mockAuthRepository.authStateChanges(),
+        () => mockWatchAuthStateChanges(any()),
       ).thenAnswer((_) => Stream.value(left(failure)));
 
       // Act
       return AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
     },
     expect: () => [
@@ -134,7 +134,7 @@ void main() {
 
       return AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
     },
     act: (cubit) {
@@ -160,7 +160,7 @@ void main() {
 
       return AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
     },
     act: (cubit) {
@@ -189,7 +189,7 @@ void main() {
 
       final appUserCubit = AppUserCubit(
         userSignOut: mockUserSignOut,
-        authRepository: mockAuthRepository,
+        watchAuthStateChanges: mockWatchAuthStateChanges,
       );
       addTearDown(appUserCubit.close);
 

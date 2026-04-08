@@ -6,6 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 
@@ -22,14 +23,16 @@ void main() {
     title: 'Title',
     content: 'Content',
     imageUrl: 'https://image',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: DateTime(2025),
+    posterName: 'Alice',
   );
 
   setUpAll(() {
     registerFallbackValue(
       CreateBlogParams(
         posterId: '',
+        posterName: '',
         title: '',
         content: '',
         image: File('/tmp/image.png'),
@@ -65,10 +68,11 @@ void main() {
     act: (bloc) => bloc.add(
       AddBlog(
         posterId: 'user-1',
+        posterName: 'Alice',
         title: 'Title',
         content: 'Content',
         image: File('/tmp/image.png'),
-        topics: const ['Tech'],
+        topics: const [BlogTopic.technology],
       ),
     ),
     expect: () => [isA<BlogLoading>(), isA<BlogUploadSuccess>()],
@@ -78,9 +82,14 @@ void main() {
           any(
             that: isA<CreateBlogParams>()
                 .having((p) => p.posterId, 'posterId', 'user-1')
+                .having((p) => p.posterName, 'posterName', 'Alice')
                 .having((p) => p.title, 'title', 'Title')
                 .having((p) => p.content, 'content', 'Content')
-                .having((p) => p.topics, 'topics', const ['Tech']),
+                .having(
+                  (p) => p.topics,
+                  'topics',
+                  const [BlogTopic.technology],
+                ),
           ),
         ),
       ).called(1);
@@ -99,10 +108,11 @@ void main() {
     act: (bloc) => bloc.add(
       AddBlog(
         posterId: 'user-1',
+        posterName: 'Alice',
         title: 'Title',
         content: 'Content',
         image: File('/tmp/image.png'),
-        topics: const ['Tech'],
+        topics: const [BlogTopic.technology],
       ),
     ),
     expect: () => [

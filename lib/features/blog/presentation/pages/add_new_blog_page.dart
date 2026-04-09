@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/core/constants/config/blog_config.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/pick_image.dart';
 import 'package:social_app/core/utils/show_snackbar.dart';
 import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_editor.dart';
 
@@ -27,7 +27,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  List<String> selectedTopics = [];
+  List<BlogTopic> selectedTopics = [];
   File? image;
   bool _isImagePickerLoading = false;
 
@@ -120,6 +120,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         topics: selectedTopics,
         image: image!,
         posterId: state.user.id,
+        posterName: state.user.name,
       ),
     );
   }
@@ -212,7 +213,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: BlogConfig.topics
+        children: BlogTopic.values
             .map(
               (e) => Padding(
                 padding: const EdgeInsetsGeometry.all(5),
@@ -226,7 +227,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
                     setState(() {});
                   },
                   child: Chip(
-                    label: Text(e),
+                    label: Text(e.value),
                     color: selectedTopics.contains(e)
                         ? const WidgetStatePropertyAll(
                             AppPallete.gradient1,

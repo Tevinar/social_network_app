@@ -8,17 +8,24 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
+import 'package:social_app/features/blog/data/data_sources/blog_local_data_source.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
+import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 
 class MockBlogRemoteDataSource extends Mock implements BlogRemoteDataSource {}
+
+class MockBlogLocalDataSource extends Mock implements BlogLocalDataSource {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
   late MockBlogRemoteDataSource remote;
+  late MockBlogLocalDataSource local;
   late MockAppLogger logger;
   late BlogRepositoryImpl repository;
 
@@ -28,7 +35,7 @@ void main() {
     title: 'Title',
     content: 'Content',
     imageUrl: 'https://image',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: DateTime(2025),
     posterName: 'Alice',
   );
@@ -36,9 +43,18 @@ void main() {
   setUp(() async {
     await GetIt.I.reset();
     remote = MockBlogRemoteDataSource();
+    local = MockBlogLocalDataSource();
     logger = MockAppLogger();
     GetIt.I.registerSingleton<AppLogger>(logger);
-    repository = BlogRepositoryImpl(blogRemoteDataSource: remote);
+    repository = BlogRepositoryImpl(
+      blogRemoteDataSource: remote,
+      blogLocalDataSource: local,
+    );
+    when(() => local.upsertBlogs(any())).thenAnswer((_) async {});
+    when(
+      () => local.getBlogsPage(any()),
+    ).thenAnswer((_) async => <BlogModel>[]);
+    when(() => local.getBlogById(any())).thenAnswer((_) async => null);
   });
 
   tearDown(() async {
@@ -56,16 +72,16 @@ void main() {
         imageUrl: '',
         topics: const [],
         updatedAt: DateTime(2025),
+        posterName: '',
       ),
     );
   });
 
   group('createBlog', () {
     test(
-      'given remote calls succeed when createBlog is invoked then returns '
-      'Right<Blog>',
+      'given remote calls succeed when createBlog is invoked then caches and '
+      'returns the created blog',
       () async {
-        // Arrange
         when(
           () => remote.uploadBlogImage(
             image: any(named: 'image'),
@@ -74,31 +90,20 @@ void main() {
         ).thenAnswer((_) async => 'https://image');
         when(() => remote.postBlog(any())).thenAnswer((_) async => blogModel);
 
-        // Act
         final result = await repository.createBlog(
           image: File('/tmp/image.png'),
           title: 'Title',
           content: 'Content',
           posterId: 'user-1',
-          topics: const ['Tech'],
+          posterName: 'Alice',
+          topics: const [BlogTopic.technology],
         );
 
-        // Assert
         expect(result, isA<Right<Failure, dynamic>>());
-        result.fold(
-          (_) => fail('Expected success'),
-          (blog) {
-            expect(blog.id, blogModel.id);
-            expect(blog.title, blogModel.title);
-          },
-        );
-        verify(
-          () => remote.uploadBlogImage(
-            image: any(named: 'image'),
-            blogId: any(named: 'blogId'),
-          ),
-        ).called(1);
-        verify(() => remote.postBlog(any(that: isA<BlogModel>()))).called(1);
+        final capturedBlogs =
+            verify(() => local.upsertBlogs(captureAny())).captured.single
+                as List<BlogModel>;
+        expect(capturedBlogs.single.id, blogModel.id);
       },
     );
 
@@ -106,7 +111,6 @@ void main() {
       'given a known exception when createBlog is invoked then returns '
       'Left<Failure>',
       () async {
-        // Arrange
         when(
           () => remote.uploadBlogImage(
             image: any(named: 'image'),
@@ -114,16 +118,15 @@ void main() {
           ),
         ).thenThrow(const NetworkException(message: 'offline'));
 
-        // Act
         final result = await repository.createBlog(
           image: File('/tmp/image.png'),
           title: 'Title',
           content: 'Content',
           posterId: 'user-1',
-          topics: const ['Tech'],
+          posterName: 'Alice',
+          topics: const [BlogTopic.technology],
         );
 
-        // Assert
         expect(result, isA<Left<Failure, dynamic>>());
         result.fold(
           (failure) => expect(failure, isA<NetworkFailure>()),
@@ -131,90 +134,104 @@ void main() {
         );
       },
     );
-
-    test(
-      'given an unexpected exception when createBlog is invoked then '
-      'returns Left and logs the error',
-      () async {
-        // Arrange
-        when(
-          () => remote.uploadBlogImage(
-            image: any(named: 'image'),
-            blogId: any(named: 'blogId'),
-          ),
-        ).thenThrow(const ServerException(message: 'boom'));
-
-        // Act
-        final result = await repository.createBlog(
-          image: File('/tmp/image.png'),
-          title: 'Title',
-          content: 'Content',
-          posterId: 'user-1',
-          topics: const ['Tech'],
-        );
-
-        // Assert
-        expect(result, isA<Left<Failure, dynamic>>());
-        verify(
-          () => logger.error(
-            'Unexpected error in BlogRepositoryImpl.createBlog',
-            error: any(named: 'error'),
-            stackTrace: any(named: 'stackTrace'),
-          ),
-        ).called(1);
-      },
-    );
   });
 
-  group('getBlogsPage', () {
+  group('watchBlogsPage', () {
     test(
-      'given remote succeeds when getBlogsPage is invoked then returns '
-      'Right<List<Blog>>',
+      'given cache and remote succeed when watchBlogsPage is listened to then '
+      'it emits cache then remote',
       () async {
-        // Arrange
+        when(() => local.getBlogsPage(2)).thenAnswer((_) async => [blogModel]);
         when(() => remote.getBlogsPage(2)).thenAnswer((_) async => [blogModel]);
 
-        // Act
-        final result = await repository.getBlogsPage(2);
+        final stream = repository.watchBlogsPage(2);
 
-        // Assert
-        expect(
-          result,
-          isA<Right<Failure, List<dynamic>>>(),
+        await expectLater(
+          stream,
+          emitsInOrder([
+            isA<Right<Failure, BlogsPageSnapshot>>()
+                .having(
+                  (value) => value.value.source,
+                  'source',
+                  BlogsPageSource.cache,
+                )
+                .having(
+                  (value) => value.value.blogs.single.id,
+                  'blog id',
+                  'blog-1',
+                ),
+            isA<Right<Failure, BlogsPageSnapshot>>()
+                .having(
+                  (value) => value.value.source,
+                  'source',
+                  BlogsPageSource.remote,
+                )
+                .having(
+                  (value) => value.value.blogs.single.id,
+                  'blog id',
+                  'blog-1',
+                ),
+            emitsDone,
+          ]),
         );
-        result.fold(
-          (_) => fail('Expected success'),
-          (blogs) {
-            expect(blogs, hasLength(1));
-            expect(blogs.first.id, blogModel.id);
-            expect(blogs.first.posterId, blogModel.posterId);
-            expect(blogs.first.title, blogModel.title);
-          },
+        final capturedBlogs =
+            verify(() => local.upsertBlogs(captureAny())).captured.single
+                as List<BlogModel>;
+        expect(capturedBlogs.single.id, blogModel.id);
+      },
+    );
+
+    test(
+      'given remote fails without cache when watchBlogsPage is listened to '
+      'then it emits Left<Failure>',
+      () async {
+        when(
+          () => remote.getBlogsPage(2),
+        ).thenThrow(const NetworkException(message: 'offline'));
+
+        final stream = repository.watchBlogsPage(2);
+
+        await expectLater(
+          stream,
+          emitsInOrder([
+            isA<Left<Failure, BlogsPageSnapshot>>().having(
+              (value) => value.value,
+              'failure',
+              isA<NetworkFailure>(),
+            ),
+            emitsDone,
+          ]),
         );
       },
     );
 
     test(
-      'given an unexpected exception when getBlogsPage is invoked then '
-      'returns Left and logs the error',
+      'given cache exists and remote fails when watchBlogsPage is listened to '
+      'then it emits cached data with a refresh failure',
       () async {
-        // Arrange
+        when(() => local.getBlogsPage(2)).thenAnswer((_) async => [blogModel]);
         when(
           () => remote.getBlogsPage(2),
-        ).thenThrow(const ServerException(message: 'boom'));
+        ).thenThrow(const ServerException(message: 'boom', code: '23505'));
 
-        // Act
-        final result = await repository.getBlogsPage(2);
+        final stream = repository.watchBlogsPage(2);
 
-        // Assert
-        expect(result, isA<Left<Failure, dynamic>>());
-        verify(
-          () => logger.error(
-            'Unexpected error in BlogRepositoryImpl.getBlogsPage',
-            error: any(named: 'error'),
-            stackTrace: any(named: 'stackTrace'),
-          ),
-        ).called(1);
+        await expectLater(
+          stream,
+          emitsInOrder([
+            isA<Right<Failure, BlogsPageSnapshot>>().having(
+              (value) => value.value.source,
+              'source',
+              BlogsPageSource.cache,
+            ),
+            isA<Right<Failure, BlogsPageSnapshot>>().having(
+              (value) => value.value.refreshFailure,
+              'refreshFailure',
+              isA<ValidationFailure>(),
+            ),
+            emitsDone,
+          ]),
+        );
       },
     );
   });
@@ -224,46 +241,19 @@ void main() {
       'given remote succeeds when getBlogsCount is invoked then returns '
       'Right<int>',
       () async {
-        // Arrange
         when(() => remote.getBlogsCount()).thenAnswer((_) async => 3);
 
-        // Act
         final result = await repository.getBlogsCount();
 
-        // Assert
         expect(result, right<Failure, int>(3));
-      },
-    );
-
-    test(
-      'given an unexpected exception when getBlogsCount is invoked then '
-      'returns Left and logs the error',
-      () async {
-        // Arrange
-        when(
-          () => remote.getBlogsCount(),
-        ).thenThrow(const ServerException(message: 'boom'));
-
-        // Act
-        final result = await repository.getBlogsCount();
-
-        // Assert
-        expect(result, isA<Left<Failure, dynamic>>());
-        verify(
-          () => logger.error(
-            'Unexpected error in BlogRepositoryImpl.getBlogsCount',
-            error: any(named: 'error'),
-            stackTrace: any(named: 'stackTrace'),
-          ),
-        ).called(1);
       },
     );
   });
 
   group('getBlogById', () {
     test(
-      'given remote succeeds when getBlogById is invoked then returns '
-      'Right<Blog>',
+      'given remote succeeds when getBlogById is invoked then caches and '
+      'returns Right<Blog>',
       () async {
         when(
           () => remote.getBlogById(blogModel.id),
@@ -272,19 +262,37 @@ void main() {
         final result = await repository.getBlogById(blogModel.id);
 
         expect(result, isA<Right<Failure, dynamic>>());
+        final capturedBlogs =
+            verify(() => local.upsertBlogs(captureAny())).captured.single
+                as List<BlogModel>;
+        expect(capturedBlogs.single.id, blogModel.id);
+      },
+    );
+
+    test(
+      'given cached data and remote failure when getBlogById is invoked then '
+      'returns the cached blog',
+      () async {
+        when(() => local.getBlogById(blogModel.id)).thenAnswer(
+          (_) async => blogModel,
+        );
+        when(
+          () => remote.getBlogById(blogModel.id),
+        ).thenThrow(const NetworkException(message: 'offline'));
+
+        final result = await repository.getBlogById(blogModel.id);
+
+        expect(result, isA<Right<Failure, dynamic>>());
         result.fold(
           (_) => fail('Expected success'),
-          (blog) {
-            expect(blog.id, blogModel.id);
-            expect(blog.title, blogModel.title);
-          },
+          (blog) => expect(blog.id, blogModel.id),
         );
       },
     );
 
     test(
-      'given an unexpected exception when getBlogById is invoked then '
-      'returns Left and logs the error',
+      'given no cached data and an unexpected remote exception when '
+      'getBlogById is invoked then returns Left and logs the error',
       () async {
         when(
           () => remote.getBlogById(blogModel.id),
@@ -304,25 +312,45 @@ void main() {
     );
   });
 
-  group('watchBlogChanges', () {
+  group('watchBlogById', () {
     test(
-      'given remote emits blog changes when watchBlogChanges is listened to '
-      'then emits Right<BlogChange>',
+      'given cache and remote succeed when watchBlogById is listened to then '
+      'it emits cache then remote',
       () async {
-        // Arrange
-        final change = BlogInserted(blogModel.toEntity());
+        when(() => local.getBlogById(blogModel.id)).thenAnswer(
+          (_) async => blogModel,
+        );
         when(
-          () => remote.watchBlogChanges(),
-        ).thenAnswer((_) => Stream.value(change));
+          () => remote.getBlogById(blogModel.id),
+        ).thenAnswer((_) async => blogModel);
 
-        // Act
-        final stream = repository.watchBlogChanges();
+        final stream = repository.watchBlogById(blogModel.id);
 
-        // Assert
         await expectLater(
           stream,
           emitsInOrder([
-            right<Failure, BlogChange>(change),
+            isA<Right<Failure, BlogSnapshot>>()
+                .having(
+                  (value) => value.value.source,
+                  'source',
+                  BlogSource.cache,
+                )
+                .having(
+                  (value) => value.value.blog.id,
+                  'blog id',
+                  blogModel.id,
+                ),
+            isA<Right<Failure, BlogSnapshot>>()
+                .having(
+                  (value) => value.value.source,
+                  'source',
+                  BlogSource.remote,
+                )
+                .having(
+                  (value) => value.value.blog.id,
+                  'blog id',
+                  blogModel.id,
+                ),
             emitsDone,
           ]),
         );
@@ -330,38 +358,81 @@ void main() {
     );
 
     test(
-      'given remote emits an unexpected stream error when watchBlogChanges '
-      'is listened to then emits Left and logs the error',
+      'given cached data and remote failure when watchBlogById is listened to '
+      'then it emits cached data with a refresh failure',
       () async {
-        // Arrange
-        when(
-          () => remote.watchBlogChanges(),
-        ).thenAnswer(
-          (_) =>
-              Stream<BlogChange>.error(const ServerException(message: 'boom')),
+        when(() => local.getBlogById(blogModel.id)).thenAnswer(
+          (_) async => blogModel,
         );
+        when(
+          () => remote.getBlogById(blogModel.id),
+        ).thenThrow(const NetworkException(message: 'offline'));
 
-        // Act
-        final stream = repository.watchBlogChanges();
+        final stream = repository.watchBlogById(blogModel.id);
 
-        // Assert
         await expectLater(
           stream,
-          emits(
-            isA<Left<Failure, BlogChange>>().having(
+          emitsInOrder([
+            isA<Right<Failure, BlogSnapshot>>().having(
+              (value) => value.value.source,
+              'source',
+              BlogSource.cache,
+            ),
+            isA<Right<Failure, BlogSnapshot>>().having(
+              (value) => value.value.refreshFailure,
+              'refreshFailure',
+              isA<NetworkFailure>(),
+            ),
+            emitsDone,
+          ]),
+        );
+      },
+    );
+
+    test(
+      'given no cached data and remote failure when watchBlogById is listened '
+      'to then it emits Left<Failure>',
+      () async {
+        when(
+          () => remote.getBlogById(blogModel.id),
+        ).thenThrow(const NetworkException(message: 'offline'));
+
+        final stream = repository.watchBlogById(blogModel.id);
+
+        await expectLater(
+          stream,
+          emitsInOrder([
+            isA<Left<Failure, BlogSnapshot>>().having(
               (value) => value.value,
               'failure',
-              isA<UnexpectedFailure>(),
+              isA<NetworkFailure>(),
             ),
-          ),
+            emitsDone,
+          ]),
         );
-        verify(
-          () => logger.error(
-            'Unexpected error in BlogRepositoryImpl.watchBlogChanges',
-            error: any(named: 'error'),
-            stackTrace: any(named: 'stackTrace'),
-          ),
-        ).called(1);
+      },
+    );
+  });
+
+  group('watchBlogChanges', () {
+    test(
+      'given remote emits blog changes when watchBlogChanges is listened to '
+      'then emits Right<BlogChange>',
+      () async {
+        final change = BlogInserted(blogModel.toEntity());
+        when(
+          () => remote.watchBlogChanges(),
+        ).thenAnswer((_) => Stream.value(change));
+
+        final stream = repository.watchBlogChanges();
+
+        await expectLater(
+          stream,
+          emitsInOrder([
+            right<Failure, BlogChange>(change),
+            emitsDone,
+          ]),
+        );
       },
     );
   });

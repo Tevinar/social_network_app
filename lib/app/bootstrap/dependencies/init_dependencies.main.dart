@@ -44,10 +44,12 @@ void _initApp() {
 void _initCore() {
   // Connection checker
   serviceLocator
+    ..registerLazySingleton(AppDatabase.new)
     ..registerLazySingleton(InternetConnection.new)
     ..registerLazySingleton<ConnectionChecker>(
       () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
     )
+    ..registerLazySingleton<ImageFileCache>(ImageFileCacheImpl.new)
     // Image picker service
     ..registerLazySingleton(ImagePicker.new)
     ..registerLazySingleton<ImagePickerService>(
@@ -88,18 +90,25 @@ void _initAuth() {
 void _initBlog() {
   serviceLocator
     // Datasources
+    ..registerLazySingleton<BlogLocalDataSource>(
+      () => BlogLocalDataSourceDriftImpl(database: serviceLocator()),
+    )
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
     // Repositories
     ..registerLazySingleton<BlogRepository>(
-      () => BlogRepositoryImpl(blogRemoteDataSource: serviceLocator()),
+      () => BlogRepositoryImpl(
+        blogRemoteDataSource: serviceLocator(),
+        blogLocalDataSource: serviceLocator(),
+      ),
     )
     // Usecases
     ..registerLazySingleton(() => CreateBlog(blogRepository: serviceLocator()))
     ..registerLazySingleton(() => GetBlogById(serviceLocator()))
+    ..registerLazySingleton(() => WatchBlogById(serviceLocator()))
     ..registerLazySingleton(
-      () => GetBlogsPage(blogRepository: serviceLocator()),
+      () => WatchBlogsPage(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(
       () => GetBlogsCount(blogRepository: serviceLocator()),
@@ -111,13 +120,13 @@ void _initBlog() {
     ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
     ..registerLazySingleton(
       () => BlogsBloc(
-        getBlogsPage: serviceLocator(),
+        watchBlogsPage: serviceLocator(),
         getBlogsCount: serviceLocator(),
         watchBlogChanges: serviceLocator(),
       ),
     )
     ..registerFactory(
-      () => BlogViewerBloc(getBlogById: serviceLocator()),
+      () => BlogViewerBloc(watchBlogById: serviceLocator()),
     );
 }
 

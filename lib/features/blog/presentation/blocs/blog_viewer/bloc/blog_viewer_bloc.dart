@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
+import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_blog_by_id.dart';
 
 part 'blog_viewer_event.dart';
 part 'blog_viewer_state.dart';
@@ -10,21 +11,27 @@ part 'blog_viewer_state.dart';
 class BlogViewerBloc extends Bloc<BlogViewerEvent, BlogViewerState> {
   /// Creates a [BlogViewerBloc].
   BlogViewerBloc({
-    required GetBlogById getBlogById,
-  }) : _getBlogById = getBlogById,
+    required WatchBlogById watchBlogById,
+  }) : _watchBlogById = watchBlogById,
        super(BlogViewerInitial()) {
     on<LoadBlog>(_loadBlog);
   }
 
-  final GetBlogById _getBlogById;
+  final WatchBlogById _watchBlogById;
 
   Future<void> _loadBlog(LoadBlog event, Emitter<BlogViewerState> emit) async {
-    final result = await _getBlogById(event.blogId);
+    emit(BlogViewerLoading());
 
-    result.fold(
-      (failure) => emit(BlogViewerFailure(error: failure.message)),
-      (blog) => emit(BlogViewerSuccess(blog: blog)),
+    await emit.forEach(
+      _watchBlogById(event.blogId),
+      onData: (result) => result.fold(
+        (failure) => BlogViewerFailure(error: failure.message),
+        (snapshot) => BlogViewerSuccess(
+          blog: snapshot.blog,
+          isFromCache: snapshot.source == BlogSource.cache,
+          refreshError: snapshot.refreshFailure?.message,
+        ),
+      ),
     );
-    return;
   }
 }

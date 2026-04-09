@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 
 part 'blog_editor_event.dart';
@@ -22,6 +23,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
     final res = await _uploadBlog.call(
       CreateBlogParams(
         posterId: event.posterId,
+        posterName: event.posterName,
         title: event.title,
         content: event.content,
         image: event.image,

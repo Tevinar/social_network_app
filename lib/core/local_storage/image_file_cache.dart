@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:social_app/core/local_storage/app_directory_provider.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/network/http_downloader.dart';
 
 /// A disk cache for remote image files.
@@ -65,7 +66,12 @@ class ImageFileCacheImpl implements ImageFileCache {
       final file = await _fileFor(cacheKey);
       await file.writeAsBytes(bytes, flush: true);
       return file;
-    } on Exception {
+    } on Exception catch (e, stackTrace) {
+      appLogger.error(
+        'Failed to download or cache image for $cacheKey from $imageUrl',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }

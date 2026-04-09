@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 
 /// Downloads remote resources as bytes.
 // ignore: one_member_abstracts
@@ -25,7 +26,15 @@ class DartHttpDownloader implements HttpDownloader {
         );
       }
 
-      return consolidateHttpClientResponseBytes(response);
+      final bytes = await consolidateHttpClientResponseBytes(response);
+      return bytes;
+    } catch (e, stackTrace) {
+      appLogger.error(
+        'Error downloading resource from $uri',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     } finally {
       client.close(force: true);
     }

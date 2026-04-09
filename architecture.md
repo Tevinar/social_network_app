@@ -68,6 +68,7 @@ Typical contents:
 - shared errors and low-level abstractions
 - configuration access
 - shared constants and schema names
+- local database and local file storage infrastructure
 - reusable utilities
 - use case conventions
 - feature-agnostic widgets
@@ -97,6 +98,7 @@ Typical contents:
 - routing and route guards
 - app shell
 - global session state
+- startup-only UX such as one-shot offline notifications
 - app-wide logging integration
 - concrete shared service implementations when they are truly global
 
@@ -219,6 +221,17 @@ Notes:
 4. stream emissions are converted into BLoC events
 5. state changes still go through the BLoC event pipeline
 
+### Cache-first reactive flow
+
+When stale local data is still useful, the reactive flow becomes local-first:
+
+1. a repository reads local cache first
+2. the repository emits a domain snapshot from cache
+3. the repository refreshes from the backend
+4. the repository emits fresh remote data or a refresh failure attached to the
+   stale cached snapshot
+5. the BLoC updates UI state without duplicating cache and remote emissions
+
 ### App-wide coordination
 
 Some runtime concerns are global rather than feature-local. In this project,
@@ -230,11 +243,19 @@ they are centered on:
 - `GetIt` for dependency composition
 - `GoRouter` for navigation
 - BLoC/Cubit for state management
+- `StreamUseCase` for cache-first and other reactive feature reads
 
 Rule:
 
 - feature behavior stays inside features
 - global lifecycle, routing, and session concerns live in `app/`
+
+Current notable patterns:
+
+- blog page and blog viewer flows can emit cached data before remote refresh
+- image loading can use file-backed local cache before falling back to network
+- startup-only feedback such as the offline snackbar remains an app concern,
+  not a feature concern
 
 ---
 
@@ -253,6 +274,8 @@ Practical rules:
 - technical exceptions must not leak directly to the UI
 - expected failures should be modeled explicitly
 - unexpected failures should be logged with stack traces
+- stale cached data may stay visible while a refresh failure is surfaced
+  separately
 - global handlers are a safety net, not a replacement for local handling
 
 ---
@@ -264,6 +287,7 @@ Shared concerns in this project include:
 - logging
 - configuration and environment access
 - connectivity checking
+- local persistence and disk caching
 - image picking abstraction
 - formatting and technical utilities
 - theme and small UI primitives
@@ -321,6 +345,8 @@ Additional conventions:
 - mapping logic belongs in models, repositories, or dedicated mappers, not in
   the UI
 - feature BLoCs coordinate behavior, not low-level technical details
+- stream-based feature reads should use `StreamUseCase` and domain snapshots
+  when cache-first behavior is needed
 - app-level state should exist only when the concern is truly global
 - new abstractions should be introduced only when they add real clarity
 

@@ -41,7 +41,7 @@ class BlogCard extends StatelessWidget {
                         .map(
                           (e) => Padding(
                             padding: const EdgeInsetsGeometry.all(5),
-                            child: Chip(label: Text(e)),
+                            child: Chip(label: Text(e.value)),
                           ),
                         )
                         .toList(),

@@ -9,6 +9,7 @@ final class AddBlog extends BlogEditorEvent {
   /// Creates a [AddBlog].
   AddBlog({
     required this.posterId,
+    required this.posterName,
     required this.title,
     required this.content,
     required this.image,
@@ -17,6 +18,10 @@ final class AddBlog extends BlogEditorEvent {
 
   /// The poster id.
   final String posterId;
+
+  /// The poster name. This is needed to avoid an extra fetch after blog
+  /// creation to resolve the poster name for display purposes.
+  final String posterName;
 
   /// The title.
   final String title;
@@ -28,5 +33,5 @@ final class AddBlog extends BlogEditorEvent {
   final File image;
 
   /// The topics.
-  final List<String> topics;
+  final List<BlogTopic> topics;
 }

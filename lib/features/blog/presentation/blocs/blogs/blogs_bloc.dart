@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
+import 'package:social_app/features/blog/domain/constants/blog_paging.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
+import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_blog_changes.dart';
@@ -17,13 +19,23 @@ part 'blogs_state.dart';
 /// BLoC responsible for displaying a paginated list of blogs.
 ///
 /// This bloc combines:
-/// - pagination via use cases (`GetBlogsPage`, `GetBlogsCount`)
+/// - pagination via use cases (`WatchBlogsPage`, `GetBlogsCount`)
 /// - real-time blog updates via a stream use case
 /// - infinite scrolling driven by a `ScrollController`
+/// - cache-first page loading where a single page may emit more than once
 ///
 /// Blog changes (insert/update/delete) are received through a stream and
 /// converted into events to ensure all state mutations flow through the
 /// BLoC event system.
+///
+/// A page loaded through `WatchBlogsPage` can emit:
+/// - cached data first
+/// - fresh remote data later
+/// - cached data again with a refresh failure
+///
+/// Because of that, the bloc stores pages internally in `_pages` and replaces
+/// a page's content when a newer snapshot arrives instead of blindly appending
+/// blogs to the existing flat list.
 
 /// Manages the blog feed state, including pagination, loading states,
 /// and real-time updates to already loaded blogs.
@@ -33,35 +45,63 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   /// - subscribes to real-time blog changes
   /// - triggers the initial page load
   BlogsBloc({
-    required GetBlogsPage getBlogsPage,
+    required WatchBlogsPage watchBlogsPage,
     required GetBlogsCount getBlogsCount,
     required WatchBlogChanges watchBlogChanges,
-  }) : _getBlogsPage = getBlogsPage,
+  }) : _watchBlogsPage = watchBlogsPage,
        _getBlogsCount = getBlogsCount,
        _watchBlogChanges = watchBlogChanges,
        super(const BlogsLoading(blogs: [], pageNumber: 1)) {
     on<LoadBlogsNextPage>(_onLoadBlogsNextPage);
     on<BlogChangeReceived>(_onBlogChangeReceived);
     on<RefreshBlogsView>(_onRefreshBlogsView);
+    on<_BlogsPageSnapshotReceived>(_onBlogsPageSnapshotReceived);
 
     _addListenerToScrollController();
     _addListenerToSubscription();
 
     add(LoadBlogsNextPage());
   }
-  final GetBlogsPage _getBlogsPage;
+
+  /// Stream use case used to observe one page at a time with cache-first
+  /// semantics.
+  final WatchBlogsPage _watchBlogsPage;
+
+  /// One-shot use case used to retrieve the total number of blogs.
   final GetBlogsCount _getBlogsCount;
+
+  /// Passive stream used to receive realtime insert/update/delete events.
   final WatchBlogChanges _watchBlogChanges;
 
-  // Listens to scroll position to trigger pagination when nearing the bottom
+  /// Scroll controller exposed to the page for infinite scroll behavior.
   final ScrollController _scrollController = ScrollController();
-  // Subscription to passive blog change stream (insert/update/delete)
+
+  /// Subscription to the global realtime blog-change stream.
   late final StreamSubscription<Either<Failure, BlogChange>> _blogChangeSub;
 
+  /// Loaded pages keyed by page number.
+  ///
+  /// This is the bloc's source of truth for paginated data. It lets the bloc
+  /// replace a page when a fresher snapshot arrives without duplicating items
+  /// already rendered from a cached emission.
+  final Map<int, List<Blog>> _pages = {};
+
+  /// Active page subscriptions keyed by page number.
+  ///
+  /// Each page is listened to independently because `WatchBlogsPage(page)` is a
+  /// stream that may emit multiple snapshots for the same page.
+  final Map<int, StreamSubscription<Either<Failure, BlogsPageSnapshot>>>
+  _pageSubs = {};
+
   @override
+  /// Cancels realtime and page-level subscriptions before disposing the
+  /// controller and closing the bloc.
   Future<void> close() async {
     try {
-      await _blogChangeSub.cancel();
+      await Future.wait([
+        _blogChangeSub.cancel(),
+        ..._pageSubs.values.map((subscription) => subscription.cancel()),
+      ]);
     } finally {
       try {
         _scrollController.dispose();
@@ -71,12 +111,13 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     }
   }
 
-  // Re-emit the current state to trigger rebuild
+  /// Re-emits the current state to force a rebuild without changing data.
   void _onRefreshBlogsView(RefreshBlogsView event, Emitter<BlogsState> emit) {
     emit(state.copyWith());
   }
 
-  // Triggers pagination when the user scrolls close to the bottom of the list.
+  /// Triggers pagination when the user scrolls close to the bottom of the
+  /// current list.
   void _addListenerToScrollController() {
     _scrollController.addListener(() {
       if (_scrollController.offset >=
@@ -104,6 +145,10 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
   ///
   /// These changes may affect blogs that were already loaded via pagination.
   /// This handler does not trigger refetching or pagination.
+  ///
+  /// After applying the change to the flat list shown in the state, `_pages`
+  /// is rebuilt from that updated list so future cache/remote page snapshots
+  /// remain aligned with the currently visible feed.
   void _onBlogChangeReceived(
     BlogChangeReceived event,
     Emitter<BlogsState> emit,
@@ -120,47 +165,69 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         );
       },
       (blogChange) {
-        if (blogChange is BlogInserted) {
-          emit(
-            state.copyWith(
-              blogs: [blogChange.blog, ...state.blogs],
-              totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 0) + 1,
-            ),
-          );
-        }
+        final updatedBlogs = switch (blogChange) {
+          BlogInserted(:final blog) => [blog, ...state.blogs],
+          BlogUpdated(:final blog) =>
+            state.blogs
+                .map(
+                  (loadedBlog) => loadedBlog.id == blog.id ? blog : loadedBlog,
+                )
+                .toList(),
+          BlogDeleted(:final blogId) =>
+            state.blogs.where((blog) => blog.id != blogId).toList(),
+        };
+        final nextTotalBlogsInDatabase = switch (blogChange) {
+          BlogInserted() => (state.totalBlogsInDatabase ?? 0) + 1,
+          BlogDeleted() => (state.totalBlogsInDatabase ?? 1) - 1,
+          BlogUpdated() => state.totalBlogsInDatabase,
+        };
 
-        if (blogChange is BlogUpdated) {
-          emit(
-            state.copyWith(
-              blogs: state.blogs
-                  .map(
-                    (blog) =>
-                        blog.id == blogChange.blog.id ? blogChange.blog : blog,
-                  )
-                  .toList(),
-            ),
-          );
-        }
+        _syncPagesFromBlogs(updatedBlogs);
 
-        if (blogChange is BlogDeleted) {
-          emit(
-            state.copyWith(
-              blogs: state.blogs
-                  .where((blog) => blog.id != blogChange.blogId)
-                  .toList(),
-              totalBlogsInDatabase: (state.totalBlogsInDatabase ?? 1) - 1,
-            ),
-          );
-        }
+        emit(
+          state.copyWith(
+            blogs: updatedBlogs,
+            totalBlogsInDatabase: nextTotalBlogsInDatabase,
+          ),
+        );
       },
     );
+  }
+
+  /// Rebuilds the internal page map from a flat list of blogs.
+  ///
+  /// This is used after realtime insert/update/delete events, which operate on
+  /// the list currently shown to the user rather than on a single page.
+  void _syncPagesFromBlogs(List<Blog> blogs) {
+    _pages
+      ..clear()
+      ..addAll(_chunkBlogs(blogs));
+  }
+
+  /// Splits a flat list of blogs into fixed-size pages using `blogPageSize`.
+  Map<int, List<Blog>> _chunkBlogs(List<Blog> blogs) {
+    final pages = <int, List<Blog>>{};
+
+    for (var start = 0; start < blogs.length; start += blogPageSize) {
+      final pageNumber = (start ~/ blogPageSize) + 1;
+      final end = start + blogPageSize > blogs.length
+          ? blogs.length
+          : start + blogPageSize;
+      pages[pageNumber] = blogs.sublist(start, end);
+    }
+
+    return pages;
   }
 
   /// Loads the next page of blogs if available.
   ///
   /// Pagination is skipped if:
   /// - the total number of blogs is already loaded
-  /// - a loading operation is already in progress
+  /// - a stream for the requested page is already active
+  ///
+  /// The requested page is listened to as a stream rather than awaited once,
+  /// because the repository may emit cached data first and then fresh remote
+  /// data for the same page.
   Future<void> _onLoadBlogsNextPage(
     LoadBlogsNextPage event,
     Emitter<BlogsState> emit,
@@ -169,14 +236,16 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       await _initializeBlogsCount(emit);
     }
 
-    // If we don't have more blogs to load, do nothing
-    if (state.blogs.length == state.totalBlogsInDatabase &&
-        state.totalBlogsInDatabase != 0) {
+    final pageToLoad = state.pageNumber;
+    final totalBlogsInDatabase = state.totalBlogsInDatabase;
+
+    if (_pageSubs.containsKey(pageToLoad)) {
       return;
     }
-    // Avoid emitting loading state if we already have blogs loading
-    // This is not triggered on the initial load
-    if (state is BlogsLoading && state.blogs.isNotEmpty) {
+
+    if (totalBlogsInDatabase != null &&
+        totalBlogsInDatabase != 0 &&
+        state.blogs.length >= totalBlogsInDatabase) {
       return;
     }
 
@@ -187,29 +256,13 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         totalBlogsInDatabase: state.totalBlogsInDatabase,
       ),
     );
-    final result = await _getBlogsPage(
-      state.pageNumber,
-    );
-    result.fold(
-      (error) {
-        emit(
-          BlogsFailure(
-            error: error.message,
-            blogs: state.blogs,
-            pageNumber: state.pageNumber,
-            totalBlogsInDatabase: state.totalBlogsInDatabase,
-          ),
-        );
+
+    _pageSubs[pageToLoad] = _watchBlogsPage(pageToLoad).listen(
+      (result) {
+        add(_BlogsPageSnapshotReceived(pageToLoad, result));
       },
-      (blogsNextPage) {
-        final newBlogs = <Blog>[...state.blogs, ...blogsNextPage];
-        emit(
-          BlogsSuccess(
-            blogs: newBlogs,
-            pageNumber: state.pageNumber + 1,
-            totalBlogsInDatabase: state.totalBlogsInDatabase,
-          ),
-        );
+      onDone: () {
+        _pageSubs.remove(pageToLoad);
       },
     );
   }
@@ -251,5 +304,76 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         );
       },
     );
+  }
+
+  /// Applies a cache-first page snapshot emitted by `WatchBlogsPage`.
+  ///
+  /// A successful snapshot replaces the page stored under `event.pageNumber`,
+  /// then all loaded pages are flattened in order to rebuild the list exposed
+  /// by the public state.
+  ///
+  /// If `refreshFailure` is present, the bloc keeps the last usable blogs but
+  /// exposes the refresh error through a `BlogsFailure` state.
+  void _onBlogsPageSnapshotReceived(
+    _BlogsPageSnapshotReceived event,
+    Emitter<BlogsState> emit,
+  ) {
+    event.result.fold(
+      (failure) {
+        emit(
+          BlogsFailure(
+            error: failure.message,
+            blogs: state.blogs,
+            pageNumber: state.pageNumber,
+            totalBlogsInDatabase: state.totalBlogsInDatabase,
+          ),
+        );
+      },
+      (snapshot) {
+        _pages[event.pageNumber] = snapshot.blogs;
+        final flattenedBlogs = _flattenPages();
+        final nextPageNumber = _nextPageNumber();
+
+        if (snapshot.refreshFailure != null) {
+          emit(
+            BlogsFailure(
+              error: snapshot.refreshFailure!.message,
+              blogs: flattenedBlogs,
+              pageNumber: nextPageNumber,
+              totalBlogsInDatabase: state.totalBlogsInDatabase,
+            ),
+          );
+          return;
+        }
+
+        emit(
+          BlogsSuccess(
+            blogs: flattenedBlogs,
+            pageNumber: nextPageNumber,
+            totalBlogsInDatabase: state.totalBlogsInDatabase,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Flattens all loaded pages into a single ordered list for UI consumption.
+  List<Blog> _flattenPages() {
+    final orderedPages = _pages.keys.toList()..sort();
+    return orderedPages.expand((pageNumber) => _pages[pageNumber]!).toList();
+  }
+
+  /// Returns the next page number that should be requested.
+  ///
+  /// This is derived from the highest loaded page, not from the current state
+  /// object, so repeated cache/remote emissions for the same page do not
+  /// accidentally advance pagination more than once.
+  int _nextPageNumber() {
+    if (_pages.isEmpty) {
+      return 1;
+    }
+
+    return (_pages.keys.reduce((left, right) => left > right ? left : right)) +
+        1;
   }
 }

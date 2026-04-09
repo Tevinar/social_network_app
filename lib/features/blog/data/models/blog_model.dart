@@ -1,4 +1,5 @@
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 
 /// A blog model.
 class BlogModel {
@@ -11,21 +12,24 @@ class BlogModel {
     required this.imageUrl,
     required this.topics,
     required this.updatedAt,
-    this.posterName,
+    required this.posterName,
   });
 
-  /// Creates a [BlogModel].
-  factory BlogModel.fromJson(Map<String, dynamic> map) {
+  /// Creates a [BlogModel] from a JSON map returned by Supabase.
+  factory BlogModel.fromSupabaseJson(Map<String, dynamic> map) {
     return BlogModel(
       id: (map['id'] as String?) ?? '',
       posterId: (map['poster_id'] as String?) ?? '',
       title: (map['title'] as String?) ?? '',
       content: (map['content'] as String?) ?? '',
       imageUrl: (map['image_url'] as String?) ?? '',
-      topics: List<String>.from((map['topics'] as List<dynamic>?) ?? []),
+      topics: ((map['topics'] as List<dynamic>?) ?? [])
+          .map((topic) => BlogTopic.fromValue(topic as String))
+          .toList(),
       updatedAt: map['updated_at'] == null
           ? DateTime.now()
           : DateTime.parse(map['updated_at'] as String),
+      posterName: map['poster_name'] as String? ?? '',
     );
   }
 
@@ -45,23 +49,23 @@ class BlogModel {
   final String imageUrl;
 
   /// The topics.
-  final List<String> topics;
+  final List<BlogTopic> topics;
 
   /// The updated at.
   final DateTime updatedAt;
 
   /// The poster name.
-  final String? posterName;
+  final String posterName;
 
-  /// The to json.
-  Map<String, dynamic> toJson() {
+  /// Converts the blog model to a JSON map for Supabase insertion.
+  Map<String, dynamic> toSupabaseInsertJson() {
     return <String, dynamic>{
       'id': id,
       'poster_id': posterId,
       'title': title,
       'content': content,
       'image_url': imageUrl,
-      'topics': topics,
+      'topics': topics.map((topic) => topic.value).toList(),
       'updated_at': updatedAt.toIso8601String(),
     };
   }
@@ -84,7 +88,7 @@ class BlogModel {
     String? imageUrl,
 
     /// The topics.
-    List<String>? topics,
+    List<BlogTopic>? topics,
 
     /// The updated at.
     DateTime? updatedAt,

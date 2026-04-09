@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
 
 void main() {
@@ -11,7 +12,7 @@ void main() {
     title: 'Title',
     content: List.filled(220, 'word').join(' '),
     imageUrl: 'https://image',
-    topics: const ['Tech', 'Science'],
+    topics: const [BlogTopic.technology, BlogTopic.programming],
     updatedAt: DateTime(2025),
     posterName: 'Alice',
   );
@@ -30,8 +31,8 @@ void main() {
       );
 
       // Assert
-      expect(find.text('Tech'), findsOneWidget);
-      expect(find.text('Science'), findsOneWidget);
+      expect(find.text('Technology'), findsOneWidget);
+      expect(find.text('Programming'), findsOneWidget);
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('1 min'), findsOneWidget);
     },

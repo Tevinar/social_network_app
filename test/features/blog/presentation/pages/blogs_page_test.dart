@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
@@ -30,7 +31,7 @@ void main() {
     title: 'Title',
     content: 'Content',
     imageUrl: 'https://image',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: DateTime(2025),
     posterName: 'Alice',
   );
@@ -146,7 +147,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Error loading blogs'), findsOneWidget);
+    expect(find.text('boom'), findsOneWidget);
   });
 
   testWidgets('shows the list of blogs and a loader for the next page', (

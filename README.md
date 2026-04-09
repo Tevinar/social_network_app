@@ -11,7 +11,7 @@ Social App is a client application built with Flutter. It currently covers
 three main capabilities:
 
 - email/password authentication
-- real-time blog publishing with image upload
+- real-time blog publishing with image upload and offline-aware reading
 - real-time chat and messaging
 
 The project is intended as a technical codebase
@@ -24,6 +24,7 @@ This project solves the need for a single codebase that combines:
 - session-aware navigation
 - feature isolation
 - real-time updates
+- local-first blog loading and disk-cached blog images
 - backend integration through clear infrastructure boundaries
 
 It is a mobile-first Flutter application, but the repository also includes the standard multi-platform Flutter targets.
@@ -51,7 +52,9 @@ The main goals of the project are:
 
 - Database: Supabase Postgres
 - Query layer: `supabase_flutter` / Supabase client APIs and RPC calls
-- Cache: no dedicated caching layer yet
+- Local structured cache: Drift / SQLite for blog persistence
+- Local file cache: disk-backed cache for blog images
+- Read strategy: cache-first streams for blog pages and blog viewer flows
 
 ### Infrastructure
 
@@ -88,7 +91,8 @@ zones:
 
 At runtime, feature UI is coordinated with BLoC/Cubit, navigation is handled
 through `GoRouter`, dependencies are composed with `GetIt`, and repositories
-expose safe results through `Either<Failure, T>`.
+expose safe results through `Either<Failure, T>` or cache-first stream
+snapshots when stale local data can be shown before remote refresh completes.
 
 For the full architectural rules, dependency direction, testing conventions,
 and runtime coordination patterns, see [architecture.md](./architecture.md).
@@ -122,7 +126,7 @@ Main folders:
 
 - Unit tests
 - Widget tests for targeted UI behavior
-- Current automated coverage baseline: 100% line coverage across the project
+- Current automated coverage baseline: is at least 70% line coverage across the project
 
 ## Getting Started
 
@@ -131,6 +135,7 @@ Main folders:
 You need:
 
 - Flutter SDK compatible with `sdk: ^3.10.4`
+- a working Flutter toolchain for your target platform
 
 ### Installation
 

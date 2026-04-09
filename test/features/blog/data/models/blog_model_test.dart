@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 
 void main() {
   final updatedAt = DateTime(2025, 1, 1, 12);
@@ -9,14 +10,15 @@ void main() {
     title: 'Title',
     content: 'Content',
     imageUrl: 'https://image',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: updatedAt,
     posterName: 'Alice',
   );
 
-  group('BlogModel.fromJson', () {
+  group('BlogModel.fromSupabaseJson', () {
     test(
-      'given a complete json when fromJson is called then returns a BlogModel',
+      'given a complete json when fromSupabaseJson is called then returns '
+      'a BlogModel',
       () {
         // Arrange
         final json = <String, dynamic>{
@@ -25,12 +27,13 @@ void main() {
           'title': 'Title',
           'content': 'Content',
           'image_url': 'https://image',
-          'topics': ['Tech'],
+          'topics': ['Technology'],
           'updated_at': updatedAt.toIso8601String(),
+          'poster_name': 'Alice',
         };
 
         // Act
-        final result = BlogModel.fromJson(json);
+        final result = BlogModel.fromSupabaseJson(json);
 
         // Assert
         expect(result.id, 'blog-1');
@@ -38,19 +41,20 @@ void main() {
         expect(result.title, 'Title');
         expect(result.content, 'Content');
         expect(result.imageUrl, 'https://image');
-        expect(result.topics, const ['Tech']);
+        expect(result.topics, const [BlogTopic.technology]);
         expect(result.updatedAt, updatedAt);
+        expect(result.posterName, 'Alice');
       },
     );
 
     test(
-      'given missing fields when fromJson is called then uses defaults',
+      'given missing fields when fromSupabaseJson is called then uses defaults',
       () {
         // Arrange
         final before = DateTime.now();
 
         // Act
-        final result = BlogModel.fromJson(const <String, dynamic>{});
+        final result = BlogModel.fromSupabaseJson(const <String, dynamic>{});
 
         // Assert
         final after = DateTime.now();
@@ -75,10 +79,11 @@ void main() {
   });
 
   test(
-    'given a model when toJson is called then returns a serializable map',
+    'given a model when toSupabaseInsertJson is called then returns a '
+    'serializable map',
     () {
       // Act
-      final result = model.toJson();
+      final result = model.toSupabaseInsertJson();
 
       // Assert
       expect(result, <String, dynamic>{
@@ -87,7 +92,7 @@ void main() {
         'title': 'Title',
         'content': 'Content',
         'image_url': 'https://image',
-        'topics': ['Tech'],
+        'topics': ['Technology'],
         'updated_at': updatedAt.toIso8601String(),
       });
     },
@@ -103,7 +108,7 @@ void main() {
         title: 'New Title',
         content: 'New Content',
         imageUrl: 'https://new-image',
-        topics: const ['Science'],
+        topics: const [BlogTopic.programming],
         updatedAt: DateTime(2025, 2),
         posterName: 'Bob',
       );
@@ -114,7 +119,7 @@ void main() {
       expect(result.title, 'New Title');
       expect(result.content, 'New Content');
       expect(result.imageUrl, 'https://new-image');
-      expect(result.topics, const ['Science']);
+      expect(result.topics, const [BlogTopic.programming]);
       expect(result.updatedAt, DateTime(2025, 2));
       expect(result.posterName, 'Bob');
     },

@@ -1,19 +1,20 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 
-/// A get blogs page widget.
-class GetBlogsPage implements UseCase<List<Blog>, int> {
-  /// Creates a [GetBlogsPage].
-  GetBlogsPage({required this.blogRepository});
+/// Watches a page of blogs, emitting cached data first and remote updates next.
+class WatchBlogsPage
+    implements StreamUseCase<Either<Failure, BlogsPageSnapshot>, int> {
+  /// Creates a [WatchBlogsPage].
+  WatchBlogsPage({required this.blogRepository});
 
-  /// The blog repository.
-  BlogRepository blogRepository;
+  /// Repository used to observe paged blog snapshots.
+  final BlogRepository blogRepository;
 
   @override
-  Future<Either<Failure, List<Blog>>> call(int pageNumber) {
-    return blogRepository.getBlogsPage(pageNumber);
+  Stream<Either<Failure, BlogsPageSnapshot>> call(int pageNumber) {
+    return blogRepository.watchBlogsPage(pageNumber);
   }
 }

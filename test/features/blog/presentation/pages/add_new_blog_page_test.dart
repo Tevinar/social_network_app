@@ -14,6 +14,7 @@ import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/services/image_picker_service.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/add_new_blog_page.dart';
 
@@ -38,6 +39,7 @@ void main() {
     registerFallbackValue(
       AddBlog(
         posterId: '',
+        posterName: '',
         title: '',
         content: '',
         image: File('/tmp/fallback.png'),
@@ -317,9 +319,14 @@ void main() {
         any(
           that: isA<AddBlog>()
               .having((event) => event.posterId, 'posterId', 'user-1')
+              .having((event) => event.posterName, 'posterName', 'Alice')
               .having((event) => event.title, 'title', 'Title')
               .having((event) => event.content, 'content', 'Content')
-              .having((event) => event.topics, 'topics', ['Technology'])
+              .having(
+                (event) => event.topics,
+                'topics',
+                const [BlogTopic.technology],
+              )
               .having(
                 (event) => event.image.path,
                 'image.path',

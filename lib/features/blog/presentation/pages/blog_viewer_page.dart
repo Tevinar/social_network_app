@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/calculate_reading_time.dart';
 import 'package:social_app/core/utils/format_date.dart';
@@ -13,27 +14,11 @@ class BlogViewerPage extends StatelessWidget {
   /// Creates a [BlogViewerPage].
   const BlogViewerPage({
     required this.blogId,
-    this.imageProvider,
-    this.precacheImageCallback,
     super.key,
   });
 
   /// The blog ID.
   final String blogId;
-
-  /// The image provider used to render the blog image.
-  ///
-  /// This is mainly useful in tests to avoid real network image loading.
-  final ImageProvider<Object>? imageProvider;
-
-  /// The callback used to precache the image before rendering the page body.
-  ///
-  /// This is mainly useful in tests to control or bypass image precaching.
-  final Future<void> Function(BuildContext, ImageProvider<Object>)?
-  precacheImageCallback;
-
-  ImageProvider<Object> _resolvedImageProvider(Blog blog) =>
-      imageProvider ?? NetworkImage(blog.imageUrl);
 
   /// Builds the blog viewer page.
   @override
@@ -82,12 +67,7 @@ class BlogViewerPage extends StatelessWidget {
   Widget _buildBlogContent(BuildContext context, BlogViewerSuccess state) {
     final blog = state.blog;
     return FutureBuilder(
-      future:
-          precacheImageCallback?.call(
-            context,
-            _resolvedImageProvider(blog),
-          ) ??
-          precacheImage(_resolvedImageProvider(blog), context),
+      future: _prepareBlogImage(context, blog),
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return const Loader();
@@ -124,10 +104,7 @@ class BlogViewerPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(10),
-                    child: Image(image: _resolvedImageProvider(blog)),
-                  ),
+                  _displayBlogImage(context, asyncSnapshot.data, blog),
                   const SizedBox(height: 20),
                   Text(
                     blog.content,
@@ -140,5 +117,60 @@ class BlogViewerPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _displayBlogImage(
+    BuildContext context,
+    ImageProvider<Object>? imageProvider,
+    Blog blog,
+  ) {
+    if (imageProvider == null) {
+      return Container(
+        height: 220,
+        alignment: Alignment.center,
+        child: const Text('Image unavailable offline'),
+      );
+    } else {
+      return Image(
+        image: imageProvider,
+        errorBuilder: (_, _, _) {
+          return Container(
+            height: 220,
+            alignment: Alignment.center,
+            child: const Text('Image unavailable'),
+          );
+        },
+      );
+    }
+  }
+
+  Future<ImageProvider<Object>?> _resolveBlogImage(Blog blog) async {
+    final downloadedFile = await serviceLocator<ImageFileCache>().getOrDownload(
+      cacheKey: blog.id,
+      imageUrl: blog.imageUrl,
+    );
+
+    if (downloadedFile == null) {
+      return null;
+    }
+
+    return FileImage(downloadedFile);
+  }
+
+  Future<ImageProvider<Object>?> _prepareBlogImage(
+    BuildContext context,
+    Blog blog,
+  ) async {
+    final resolvedImageProvider = await _resolveBlogImage(blog);
+    if (resolvedImageProvider == null) {
+      return null;
+    }
+    if (!context.mounted) {
+      return resolvedImageProvider;
+    }
+
+    await precacheImage(resolvedImageProvider, context);
+
+    return resolvedImageProvider;
   }
 }

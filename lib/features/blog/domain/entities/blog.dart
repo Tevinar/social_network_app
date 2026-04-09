@@ -1,3 +1,5 @@
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+
 /// Domain entity representing a blog post displayed in the app.
 class Blog {
   /// Creates a [Blog].
@@ -9,7 +11,7 @@ class Blog {
     required this.imageUrl,
     required this.topics,
     required this.updatedAt,
-    this.posterName,
+    required this.posterName,
   });
 
   /// Unique blog identifier.
@@ -28,11 +30,11 @@ class Blog {
   final String imageUrl;
 
   /// Topics associated with the blog.
-  final List<String> topics;
+  final List<BlogTopic> topics;
 
   /// Last update date used for ordering and display.
   final DateTime updatedAt;
 
-  /// Optional poster name resolved for display purposes.
-  final String? posterName;
+  /// Poster name resolved for display purposes.
+  final String posterName;
 }

@@ -16,5 +16,17 @@ final class BlogChangeReceived extends BlogsEvent {
   final Either<Failure, BlogChange> blogChange;
 }
 
+/// A blogs page snapshot received from the cache-first stream.
+final class _BlogsPageSnapshotReceived extends BlogsEvent {
+  /// Creates a [_BlogsPageSnapshotReceived].
+  _BlogsPageSnapshotReceived(this.pageNumber, this.result);
+
+  /// The page that emitted.
+  final int pageNumber;
+
+  /// The emitted repository result for that page.
+  final Either<Failure, BlogsPageSnapshot> result;
+}
+
 /// A refresh blogs view.
 class RefreshBlogsView extends BlogsEvent {}

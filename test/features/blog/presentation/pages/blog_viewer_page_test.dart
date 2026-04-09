@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -9,46 +8,22 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
+import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_blog_by_id.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
 
-class _TestImageProvider extends ImageProvider<_TestImageProvider> {
-  const _TestImageProvider();
+class MockWatchBlogById extends Mock implements WatchBlogById {}
 
-  @override
-  Future<_TestImageProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture(this);
-
-  @override
-  ImageStreamCompleter loadImage(
-    _TestImageProvider key,
-    ImageDecoderCallback decode,
-  ) {
-    return OneFrameImageStreamCompleter(_loadImageInfo());
-  }
-
-  Future<ImageInfo> _loadImageInfo() async {
-    final completer = Completer<ui.Image>();
-    ui.decodeImageFromPixels(
-      Uint8List.fromList([255, 255, 255, 255]),
-      1,
-      1,
-      ui.PixelFormat.rgba8888,
-      completer.complete,
-    );
-
-    final image = await completer.future;
-    return ImageInfo(image: image);
-  }
-}
-
-class MockGetBlogById extends Mock implements GetBlogById {}
+class MockImageFileCache extends Mock implements ImageFileCache {}
 
 void main() {
-  late MockGetBlogById getBlogById;
+  late MockWatchBlogById watchBlogById;
+  late MockImageFileCache imageFileCache;
 
   final blog = Blog(
     id: 'blog-1',
@@ -56,18 +31,36 @@ void main() {
     title: 'Title',
     content: List.filled(220, 'word').join(' '),
     imageUrl: 'https://image.test/blog.png',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: DateTime(2025),
     posterName: 'Alice',
   );
 
   setUp(() async {
     await GetIt.I.reset();
-    getBlogById = MockGetBlogById();
-    when(() => getBlogById(any())).thenAnswer((_) async => right(blog));
-    serviceLocator.registerFactory<BlogViewerBloc>(
-      () => BlogViewerBloc(getBlogById: getBlogById),
+    watchBlogById = MockWatchBlogById();
+    imageFileCache = MockImageFileCache();
+    when(() => watchBlogById(any())).thenAnswer(
+      (_) => Stream.value(
+        right(
+          BlogSnapshot(
+            blog: blog,
+            source: BlogSource.remote,
+          ),
+        ),
+      ),
     );
+    when(
+      () => imageFileCache.getOrDownload(
+        cacheKey: any(named: 'cacheKey'),
+        imageUrl: any(named: 'imageUrl'),
+      ),
+    ).thenAnswer((_) async => null);
+    serviceLocator
+      ..registerFactory<BlogViewerBloc>(
+        () => BlogViewerBloc(watchBlogById: watchBlogById),
+      )
+      ..registerLazySingleton<ImageFileCache>(() => imageFileCache);
   });
 
   tearDown(() async {
@@ -82,16 +75,17 @@ void main() {
     'given a blog is fetched when BlogViewerPage is rendered then it shows '
     'a loader during image precache before the content',
     (tester) async {
-      final precacheCompleter = Completer<void>();
+      final imageCompleter = Completer<File?>();
+      when(
+        () => imageFileCache.getOrDownload(
+          cacheKey: blog.id,
+          imageUrl: blog.imageUrl,
+        ),
+      ).thenAnswer((_) => imageCompleter.future);
 
       await tester.pumpWidget(
         buildTestableWidget(
-          child: BlogViewerPage(
-            blogId: blog.id,
-            imageProvider: const _TestImageProvider(),
-            precacheImageCallback: (context, imageProvider) =>
-                precacheCompleter.future,
-          ),
+          child: BlogViewerPage(blogId: blog.id),
         ),
       );
 
@@ -100,7 +94,7 @@ void main() {
 
       expect(find.byType(Loader), findsOneWidget);
 
-      precacheCompleter.complete();
+      imageCompleter.complete(null);
       await tester.pumpAndSettle();
 
       expect(find.text('Title'), findsOneWidget);
@@ -113,28 +107,32 @@ void main() {
     'given the fetch is pending when BlogViewerPage is rendered then it '
     'fetches the blog by id and then shows the content',
     (tester) async {
-      final request = Completer<Either<Failure, Blog>>();
+      final controller = StreamController<Either<Failure, BlogSnapshot>>();
+      addTearDown(controller.close);
 
-      when(() => getBlogById(blog.id)).thenAnswer((_) => request.future);
+      when(() => watchBlogById(blog.id)).thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(
         buildTestableWidget(
-          child: BlogViewerPage(
-            blogId: blog.id,
-            imageProvider: const _TestImageProvider(),
-            precacheImageCallback: (context, imageProvider) async {},
-          ),
+          child: BlogViewerPage(blogId: blog.id),
         ),
       );
 
       await tester.pump();
-      expect(find.byType(Loader), findsNothing);
+      expect(find.byType(Loader), findsOneWidget);
       expect(find.text('Title'), findsNothing);
 
-      request.complete(right(blog));
+      controller.add(
+        right(
+          BlogSnapshot(
+            blog: blog,
+            source: BlogSource.remote,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      verify(() => getBlogById(blog.id)).called(1);
+      verify(() => watchBlogById(blog.id)).called(1);
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('By Alice'), findsOneWidget);
     },
@@ -144,8 +142,8 @@ void main() {
     'given the blog fetch fails when BlogViewerPage is rendered then it '
     'shows the failure message',
     (tester) async {
-      when(() => getBlogById(blog.id)).thenAnswer(
-        (_) async => left(const ValidationFailure('Blog fetch failed')),
+      when(() => watchBlogById(blog.id)).thenAnswer(
+        (_) => Stream.value(left(const ValidationFailure('Blog fetch failed'))),
       );
 
       await tester.pumpWidget(
@@ -164,23 +162,66 @@ void main() {
   );
 
   testWidgets(
-    'given no precache callback when BlogViewerPage is rendered then it '
-    'shows a loader while the default precacheImage future resolves',
+    'given cached data and a refresh failure when BlogViewerPage is rendered '
+    'then it keeps showing the blog content',
     (tester) async {
+      when(() => watchBlogById(blog.id)).thenAnswer(
+        (_) => Stream.fromIterable([
+          right(
+            BlogSnapshot(
+              blog: blog,
+              source: BlogSource.cache,
+            ),
+          ),
+          right(
+            BlogSnapshot(
+              blog: blog,
+              source: BlogSource.cache,
+              refreshFailure: const ValidationFailure('Refresh failed'),
+            ),
+          ),
+        ]),
+      );
+
       await tester.pumpWidget(
         buildTestableWidget(
-          child: BlogViewerPage(
-            blogId: blog.id,
-            imageProvider: const _TestImageProvider(),
-          ),
+          child: BlogViewerPage(blogId: blog.id),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Title'), findsOneWidget);
+      expect(find.text('By Alice'), findsOneWidget);
+      expect(find.text(blog.content), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'given image resolution is pending when BlogViewerPage is rendered then '
+    'it shows a loader while the image future resolves',
+    (tester) async {
+      final imageCompleter = Completer<File?>();
+      when(
+        () => imageFileCache.getOrDownload(
+          cacheKey: blog.id,
+          imageUrl: blog.imageUrl,
+        ),
+      ).thenAnswer((_) => imageCompleter.future);
+
+      await tester.pumpWidget(
+        buildTestableWidget(
+          child: BlogViewerPage(blogId: blog.id),
         ),
       );
 
       await tester.pump();
       await tester.pump();
-      await tester.pump();
 
       expect(find.byType(Loader), findsOneWidget);
+
+      imageCompleter.complete(null);
+      await tester.pumpAndSettle();
     },
   );
 
@@ -198,9 +239,6 @@ void main() {
                     MaterialPageRoute<void>(
                       builder: (_) => BlogViewerPage(
                         blogId: blog.id,
-                        imageProvider: const _TestImageProvider(),
-                        precacheImageCallback:
-                            (context, imageProvider) async {},
                       ),
                     ),
                   ),

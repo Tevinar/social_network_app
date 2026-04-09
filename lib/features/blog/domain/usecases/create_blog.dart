@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 
 /// Validates blog input data and delegates blog creation to the repository.
@@ -41,6 +42,7 @@ class CreateBlog implements UseCase<Blog, CreateBlogParams> {
       title: params.title,
       content: params.content,
       posterId: params.posterId,
+      posterName: params.posterName,
       topics: params.topics,
     );
   }
@@ -51,6 +53,7 @@ class CreateBlogParams {
   /// Creates a [CreateBlogParams].
   CreateBlogParams({
     required this.posterId,
+    required this.posterName,
     required this.title,
     required this.content,
     required this.image,
@@ -59,6 +62,9 @@ class CreateBlogParams {
 
   /// Identifier of the user creating the blog.
   final String posterId;
+
+  /// Name of the user creating the blog.
+  final String posterName;
 
   /// Blog title.
   final String title;
@@ -70,5 +76,5 @@ class CreateBlogParams {
   final File image;
 
   /// Selected topics attached to the blog.
-  final List<String> topics;
+  final List<BlogTopic> topics;
 }

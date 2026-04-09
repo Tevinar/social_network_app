@@ -126,7 +126,7 @@ Main folders:
 
 - Unit tests
 - Widget tests for targeted UI behavior
-- Current automated coverage baseline: 100% line coverage across the project
+- Current automated coverage baseline: is at least 70% line coverage across the project
 
 ## Getting Started
 

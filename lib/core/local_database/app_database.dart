@@ -17,6 +17,9 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
 
+  /// Creates an in-memory database for tests or isolated execution contexts.
+  AppDatabase.test(super.e);
+
   // You should bump this number whenever you change or add a table definition.
   @override
   int get schemaVersion => 1;

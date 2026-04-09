@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:social_app/core/local_storage/app_directory_provider.dart';
+import 'package:social_app/core/network/http_downloader.dart';
 
 /// A disk cache for remote image files.
 // ignore: one_member_abstracts
@@ -13,10 +14,22 @@ abstract interface class ImageFileCache {
   });
 }
 
-/// A file-based implementation of [ImageFileCache].
+/// An implementation of [ImageFileCache] that uses the device's file system
+/// to cache images.
 class ImageFileCacheImpl implements ImageFileCache {
+  /// Creates an [ImageFileCacheImpl].
+  ImageFileCacheImpl({
+    AppDirectoryProvider? directoryProvider,
+    HttpDownloader? httpDownloader,
+  }) : _directoryProvider =
+           directoryProvider ?? PathProviderAppDirectoryProvider(),
+       _httpDownloader = httpDownloader ?? DartHttpDownloader();
+
+  final AppDirectoryProvider _directoryProvider;
+  final HttpDownloader _httpDownloader;
+
   Future<Directory> get _cacheDir async {
-    final baseDir = await getApplicationDocumentsDirectory();
+    final baseDir = await _directoryProvider.getApplicationDocumentsDirectory();
     final dir = Directory('${baseDir.path}/image_cache');
     if (!dir.existsSync()) {
       await dir.create(recursive: true);
@@ -47,23 +60,17 @@ class ImageFileCacheImpl implements ImageFileCache {
       return cachedFile;
     }
 
-    final client = HttpClient();
     try {
-      final request = await client.getUrl(Uri.parse(imageUrl));
-      final response = await request.close();
-
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        return null;
-      }
-
-      final bytes = await consolidateHttpClientResponseBytes(response);
+      final bytes = await _downloadImage(Uri.parse(imageUrl));
       final file = await _fileFor(cacheKey);
       await file.writeAsBytes(bytes, flush: true);
       return file;
     } on Exception {
       return null;
-    } finally {
-      client.close(force: true);
     }
+  }
+
+  Future<Uint8List> _downloadImage(Uri uri) {
+    return _httpDownloader.downloadBytes(uri);
   }
 }

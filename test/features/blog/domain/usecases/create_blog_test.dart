@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
 
@@ -21,8 +22,9 @@ void main() {
     title: 'Title',
     content: 'Content',
     imageUrl: 'https://image',
-    topics: const ['Tech'],
+    topics: const [BlogTopic.technology],
     updatedAt: DateTime(2025),
+    posterName: 'Alice',
   );
 
   setUpAll(() {
@@ -40,10 +42,12 @@ void main() {
     String title = 'Title',
     String content = 'Content',
     String posterId = 'user-1',
-    List<String> topics = const ['Tech'],
+    String posterName = 'Alice',
+    List<BlogTopic> topics = const [BlogTopic.technology],
   }) {
     return CreateBlogParams(
       posterId: posterId,
+      posterName: posterName,
       title: title,
       content: content,
       image: image ?? defaultImage,
@@ -73,6 +77,7 @@ void main() {
           title: any(named: 'title'),
           content: any(named: 'content'),
           posterId: any(named: 'posterId'),
+          posterName: any(named: 'posterName'),
           topics: any(named: 'topics'),
         ),
       );
@@ -155,6 +160,7 @@ void main() {
           title: any(named: 'title'),
           content: any(named: 'content'),
           posterId: any(named: 'posterId'),
+          posterName: any(named: 'posterName'),
           topics: any(named: 'topics'),
         ),
       ).thenAnswer((_) async => right<Failure, Blog>(blog));
@@ -170,7 +176,8 @@ void main() {
           title: 'Title',
           content: 'Content',
           posterId: 'user-1',
-          topics: const ['Tech'],
+          posterName: 'Alice',
+          topics: const [BlogTopic.technology],
         ),
       ).called(1);
     },

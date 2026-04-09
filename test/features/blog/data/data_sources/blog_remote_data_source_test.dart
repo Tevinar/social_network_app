@@ -11,6 +11,7 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../helpers/supabase_fakes.dart';
@@ -35,7 +36,7 @@ void main() {
     BlogFields.title: 'Title',
     BlogFields.content: 'Content',
     BlogFields.imageUrl: 'https://image',
-    BlogFields.topics: ['Tech'],
+    BlogFields.topics: ['Technology'],
     BlogFields.updatedAt: DateTime(2025).toIso8601String(),
     Tables.profiles: <String, dynamic>{ProfileFields.name: 'Alice'},
   };
@@ -79,15 +80,16 @@ void main() {
           title: 'Title',
           content: 'Content',
           imageUrl: 'https://image',
-          topics: const ['Tech'],
+          topics: const [BlogTopic.technology],
           updatedAt: DateTime(2025),
+          posterName: 'Alice',
         );
 
         // Act
         final result = await dataSource.postBlog(blogModel);
 
         // Assert
-        expect(insertBuilder.insertedValues, blogModel.toJson());
+        expect(insertBuilder.insertedValues, blogModel.toSupabaseInsertJson());
         expect(result.id, 'blog-1');
         expect(result.title, 'Title');
         expect(result.content, 'Content');
@@ -111,8 +113,9 @@ void main() {
             title: 'Title',
             content: 'Content',
             imageUrl: 'https://image',
-            topics: const ['Tech'],
+            topics: const [BlogTopic.technology],
             updatedAt: DateTime(2025),
+            posterName: 'Alice',
           ),
         );
 
@@ -394,7 +397,7 @@ void main() {
               BlogFields.title: 'Title',
               BlogFields.content: 'Content',
               BlogFields.imageUrl: 'https://image',
-              BlogFields.topics: ['Tech'],
+              BlogFields.topics: ['Technology'],
               BlogFields.updatedAt: 'invalid',
             },
             oldRecord: const {},

@@ -11,6 +11,7 @@ import 'package:social_app/core/constants/supabase_schema/tables.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
+import 'package:social_app/features/blog/domain/constants/blog_paging.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,10 +50,10 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
     return guardRemoteDataSourceCall(() async {
       final blogData = await supabaseClient
           .from(Tables.blogs)
-          .insert(blog.toJson())
+          .insert(blog.toSupabaseInsertJson())
           .select();
 
-      return BlogModel.fromJson(blogData.first);
+      return BlogModel.fromSupabaseJson(blogData.first);
     });
   }
 
@@ -74,9 +75,8 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   @override
   Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
     return guardRemoteDataSourceCall(() async {
-      const pageSize = 20;
-      final from = (pageNumber - 1) * pageSize;
-      final to = from + pageSize - 1;
+      final from = (pageNumber - 1) * blogPageSize;
+      final to = from + blogPageSize - 1;
 
       final rawBlogs = await supabaseClient
           .from(Tables.blogs)
@@ -88,7 +88,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         (rawBlog) {
           final profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
           final posterName = profile?[ProfileFields.name] as String?;
-          return BlogModel.fromJson(rawBlog).copyWith(
+          return BlogModel.fromSupabaseJson(rawBlog).copyWith(
             posterName: posterName,
           );
         },
@@ -171,14 +171,18 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
                       case PostgresChangeEvent.insert:
                         controller.add(
                           BlogInserted(
-                            BlogModel.fromJson(payload.newRecord).toEntity(),
+                            BlogModel.fromSupabaseJson(
+                              payload.newRecord,
+                            ).toEntity(),
                           ),
                         );
 
                       case PostgresChangeEvent.update:
                         controller.add(
                           BlogUpdated(
-                            BlogModel.fromJson(payload.newRecord).toEntity(),
+                            BlogModel.fromSupabaseJson(
+                              payload.newRecord,
+                            ).toEntity(),
                           ),
                         );
 
@@ -223,7 +227,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
       final profile = blogData[Tables.profiles] as Map<String, dynamic>?;
       final posterName = profile?[ProfileFields.name] as String?;
 
-      return BlogModel.fromJson(blogData).copyWith(
+      return BlogModel.fromSupabaseJson(blogData).copyWith(
         posterName: posterName,
       );
     });

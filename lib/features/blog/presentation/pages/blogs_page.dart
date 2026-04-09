@@ -85,12 +85,14 @@ class BlogsPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, BlogsState state) {
-    if (state is BlogsFailure) {
-      return const Center(child: Text('Error loading blogs'));
-    }
-
     if (state is BlogsLoading && state.blogs.isEmpty) {
       return _buildLoadingPlaceholders();
+    }
+
+    if (state is BlogsFailure && state.blogs.isEmpty) {
+      return Center(
+        child: Text(state.error),
+      );
     }
 
     return _buildBlogsList(context, state);

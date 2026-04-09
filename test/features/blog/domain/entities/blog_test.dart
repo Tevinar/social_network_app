@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
 
 void main() {
   test(
@@ -15,7 +16,7 @@ void main() {
         title: 'Title',
         content: 'Content',
         imageUrl: 'https://image',
-        topics: const ['Tech'],
+        topics: const [BlogTopic.technology],
         updatedAt: updatedAt,
         posterName: 'Alice',
       );
@@ -26,7 +27,7 @@ void main() {
       expect(blog.title, 'Title');
       expect(blog.content, 'Content');
       expect(blog.imageUrl, 'https://image');
-      expect(blog.topics, const ['Tech']);
+      expect(blog.topics, const [BlogTopic.technology]);
       expect(blog.updatedAt, updatedAt);
       expect(blog.posterName, 'Alice');
     },

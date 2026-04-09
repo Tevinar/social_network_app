@@ -2,25 +2,36 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/local_storage/app_directory_provider.dart';
 import 'package:social_app/core/local_storage/image_file_cache.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/network/http_downloader.dart';
 
 class MockAppDirectoryProvider extends Mock implements AppDirectoryProvider {}
 
 class MockHttpDownloader extends Mock implements HttpDownloader {}
 
+class MockAppLogger extends Mock implements AppLogger {}
+
 void main() {
   late MockAppDirectoryProvider directoryProvider;
   late MockHttpDownloader httpDownloader;
+  late MockAppLogger logger;
   late ImageFileCacheImpl imageFileCache;
   late Directory tempDirectory;
 
-  setUp(() {
+  setUp(() async {
     directoryProvider = MockAppDirectoryProvider();
     httpDownloader = MockHttpDownloader();
+    logger = MockAppLogger();
     tempDirectory = Directory.systemTemp.createTempSync('image-cache-test');
+
+    if (GetIt.I.isRegistered<AppLogger>()) {
+      await GetIt.I.unregister<AppLogger>();
+    }
+    GetIt.I.registerSingleton<AppLogger>(logger);
 
     when(
       () => directoryProvider.getApplicationDocumentsDirectory(),
@@ -33,6 +44,7 @@ void main() {
   });
 
   tearDown(() async {
+    await GetIt.I.reset();
     if (tempDirectory.existsSync()) {
       await tempDirectory.delete(recursive: true);
     }

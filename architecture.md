@@ -1,75 +1,38 @@
 # Architecture
 
-This document describes the architectural structure of the project, the main
-design principles, and the practical rules used to keep the codebase
-maintainable and scalable.
+This document defines the project structure, the responsibilities of each
+module, and the practical rules used to keep the codebase maintainable as it
+grows.
 
-## 1. Purpose
+## 1. Goals
 
-This architecture was chosen to organize the project around three clear
-responsibility zones:
+The architecture is designed to provide:
 
-- `core/` for passive, reusable technical building blocks
-- `app/` for application-level orchestration
-- `features/` for business capabilities
+- clear ownership of code
+- explicit boundaries between business logic, app orchestration, and shared
+  technical code
+- low coupling between features
+- predictable data flow
+- scalability without widespread rewrites
 
-The goals are:
+The core organizing question for any file is:
 
-- scalability as features grow
-- readability through explicit structure
-- separation of responsibilities
-- maintainability over time
-- ease of evolution without widespread coupling
-
-This structure is intended to make it easy to answer a practical question for
-any file: is this a low-level tool, an app-wide coordinator, or part of a
-business capability?
+- is it a passive shared building block?
+- is it app-wide coordination?
+- is it part of a business capability?
 
 ---
 
-## 2. Architectural Principles
-
-The project follows these principles:
-
-- separation of concerns
-- explicit boundaries
-- low coupling between business capabilities
-- dependency inversion where it improves clarity
-- modularity by feature
-- predictability in data flow
-- passive shared foundations
-- pragmatic consistency over dogmatism
-
----
-
-## 3. High-Level Overview
-
-At a high level, the project is organized like this:
-
-- the interface layer lives mainly in `features/*/presentation` and renders UI
-  while coordinating state through BLoC/Cubit
-- the domain layer lives in `features/*/domain` and contains entities, use
-  cases, and repository contracts
-- the infrastructure layer lives in `features/*/data` and implements those
-  contracts through Supabase and other technical services
-- the shared low-level foundation lives in `core/`
-- the application-wide coordination layer lives in `app/` and sits alongside
-  feature modules rather than between every feature layer
-
----
-
-## 4. Project Structure
-
-The project is structured as follows:
+## 2. Project Structure
 
 ```text
 lib/
  ├── core/
  ├── app/
- ├── features/
+ └── features/
 ```
 
-Feature modules are further organized like this:
+Feature modules follow the same internal structure:
 
 ```text
 features/
@@ -87,75 +50,73 @@ features/
       └── presentation/
 ```
 
-This is a practical structure used to keep the codebase understandable as it
-grows, not a strict academic layering exercise.
+This is a practical structure for clarity and growth, not an academic layering
+exercise.
 
 ---
 
-## 5. Layer Responsibilities
+## 3. Responsibilities by Module
 
 ### `core/`
 
-Responsibility:
+Purpose:
 
-- provide low-level, feature-agnostic building blocks
+- passive, feature-agnostic technical building blocks
 
-Contains:
+Typical contents:
 
-- shared error abstractions
-- shared constants and schema names
+- shared errors and low-level abstractions
 - configuration access
-- low-level network abstractions
-- use case conventions
+- shared constants and schema names
 - reusable utilities
-- feature-agnostic shared widgets
+- use case conventions
+- feature-agnostic widgets
 - technical service abstractions
 
 Must not contain:
 
-- app flows
-- BLoCs / Cubits
-- feature use cases
 - business concepts such as `User`, `Blog`, or `Chat`
-- navigation or orchestration logic
+- feature use cases
+- app flows, navigation, or orchestration logic
+- BLoCs or Cubits
 
-Important rule:
+Rule:
 
 - code in `core/` should still make sense if all features were removed
 
 ### `app/`
 
-Responsibility:
+Purpose:
 
-- orchestrate global application behavior
+- application-wide orchestration
 
-Contains:
+Typical contents:
 
 - bootstrap and startup coordination
 - dependency injection wiring
 - routing and route guards
 - app shell
 - global session state
-- app-level logging integration
-- concrete implementations of shared technical services when they are app-wide
+- app-wide logging integration
+- concrete shared service implementations when they are truly global
 
 Must not contain:
 
 - feature-specific business logic
 - feature persistence details
-- domain rules belonging to one business capability
+- domain rules owned by a single feature
 
-Important rule:
+Rule:
 
-- `app/` coordinates features, but does not become a new business layer
+- `app/` coordinates features, but is not a business layer
 
 ### `features/*/domain/`
 
-Responsibility:
+Purpose:
 
-- own the business-facing behavior of a feature
+- business-facing logic and contracts for a feature
 
-Contains:
+Typical contents:
 
 - entities
 - value objects when needed
@@ -164,22 +125,22 @@ Contains:
 
 Must not contain:
 
-- framework-specific UI logic
 - transport models
-- external system implementation details
+- UI logic
+- external system implementations
 
 ### `features/*/data/`
 
-Responsibility:
+Purpose:
 
-- implement infrastructure details for a feature
+- infrastructure details and external integration for a feature
 
-Contains:
+Typical contents:
 
 - repository implementations
 - data sources
-- DTOs / transport models
-- external persistence integration
+- DTOs and models
+- external persistence and API integration
 
 Must not contain:
 
@@ -189,233 +150,204 @@ Must not contain:
 
 ### `features/*/presentation/`
 
-Responsibility:
+Purpose:
 
-- render UI and coordinate feature-scoped state
+- UI rendering and feature-scoped state coordination
 
-Contains:
+Typical contents:
 
 - pages
 - widgets
-- BLoCs / Cubits
+- BLoCs and Cubits
 - events and states
 
 Must not contain:
 
 - direct persistence logic
-- external API handling
 - low-level infrastructure details
+- external API handling
 
 ---
 
-## 6. Dependency Rules
+## 4. Dependency Rules
 
-The main dependency rules are:
+The default direction of responsibility is:
+
+```text
+Presentation
+↓
+Domain
+↓
+Data
+```
+
+Practical dependency rules:
 
 - `core/` must not depend on `app/` or `features/`
-- `app/` may depend on stable abstractions and coordinate features
+- `app/` may coordinate features and depend on stable abstractions
 - `features/*/presentation` may depend on feature domain and selected app-level
   coordinators
 - `features/*/domain` must not depend on `features/*/data`
 - `features/*/data` implements domain contracts
-- feature presentation should not depend on other feature presentation layers
-- feature data should not depend on presentation
+- feature presentation must not depend on other feature presentation layers
+- feature data must not depend on presentation
 
-Practical reading of the dependency direction:
+Notes:
 
-```text
-Feature UI
-↓
-Feature Domain
-↓
-Feature Data
-```
-
-`app/` is not a mandatory middle layer for every feature flow. It exists for
-global coordination concerns such as bootstrap, routing, lifecycle, and session
-state.
-
-This is a rule of responsibility and ownership more than a rigid import graph.
-
-Shared code is allowed only when ownership is explicit and justified.
+- `app/` is not a mandatory middle layer for every feature flow
+- shared code is allowed only when ownership is explicit and justified
 
 ---
 
-## 7. Application Flow
+## 5. Runtime and Data Flow
 
-A typical command flow is:
+### Command flow
 
 1. a user interacts with a page or widget
-2. a BLoC/Cubit in `presentation/` receives the intent
-3. the BLoC invokes a use case from `domain/`
+2. a BLoC or Cubit in `presentation/` receives the intent
+3. it invokes a use case from `domain/`
 4. the use case delegates to a repository contract
 5. the repository implementation in `data/` performs the technical work
 6. results are mapped back to domain entities or failures
 7. the BLoC emits a new UI state
 
-A typical reactive flow is:
+### Reactive flow
 
 1. a repository exposes a passive stream of domain-level changes
-2. a BLoC subscribes to that stream
-3. stream emissions are converted into BLoC events
-4. state is updated through the BLoC event pipeline
+2. a use case exposes that stream to presentation
+3. a BLoC subscribes to the stream
+4. stream emissions are converted into BLoC events
+5. state changes still go through the BLoC event pipeline
 
-An app-wide coordination flow looks different:
+### App-wide coordination
 
-1. startup or session state changes occur
-2. `app/` modules coordinate routing, bootstrap, or global session behavior
-3. features react to the resulting app-level state when needed
+Some runtime concerns are global rather than feature-local. In this project,
+they are centered on:
 
-This keeps business actions inside features while reserving `app/` for global
-coordination concerns such as startup, navigation, and session handling.
+- `app/bootstrap` for startup
+- `app/router` for navigation
+- `app/session` for global session state
+- `GetIt` for dependency composition
+- `GoRouter` for navigation
+- BLoC/Cubit for state management
+
+Rule:
+
+- feature behavior stays inside features
+- global lifecycle, routing, and session concerns live in `app/`
 
 ---
 
-## 8. Error Handling Strategy
+## 6. Error Handling
 
-Errors are represented and propagated according to their level:
+Errors are handled according to their level:
 
-- infrastructure and external integrations may produce technical exceptions
+- infrastructure code may throw technical exceptions
 - repositories map those exceptions into safe `Failure` objects
-- use cases and presentation layers consume `Either<Failure, T>`
+- use cases and presentation consume `Either<Failure, T>`
 - UI receives intentional, user-safe messages
-- logs may keep richer technical details than user-facing states
+- logs may keep richer technical details than UI state
 
 Practical rules:
 
-- technical exceptions should not leak directly to the UI
+- technical exceptions must not leak directly to the UI
+- expected failures should be modeled explicitly
 - unexpected failures should be logged with stack traces
-- expected business-safe failures should be modeled explicitly
-- global handlers exist as a last-resort safety net, not as a replacement for
-  local responsibility
-
-This keeps the application behavior explicit while preserving observability.
+- global handlers are a safety net, not a replacement for local handling
 
 ---
 
-## 9. Shared Services and Cross-Cutting Concerns
+## 7. Shared Code and Cross-Cutting Concerns
 
-The project shares some concerns across modules:
+Shared concerns in this project include:
 
 - logging
 - configuration and environment access
 - connectivity checking
 - image picking abstraction
-- shared formatting and technical utilities
-- common theme and small UI primitives
+- formatting and technical utilities
+- theme and small UI primitives
 
-Rules for deciding where shared code belongs:
+Placement rules:
 
-- put passive, feature-agnostic technical code in `core/`
-- put app-wide coordination concerns in `app/`
-- do not move feature logic into shared modules just to reduce duplication
-- do not turn `core/` into a dumping ground
+- passive, feature-agnostic technical code belongs in `core/`
+- app-wide coordination belongs in `app/`
+- feature logic must stay in features, even if duplication exists
+- `core/` must not become a dumping ground
 
-An external dependency is acceptable in `core/` only when it supports an
-architectural convention, not when it introduces app-specific behavior.
+An external dependency belongs in `core/` only when it supports an
+architectural convention rather than app-specific behavior.
 
 ---
 
-## 10. Testing Strategy
+## 8. Testing Strategy
 
-The testing strategy should prioritize behavior over surface area.
-The current project baseline is 100% line coverage.
+Testing should prioritize behavior over surface area.
 
 Recommended focus:
 
 - unit tests for use cases, repositories, mappers, and BLoCs/Cubits
 - focused widget tests for critical screens and interactions
-- integration tests where boundaries with external systems matter
+- integration tests where external boundaries matter
 
 Practical rules:
 
 - test business behavior inside features first
 - mock data sources when testing repositories
 - mock repositories or use cases when testing BLoCs/Cubits
-- keep passive helpers and mappers easy to test in isolation
-- low-signal bootstrap or declarative configuration code does not need the same
-  testing priority as business behavior
+- keep helpers and mappers easy to test in isolation
+- low-signal bootstrap or declarative wiring does not need the same testing
+  priority as behavior-owning code
 
-The goal is not to maximize coverage mechanically. The goal is to test the code
-that owns decisions and behavior. In this project, the expectation is to keep
-that discipline while preserving the 100% coverage baseline over time.
+The goal is not mechanical coverage. The goal is to test code that owns
+decisions and behavior. The current project baseline is high, but the lasting
+expectation is to preserve disciplined behavior-focused coverage and maintain at
+least a 70% overall baseline over time.
 
 ---
 
-## 11. Conventions and Practical Rules
+## 9. Practical Conventions
 
-The following conventions make the architecture usable in daily work:
+Default placement rules:
 
-- DTOs / transport models live in `data/models`
+- DTOs and transport models live in `data/models`
 - external system access lives in `data/data_sources`
 - repository implementations live in `data/repositories`
-- business-facing use cases live in `domain/usecases`
-- shared low-level abstractions belong in `core/`
-- app-wide coordination belongs in `app/`
-- feature UI state belongs in `presentation/`
+- use cases live in `domain/usecases`
+- feature UI state lives in `presentation/`
 
-Additional rules:
+Additional conventions:
 
-- mapping logic should live in models, repositories, or dedicated mappers, not
-  in the UI
-- feature BLoCs should coordinate feature behavior, not low-level technical
-  details
+- mapping logic belongs in models, repositories, or dedicated mappers, not in
+  the UI
+- feature BLoCs coordinate behavior, not low-level technical details
 - app-level state should exist only when the concern is truly global
-- structure should grow only when needed
-- not every operation needs a new abstraction if it adds no real clarity
+- new abstractions should be introduced only when they add real clarity
 
 Sharing rules:
 
-- domain entities may be shared only with clear ownership and intention
+- domain entities may be shared only with clear ownership
 - feature UI, feature BLoCs, and DTOs should not be shared arbitrarily
 
 ---
 
-## 12. Runtime and Coordination Patterns
-
-Because this is a Flutter client application, runtime coordination is centered
-on:
-
-- BLoC/Cubit for state management
-- `GoRouter` for navigation
-- `GetIt` for dependency composition
-- async repository calls for commands and queries
-- passive streams for realtime backend-driven updates
-
-Important patterns in this project:
-
-- app-wide session state is coordinated in `app/session`
-- feature state is coordinated inside feature presentation modules
-- some states are global, while others are page-scoped when isolation matters
-- startup is coordinated in `app/bootstrap`
-- navigation is coordinated in `app/router`
-
-This keeps runtime orchestration visible and explicit instead of spreading it
-across unrelated modules.
-
----
-
-## 13. Trade-offs and Practical Decisions
+## 10. Trade-offs
 
 This architecture is intentionally pragmatic.
 
-Important trade-offs:
+Guiding rules:
+
+- `core/` stays passive
+- `app/` orchestrates globally
+- `features/` own business behavior
+
+Practical trade-offs:
 
 - not every operation needs its own abstraction
-- use cases are kept when they improve consistency and ownership, not only for
-  academic purity
-- `core/` stays intentionally limited
-- `app/` is an orchestration layer, not a hidden business layer
-- some cross-feature sharing is tolerated when ownership is explicit and the
-  concept is genuinely shared
+- use cases are kept when they improve clarity, consistency, or ownership
+- `app/` must not become a hidden business layer
+- some cross-feature sharing is acceptable when the concept is genuinely shared
+  and ownership is explicit
 - clarity is preferred over unnecessary indirection
 
-The guiding rule is:
-
-- `core` stays passive
-- `app` orchestrates globally
-- `features` own business behavior
-
-Consistency is preferred, but pragmatism is allowed when justified.
-
----
+Consistency matters, but pragmatism is allowed when justified.

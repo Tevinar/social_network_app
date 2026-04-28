@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:social_app/core/local_database/schema/app_settings.dart';
 import 'package:social_app/core/local_database/schema/cached_blogs.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [CachedBlogs])
+@DriftDatabase(tables: [CachedBlogs, AppSettings])
 /// The app database.
 /// This is the main entry point for accessing the local database in the app.
 class AppDatabase extends _$AppDatabase {
@@ -29,12 +30,13 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (m) async => m.createAll(),
     onUpgrade: (m, from, to) async {
       if (from < 2) await _migrateTo2(m);
+
       // Add more migration steps here as needed
       // when you increase the schema version.
     },
   );
 
   Future<void> _migrateTo2(Migrator m) async {
-    // Implement the logic to migrate the database to version 2.
+    await m.createTable(appSettings);
   }
 }

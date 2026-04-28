@@ -1,40 +1,51 @@
-import 'package:social_app/core/constants/error_messages.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/'
-    'profile_fields.dart';
+import 'package:dio/dio.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:social_app/core/local_database/app_settings_store.dart';
+import 'package:social_app/core/local_database/schema/app_settings.dart';
+import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
+import 'package:social_app/features/auth/data/models/auth_session_model.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
-// This abstraction keeps the data layer decoupled from Supabase so another
-// backend implementation can be introduced later without changing callers.
-/// An auth remote data source.
+/// Remote boundary for backend authentication requests.
 abstract interface class AuthRemoteDataSource {
-  /// The sign up with email password.
+  /// Registers a user through the backend and returns the authenticated user.
   Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   });
 
-  /// The sign in with email password.
+  /// Authenticates a user through the backend and returns the signed-in user.
   Future<UserModel> signInWithEmailPassword({
     required String email,
     required String password,
   });
 
-  /// The sign out.
+  /// Revokes the current backend refresh session and clears local auth state.
   Future<void> signOut();
-
-  /// The auth state changes.
-  Stream<UserModel?> authStateChanges();
 }
 
-/// An auth remote data source supabase impl.
-class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
-  /// Creates a [AuthRemoteDataSourceSupabaseImpl].
-  const AuthRemoteDataSourceSupabaseImpl(this._supabaseClient);
-  final SupabaseClient _supabaseClient;
+/// Dio-backed implementation of [AuthRemoteDataSource].
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  /// Creates a backend auth data source.
+  ///
+  /// [dio] must be configured with the backend base URL. [appSettingsStore]
+  /// provides the stable device identifier required by the auth API, and
+  /// [authSessionStore] persists the token session returned by sign-in and
+  /// sign-up.
+  const AuthRemoteDataSourceImpl({
+    required AppSettingsStore appSettingsStore,
+    required Dio dio,
+    required AuthSessionStore authSessionStore,
+  }) : _appSettingsStore = appSettingsStore,
+       _dio = dio,
+       _authSessionStore = authSessionStore;
+
+  final AppSettingsStore _appSettingsStore;
+  final Dio _dio;
+  final AuthSessionStore _authSessionStore;
 
   @override
   Future<UserModel> signInWithEmailPassword({
@@ -42,14 +53,39 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      final response = await _supabaseClient.auth.signInWithPassword(
-        password: password,
-        email: email,
+      final deviceId = await _appSettingsStore.getOrCreate(
+        key: AppSettingKey.deviceId,
+        create: const Uuid().v4,
       );
-      if (response.user == null) {
-        throw const ServerException(message: ErrorMessages.userNull);
+
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/sign-in',
+        data: {
+          'email': email,
+          'password': password,
+          'deviceId': deviceId,
+        },
+      );
+
+      final body = response.data;
+
+      if (body == null) {
+        throw const ServerException(message: 'Sign in response body is empty');
       }
-      return UserModel.fromAuthJson(response.user!.toJson());
+
+      final userJson = body['user'];
+
+      if (userJson is! Map<String, dynamic>) {
+        throw const ServerException(
+          message: 'Sign in response user is invalid',
+        );
+      }
+
+      await _authSessionStore.saveSession(
+        AuthSessionModel.fromJson(body),
+      );
+
+      return UserModel.fromJson(userJson);
     });
   }
 
@@ -60,64 +96,67 @@ class AuthRemoteDataSourceSupabaseImpl implements AuthRemoteDataSource {
     required String password,
   }) async {
     return guardRemoteDataSourceCall(() async {
-      final response = await _supabaseClient.auth.signUp(
-        password: password,
-        email: email,
-        data: {ProfileFields.name: name},
+      final deviceId = await _appSettingsStore.getOrCreate(
+        key: AppSettingKey.deviceId,
+        create: const Uuid().v4,
       );
-      if (response.user == null) {
-        throw const ServerException(message: ErrorMessages.userNull);
+
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/sign-up',
+        data: {
+          'name': name,
+          'email': email,
+          'password': password,
+          'deviceId': deviceId,
+        },
+      );
+
+      final body = response.data;
+
+      if (body == null) {
+        throw const ServerException(message: 'Sign up response body is empty');
       }
-      return UserModel.fromAuthJson(response.user!.toJson());
+
+      final userJson = body['user'];
+
+      if (userJson is! Map<String, dynamic>) {
+        throw const ServerException(
+          message: 'Sign up response user is invalid',
+        );
+      }
+
+      await _authSessionStore.saveSession(
+        AuthSessionModel.fromJson(body),
+      );
+
+      return UserModel.fromJson(userJson);
     });
   }
 
   @override
   Future<void> signOut() async {
     return guardRemoteDataSourceCall(() async {
-      await _supabaseClient.auth.signOut();
-    });
-  }
+      final session = await _authSessionStore.getSession();
 
-  // Emits authentication state changes as a stream of [UserModel].
-  //
-  // This method exposes Supabase Auth's real-time authentication stream and
-  // adapts it to the application's data layer by mapping vendor payloads into
-  // [UserModel].
-  //
-  // ### Execution boundary ownership (important)
-  // Unlike Future-based remote methods, this method does not own the execution
-  // lifecycle. Supabase Auth owns the stream and may emit events or errors
-  // asynchronously long after this method has returned.
-  //
-  // For this reason, this method **must not translate errors** into custom
-  // infrastructure exceptions (e.g. `ServerException`), as doing so would
-  // interfere with the upstream stream lifecycle.
-  //
-  // ### Emitted values
-  // - Emits a non-null [UserModel] when a user is authenticated
-  // - Emits `null` when the user signs out or when no active session exists
-  //
-  // `null` represents a **valid signed-out state**, not an error.
-  //
-  // ### Error handling responsibility
-  // - Errors emitted by Supabase Auth are allowed to propagate as stream errors
-  // - Translation of vendor errors into infrastructure exceptions or domain
-  //   failures is handled by the **repository layer**
-  //
-  // This ensures:
-  // - long-lived stream stability
-  // - correct distinction between logout and error states
-  // - proper ownership of error semantics
-  @override
-  Stream<UserModel?> authStateChanges() {
-    return _supabaseClient.auth.onAuthStateChange.map((data) {
-      final session = data.session;
-      final supabaseUser = session?.user;
+      if (session == null) {
+        await _authSessionStore.clearSession();
+        return;
+      }
 
-      return supabaseUser == null
-          ? null
-          : UserModel.fromAuthJson(supabaseUser.toJson());
+      final deviceId = await _appSettingsStore.getOrCreate(
+        key: AppSettingKey.deviceId,
+        create: const Uuid().v4,
+      );
+
+      await _dio.post<void>(
+        '/auth/sign-out',
+        data: {
+          'refreshToken': session.refreshToken,
+          'deviceId': deviceId,
+        },
+      );
+
+      await _authSessionStore.clearSession();
     });
   }
 }

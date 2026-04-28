@@ -5,13 +5,14 @@ final GetIt serviceLocator = GetIt.instance;
 
 /// The init dependencies.
 Future<void> initDependencies() async {
-  // Shared public config is committed for zero-config onboarding.
-  await dotenv.load(fileName: 'assets/config/env.public');
-  final supabase = await Supabase.initialize(
-    url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
+  serviceLocator.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        baseUrl: Env.backendBaseUrl,
+        headers: {'content-type': 'application/json'},
+      ),
+    ),
   );
-  serviceLocator.registerLazySingleton(() => supabase.client);
 
   // app
   _initApp();
@@ -64,11 +65,18 @@ void _initAuth() {
     // AuthRemoteDataSource, not on AuthRemoteDataSourceSupabaseImpl directly.
     // Without this explicit type, GetIt could not resolve the dependency.
     ..registerLazySingleton<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceSupabaseImpl(serviceLocator()),
+      () => AuthRemoteDataSourceImpl(
+        appSettingsStore: serviceLocator(),
+        dio: serviceLocator(),
+        authSessionStore: serviceLocator(),
+      ),
     )
     // Repositories
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(authRemoteDataSource: serviceLocator()),
+      () => AuthRepositoryImpl(
+        authRemoteDataSource: serviceLocator(),
+        authSessionStore: serviceLocator(),
+      ),
     )
     // Usecases
     ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))

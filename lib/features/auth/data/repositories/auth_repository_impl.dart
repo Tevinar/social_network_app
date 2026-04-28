@@ -3,16 +3,21 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 
 /// An auth repository impl.
 class AuthRepositoryImpl implements AuthRepository {
   /// Creates a [AuthRepositoryImpl].
-  const AuthRepositoryImpl({required AuthRemoteDataSource authRemoteDataSource})
-    : _authRemoteDataSource = authRemoteDataSource;
+  const AuthRepositoryImpl({
+    required AuthRemoteDataSource authRemoteDataSource,
+    required AuthSessionStore authSessionStore,
+  }) : _authRemoteDataSource = authRemoteDataSource,
+       _authSessionStore = authSessionStore;
+
   final AuthRemoteDataSource _authRemoteDataSource;
+  final AuthSessionStore _authSessionStore;
 
   @override
   Future<Either<Failure, User>> signInWithEmailPassword({
@@ -91,13 +96,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<Either<Failure, User?>> authStateChanges() async* {
     try {
-      await for (final UserModel? userModel
-          in _authRemoteDataSource.authStateChanges()) {
-        // userModel == null → signed out (valid state)
-        if (userModel == null) {
+      await for (final session in _authSessionStore.watchSession()) {
+        final user = session?.user;
+
+        if (user == null) {
           yield right(null);
         } else {
-          yield right(userModel.toEntity());
+          yield right(user.toEntity());
         }
       }
     } on Exception catch (error, stackTrace) {
@@ -110,7 +115,7 @@ class AuthRepositoryImpl implements AuthRepository {
           stackTrace: stackTrace,
         );
       }
-      // Any unexpected stream error is translated into a Failure
+
       yield left(failure);
     }
   }

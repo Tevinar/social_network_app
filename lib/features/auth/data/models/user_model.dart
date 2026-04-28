@@ -9,28 +9,17 @@ class UserModel {
     required this.email,
   });
 
-  /// Creates a [UserModel] from a profile row payload.
-  factory UserModel.fromProfileJson(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      email: '', // profiles table doesn’t own email
-    );
-  }
-
   /// Creates a [UserModel] from a domain [User].
   factory UserModel.fromEntity(User user) {
     return UserModel(id: user.id, name: user.name, email: user.email);
   }
 
-  /// Creates a [UserModel] from an auth payload.
-  factory UserModel.fromAuthJson(Map<String, dynamic> map) {
+  /// Creates a [UserModel] from json.
+  factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] as String,
       email: map['email'] as String,
-      name:
-          (map['user_metadata'] as Map<String, dynamic>?)?['name'] as String? ??
-          '',
+      name: map['name'] as String,
     );
   }
 

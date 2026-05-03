@@ -1,19 +1,23 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:social_app/app/network/http_sse_client.dart';
 import 'package:social_app/app/logging/app_talker_logger.dart';
 import 'package:social_app/app/logging/talker_config.dart';
 import 'package:social_app/app/services/image_picker_service_impl.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/config/env.dart';
 import 'package:social_app/core/local_database/app_database.dart';
+import 'package:social_app/core/local_database/app_settings_store.dart';
 import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/network/connection_checker.dart';
+import 'package:social_app/core/network/sse/sse_client.dart';
 import 'package:social_app/core/services/image_picker_service.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
 import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
@@ -27,10 +31,8 @@ import 'package:social_app/features/blog/data/repositories/blog_repository_impl.
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blog_by_id_use_case.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_feed_events_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_feed_slice_use_case.dart';
-import 'package:social_app/features/blog/domain/usecases/watch_blog_by_id.dart';
-import 'package:social_app/features/blog/domain/usecases/watch_blog_changes.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_feed/blog_feed_bloc.dart';
@@ -58,6 +60,5 @@ import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_edi
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'init_dependencies.main.dart';

@@ -60,6 +60,13 @@ void _initCore() {
 
 void _initAuth() {
   serviceLocator
+    ..registerLazySingleton(() => const FlutterSecureStorage())
+    ..registerLazySingleton<AuthSessionStore>(
+      () => SecureAuthSessionStore(serviceLocator()),
+    )
+    ..registerLazySingleton<AppSettingsStore>(
+      () => DriftAppSettingsStore(serviceLocator()),
+    )
     // Datasources
     // We register the interface type because AuthRepositoryImpl depends on
     // AuthRemoteDataSource, not on AuthRemoteDataSourceSupabaseImpl directly.
@@ -94,9 +101,9 @@ void _initAuth() {
     // BLoC
     ..registerLazySingleton(
       () => AuthBloc(
-        userSignUp: serviceLocator(),
-        userSignIn: serviceLocator(),
-        watchAuthStateChanges: serviceLocator(),
+        userSignUpUseCase: serviceLocator(),
+        userSignInUseCase: serviceLocator(),
+        watchAuthStateChangesUseCase: serviceLocator(),
       ),
     );
 }
@@ -107,8 +114,17 @@ void _initBlog() {
     ..registerLazySingleton<BlogLocalDataSource>(
       () => BlogLocalDataSourceDriftImpl(database: serviceLocator()),
     )
+    ..registerLazySingleton<SseClient>(
+      () => HttpSseClient(
+        baseUrl: Env.backendBaseUrl,
+        authSessionStore: serviceLocator(),
+      ),
+    )
     ..registerLazySingleton<BlogRemoteDataSource>(
-      () => BlogRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+      () => BlogRemoteDataSourceImpl(
+        dio: serviceLocator(),
+        sseClient: serviceLocator(),
+      ),
     )
     // Repositories
     ..registerLazySingleton<BlogRepository>(
@@ -122,27 +138,22 @@ void _initBlog() {
       () => CreateBlogUseCase(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(() => GetBlogByIdUseCase(serviceLocator()))
-    ..registerLazySingleton(() => WatchBlogById(serviceLocator()))
     ..registerLazySingleton(
       () => WatchFeedSliceUseCase(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetBlogsCount(blogRepository: serviceLocator()),
-    )
-    ..registerLazySingleton(
-      () => WatchBlogChanges(blogRepository: serviceLocator()),
+      () => WatchFeedEventsUseCase(blogRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
     ..registerLazySingleton(
       () => BlogFeedBloc(
-        watchBlogsPage: serviceLocator(),
-        getBlogsCount: serviceLocator(),
-        watchBlogChanges: serviceLocator(),
+        watchFeedSliceUseCase: serviceLocator(),
+        watchFeedEventsUseCase: serviceLocator(),
       ),
     )
     ..registerFactory(
-      () => BlogViewerBloc(watchBlogById: serviceLocator()),
+      () => BlogViewerBloc(getBlogByIdUseCase: serviceLocator()),
     );
 }
 

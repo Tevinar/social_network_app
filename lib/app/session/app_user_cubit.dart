@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
@@ -46,7 +45,7 @@ class AppUserCubit extends Cubit<AppUserState> {
   }
 
   void _subscribeToAuthStateChanges() {
-    _authStateChangesSub = _watchAuthStateChanges(const NoParams()).listen((
+    _authStateChangesSub = _watchAuthStateChanges().listen((
       event,
     ) {
       event.fold((failure) => emit(AppUserFailure(failure.message)), (user) {
@@ -63,7 +62,7 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> signOut() async {
     emit(AppUserLoading());
 
-    final result = await _userSignOut(const NoParams());
+    final result = await _userSignOut();
     result.fold(
       (failure) => emit(AppUserFailure(failure.message)),
       (_) => emit(AppUserSignedOut()),

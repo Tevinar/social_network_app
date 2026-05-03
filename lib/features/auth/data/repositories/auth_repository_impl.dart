@@ -4,7 +4,7 @@ import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 
 /// An auth repository impl.
@@ -20,7 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthSessionStore _authSessionStore;
 
   @override
-  Future<Either<Failure, User>> signInWithEmailPassword({
+  Future<Either<Failure, UserEntity>> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
@@ -46,7 +46,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUpWithEmailPassword({
+  Future<Either<Failure, UserEntity>> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
@@ -94,7 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<Either<Failure, User?>> authStateChanges() async* {
+  Stream<Either<Failure, UserEntity?>> authStateChanges() async* {
     try {
       await for (final session in _authSessionStore.watchSession()) {
         final user = session?.user;

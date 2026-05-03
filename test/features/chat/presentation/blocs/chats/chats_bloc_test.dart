@@ -7,7 +7,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
@@ -28,8 +28,12 @@ void main() {
   late MockWatchChatChanges watchChatChanges;
   late StreamController<Either<Failure, ChatChange>> chatChangeController;
 
-  const user1 = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
-  const user2 = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
+  const user1 = UserEntity(
+    id: 'user-1',
+    name: 'Alice',
+    email: 'alice@test.com',
+  );
+  const user2 = UserEntity(id: 'user-2', name: 'Bob', email: 'bob@test.com');
 
   final message = ChatMessage(
     id: 'message-1',

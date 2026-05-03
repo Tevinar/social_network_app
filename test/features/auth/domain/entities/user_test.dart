@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 
 void main() {
   group('User', () {
@@ -13,7 +13,7 @@ void main() {
         const email = 'test@test.com';
 
         // Act
-        const user = User(id: id, name: name, email: email);
+        const user = UserEntity(id: id, name: name, email: email);
 
         // Assert
         expect(user.id, id);
@@ -26,7 +26,7 @@ void main() {
       'given a User when toString is called then returns the display name',
       () {
         // Arrange
-        const user = User(
+        const user = UserEntity(
           id: '123',
           name: 'Test User',
           email: 'test@test.com',

@@ -3,6 +3,7 @@ import 'package:social_app/core/errors/exceptions.dart';
 
 /// Runs a remote data source call and maps infrastructure errors to app
 /// exceptions.
+
 Future<T> guardRemoteDataSourceCall<T>(Future<T> Function() call) async {
   try {
     return await call();
@@ -11,19 +12,30 @@ Future<T> guardRemoteDataSourceCall<T>(Future<T> Function() call) async {
       throw NetworkException(message: e.message ?? 'Network request failed');
     }
 
+    final statusCode = e.response?.statusCode;
     final data = e.response?.data;
 
-    if (data is Map<String, dynamic>) {
-      throw ServerException(
-        message: data['message'] as String? ?? 'Request failed',
-        code: data['code'] as String? ?? e.response?.statusCode.toString(),
+    final message = data is Map<String, dynamic>
+        ? data['message'] as String? ?? e.message ?? 'Request failed'
+        : e.message ?? 'Request failed';
+
+    final code = data is Map<String, dynamic>
+        ? data['code'] as String? ?? statusCode?.toString()
+        : statusCode?.toString();
+
+    if (statusCode == 401 || statusCode == 403) {
+      throw UnauthorizedException(
+        message: message,
+        code: code,
       );
     }
 
     throw ServerException(
-      message: e.message ?? 'Request failed',
-      code: e.response?.statusCode.toString(),
+      message: message,
+      code: code,
     );
+  } on UnauthorizedException {
+    rethrow;
   } catch (e) {
     throw ServerException(message: e.toString());
   }

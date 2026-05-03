@@ -18,7 +18,7 @@ final class AppUserSignedIn extends AppUserState {
   const AppUserSignedIn(this.user);
 
   /// The user.
-  final User user;
+  final UserEntity user;
 }
 
 /// Represents app user failure.

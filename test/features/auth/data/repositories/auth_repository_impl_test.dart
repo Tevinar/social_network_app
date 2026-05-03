@@ -14,7 +14,7 @@ import 'package:social_app/features/auth/data/models/auth_session_model.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/auth/data/repositories/'
     'auth_repository_impl.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
@@ -74,7 +74,7 @@ void main() {
         // Assert
         expect(
           result,
-          isA<Right<Failure, User>>()
+          isA<Right<Failure, UserEntity>>()
               .having((r) => r.value.id, 'id', '123')
               .having((r) => r.value.email, 'email', 'test@test.com')
               .having((r) => r.value.name, 'name', 'Test'),
@@ -101,7 +101,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, User>>());
+        expect(result, isA<Left<Failure, UserEntity>>());
         result.fold(
           (failure) => expect(failure, isA<NetworkFailure>()),
           (_) => fail('Expected failure'),
@@ -129,7 +129,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, User>>());
+        expect(result, isA<Left<Failure, UserEntity>>());
         result.fold(
           (failure) => expect(failure, isA<UnexpectedFailure>()),
           (_) => fail('Expected failure'),
@@ -168,7 +168,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Right<Failure, User>>());
+        expect(result, isA<Right<Failure, UserEntity>>());
       },
     );
 
@@ -193,7 +193,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, User>>());
+        expect(result, isA<Left<Failure, UserEntity>>());
 
         result.fold(
           (failure) => expect(failure, isA<UnexpectedFailure>()),
@@ -304,7 +304,7 @@ void main() {
         await expectLater(
           stream,
           emitsInOrder([
-            isA<Right<Failure, User?>>()
+            isA<Right<Failure, UserEntity?>>()
                 .having((r) => r.value!.id, 'id', '123')
                 .having((r) => r.value!.email, 'email', 'test@test.com')
                 .having((r) => r.value!.name, 'name', 'Test'),
@@ -326,7 +326,7 @@ void main() {
         // Act & Assert
         await expectLater(
           repository.authStateChanges(),
-          emits(const Right<Failure, User?>(null)),
+          emits(const Right<Failure, UserEntity?>(null)),
         );
       },
     );
@@ -343,7 +343,7 @@ void main() {
         // Act & Assert
         await expectLater(
           repository.authStateChanges(),
-          emits(isA<Left<Failure, User?>>()),
+          emits(isA<Left<Failure, UserEntity?>>()),
         );
       },
     );
@@ -362,7 +362,7 @@ void main() {
         final stream = repository.authStateChanges();
 
         // Assert
-        await expectLater(stream, emits(isA<Left<Failure, User?>>()));
+        await expectLater(stream, emits(isA<Left<Failure, UserEntity?>>()));
         verify(
           () => logger.error(
             'Unexpected error in AuthRepositoryImpl.authStateChanges',

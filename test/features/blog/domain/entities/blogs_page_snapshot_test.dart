@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 
 void main() {

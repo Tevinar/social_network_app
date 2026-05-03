@@ -17,18 +17,10 @@ final class BlogViewerSuccess extends BlogViewerState {
   /// Creates a [BlogViewerSuccess] state with the loaded [blog].
   BlogViewerSuccess({
     required this.blog,
-    this.isFromCache = false,
-    this.refreshError,
   });
 
   /// The loaded blog that can be displayed in the UI.
   final Blog blog;
-
-  /// Whether the blog currently shown comes from cache.
-  final bool isFromCache;
-
-  /// The remote refresh error while cached content is still displayed.
-  final String? refreshError;
 }
 
 /// The failure state of the [BlogViewerBloc] when an error occurs.

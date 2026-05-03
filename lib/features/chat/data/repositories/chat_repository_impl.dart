@@ -3,7 +3,7 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
@@ -21,7 +21,7 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   /// Creates a chat from domain members and returns the created domain chat.
   Future<Either<Failure, Chat>> createChat(
-    List<User> members,
+    List<UserEntity> members,
     String firstMessageContent,
   ) async {
     try {
@@ -114,7 +114,9 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   /// Looks up an existing chat for the provided member set.
-  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members) async {
+  Future<Either<Failure, Chat?>> getChatByMembers(
+    List<UserEntity> members,
+  ) async {
     try {
       final chatModel = await chatRemoteDataSource.getChatByMembers(
         members.map(UserModel.fromEntity).toList(),

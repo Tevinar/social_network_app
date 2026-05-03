@@ -5,15 +5,15 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
-import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
+import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
 
 class MockBlogRepository extends Mock implements BlogRepository {}
 
 void main() {
   late MockBlogRepository blogRepository;
-  late CreateBlog usecase;
+  late CreateBlogUseCase usecase;
   late File defaultImage;
 
   final blog = Blog(
@@ -33,7 +33,7 @@ void main() {
 
   setUp(() {
     blogRepository = MockBlogRepository();
-    usecase = CreateBlog(blogRepository: blogRepository);
+    usecase = CreateBlogUseCase(blogRepository: blogRepository);
     defaultImage = File('/tmp/image.png');
   });
 

@@ -14,7 +14,7 @@ import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
 import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 
 class MockBlogRemoteDataSource extends Mock implements BlogRemoteDataSource {}

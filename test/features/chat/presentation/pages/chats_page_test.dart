@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
@@ -28,12 +28,16 @@ void main() {
   late MockChatsBloc chatsBloc;
   late ScrollController scrollController;
 
-  const currentUser = User(
+  const currentUser = UserEntity(
     id: 'user-1',
     name: 'Alice',
     email: 'alice@test.com',
   );
-  const otherUser = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
+  const otherUser = UserEntity(
+    id: 'user-2',
+    name: 'Bob',
+    email: 'bob@test.com',
+  );
   final chat = Chat(
     id: 'chat-1',
     lastMessage: ChatMessage(

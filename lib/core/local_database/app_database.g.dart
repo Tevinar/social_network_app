@@ -71,6 +71,17 @@ class $CachedBlogsTable extends CachedBlogs
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -101,6 +112,7 @@ class $CachedBlogsTable extends CachedBlogs
     content,
     imageUrl,
     topicsJson,
+    createdAt,
     updatedAt,
     posterName,
   ];
@@ -161,6 +173,14 @@ class $CachedBlogsTable extends CachedBlogs
     } else if (isInserting) {
       context.missing(_topicsJsonMeta);
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -210,6 +230,10 @@ class $CachedBlogsTable extends CachedBlogs
         DriftSqlType.string,
         data['${effectivePrefix}topics_json'],
       )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -247,6 +271,9 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
   /// The JSON string representing the topics of the blog.
   final String topicsJson;
 
+  /// The date and time when the blog was created.
+  final DateTime createdAt;
+
   /// The date and time when the blog was last updated.
   final DateTime updatedAt;
 
@@ -259,6 +286,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
     required this.content,
     required this.imageUrl,
     required this.topicsJson,
+    required this.createdAt,
     required this.updatedAt,
     required this.posterName,
   });
@@ -271,6 +299,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
     map['content'] = Variable<String>(content);
     map['image_url'] = Variable<String>(imageUrl);
     map['topics_json'] = Variable<String>(topicsJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['poster_name'] = Variable<String>(posterName);
     return map;
@@ -284,6 +313,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
       content: Value(content),
       imageUrl: Value(imageUrl),
       topicsJson: Value(topicsJson),
+      createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       posterName: Value(posterName),
     );
@@ -301,6 +331,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
       content: serializer.fromJson<String>(json['content']),
       imageUrl: serializer.fromJson<String>(json['imageUrl']),
       topicsJson: serializer.fromJson<String>(json['topicsJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       posterName: serializer.fromJson<String>(json['posterName']),
     );
@@ -315,6 +346,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
       'content': serializer.toJson<String>(content),
       'imageUrl': serializer.toJson<String>(imageUrl),
       'topicsJson': serializer.toJson<String>(topicsJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'posterName': serializer.toJson<String>(posterName),
     };
@@ -327,6 +359,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
     String? content,
     String? imageUrl,
     String? topicsJson,
+    DateTime? createdAt,
     DateTime? updatedAt,
     String? posterName,
   }) => CachedBlog(
@@ -336,6 +369,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
     content: content ?? this.content,
     imageUrl: imageUrl ?? this.imageUrl,
     topicsJson: topicsJson ?? this.topicsJson,
+    createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     posterName: posterName ?? this.posterName,
   );
@@ -349,6 +383,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
       topicsJson: data.topicsJson.present
           ? data.topicsJson.value
           : this.topicsJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       posterName: data.posterName.present
           ? data.posterName.value
@@ -365,6 +400,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('topicsJson: $topicsJson, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('posterName: $posterName')
           ..write(')'))
@@ -379,6 +415,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
     content,
     imageUrl,
     topicsJson,
+    createdAt,
     updatedAt,
     posterName,
   );
@@ -392,6 +429,7 @@ class CachedBlog extends DataClass implements Insertable<CachedBlog> {
           other.content == this.content &&
           other.imageUrl == this.imageUrl &&
           other.topicsJson == this.topicsJson &&
+          other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.posterName == this.posterName);
 }
@@ -403,6 +441,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
   final Value<String> content;
   final Value<String> imageUrl;
   final Value<String> topicsJson;
+  final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String> posterName;
   final Value<int> rowid;
@@ -413,6 +452,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
     this.content = const Value.absent(),
     this.imageUrl = const Value.absent(),
     this.topicsJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.posterName = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -424,6 +464,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
     required String content,
     required String imageUrl,
     required String topicsJson,
+    required DateTime createdAt,
     required DateTime updatedAt,
     required String posterName,
     this.rowid = const Value.absent(),
@@ -433,6 +474,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
        content = Value(content),
        imageUrl = Value(imageUrl),
        topicsJson = Value(topicsJson),
+       createdAt = Value(createdAt),
        updatedAt = Value(updatedAt),
        posterName = Value(posterName);
   static Insertable<CachedBlog> custom({
@@ -442,6 +484,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
     Expression<String>? content,
     Expression<String>? imageUrl,
     Expression<String>? topicsJson,
+    Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? posterName,
     Expression<int>? rowid,
@@ -453,6 +496,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
       if (content != null) 'content': content,
       if (imageUrl != null) 'image_url': imageUrl,
       if (topicsJson != null) 'topics_json': topicsJson,
+      if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (posterName != null) 'poster_name': posterName,
       if (rowid != null) 'rowid': rowid,
@@ -466,6 +510,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
     Value<String>? content,
     Value<String>? imageUrl,
     Value<String>? topicsJson,
+    Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String>? posterName,
     Value<int>? rowid,
@@ -477,6 +522,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
       topicsJson: topicsJson ?? this.topicsJson,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       posterName: posterName ?? this.posterName,
       rowid: rowid ?? this.rowid,
@@ -504,6 +550,9 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
     if (topicsJson.present) {
       map['topics_json'] = Variable<String>(topicsJson.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -525,6 +574,7 @@ class CachedBlogsCompanion extends UpdateCompanion<CachedBlog> {
           ..write('content: $content, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('topicsJson: $topicsJson, ')
+          ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('posterName: $posterName, ')
           ..write('rowid: $rowid')
@@ -614,7 +664,10 @@ class $AppSettingsTable extends AppSettings
 }
 
 class AppSetting extends DataClass implements Insertable<AppSetting> {
+  /// Stable setting identifier.
   final String key;
+
+  /// Persisted setting value.
   final String value;
   const AppSetting({required this.key, required this.value});
   @override
@@ -764,6 +817,7 @@ typedef $$CachedBlogsTableCreateCompanionBuilder =
       required String content,
       required String imageUrl,
       required String topicsJson,
+      required DateTime createdAt,
       required DateTime updatedAt,
       required String posterName,
       Value<int> rowid,
@@ -776,6 +830,7 @@ typedef $$CachedBlogsTableUpdateCompanionBuilder =
       Value<String> content,
       Value<String> imageUrl,
       Value<String> topicsJson,
+      Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String> posterName,
       Value<int> rowid,
@@ -817,6 +872,11 @@ class $$CachedBlogsTableFilterComposer
 
   ColumnFilters<String> get topicsJson => $composableBuilder(
     column: $table.topicsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -870,6 +930,11 @@ class $$CachedBlogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -909,6 +974,9 @@ class $$CachedBlogsTableAnnotationComposer
     column: $table.topicsJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -956,6 +1024,7 @@ class $$CachedBlogsTableTableManager
                 Value<String> content = const Value.absent(),
                 Value<String> imageUrl = const Value.absent(),
                 Value<String> topicsJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String> posterName = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -966,6 +1035,7 @@ class $$CachedBlogsTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 topicsJson: topicsJson,
+                createdAt: createdAt,
                 updatedAt: updatedAt,
                 posterName: posterName,
                 rowid: rowid,
@@ -978,6 +1048,7 @@ class $$CachedBlogsTableTableManager
                 required String content,
                 required String imageUrl,
                 required String topicsJson,
+                required DateTime createdAt,
                 required DateTime updatedAt,
                 required String posterName,
                 Value<int> rowid = const Value.absent(),
@@ -988,6 +1059,7 @@ class $$CachedBlogsTableTableManager
                 content: content,
                 imageUrl: imageUrl,
                 topicsJson: topicsJson,
+                createdAt: createdAt,
                 updatedAt: updatedAt,
                 posterName: posterName,
                 rowid: rowid,

@@ -4,13 +4,13 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 
 /// Validates blog input data and delegates blog creation to the repository.
-class CreateBlog implements UseCase<Blog, CreateBlogParams> {
-  /// Creates a [CreateBlog].
-  CreateBlog({required BlogRepository blogRepository})
+class CreateBlogUseCase implements UseCase<Blog, CreateBlogParams> {
+  /// Creates a [CreateBlogUseCase].
+  CreateBlogUseCase({required BlogRepository blogRepository})
     : _blogRepository = blogRepository;
 
   /// Repository used to persist the new blog.
@@ -41,8 +41,6 @@ class CreateBlog implements UseCase<Blog, CreateBlogParams> {
       image: params.image,
       title: params.title,
       content: params.content,
-      posterId: params.posterId,
-      posterName: params.posterName,
       topics: params.topics,
     );
   }

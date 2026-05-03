@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
@@ -12,7 +12,7 @@ void main() {
     createdAt: DateTime(2025),
     updatedAt: DateTime(2025),
   );
-  const user = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
+  const user = UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com');
   final chat = Chat(id: 'chat-1', lastMessage: message, members: const [user]);
 
   test('given a chat when ChatInserted is created then exposes the chat', () {

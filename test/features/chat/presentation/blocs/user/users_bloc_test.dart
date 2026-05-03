@@ -5,7 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
@@ -18,8 +18,8 @@ void main() {
   late MockGetUsersPage getUsersPage;
   late MockGetUsersCount getUsersCount;
 
-  const user = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
-  const user2 = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
+  const user = UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com');
+  const user2 = UserEntity(id: 'user-2', name: 'Bob', email: 'bob@test.com');
 
   setUpAll(() {
     registerFallbackValue(const NoParams());

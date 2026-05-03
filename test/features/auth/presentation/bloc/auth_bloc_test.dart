@@ -6,15 +6,15 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
-import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
-class MockUserSignIn extends Mock implements UserSignIn {}
+class MockUserSignIn extends Mock implements UserSignInUseCase {}
 
-class MockUserSignUp extends Mock implements UserSignUp {}
+class MockUserSignUp extends Mock implements UserSignUpUseCase {}
 
 class MockWatchAuthStateChanges extends Mock implements WatchAuthStateChanges {}
 
@@ -23,7 +23,11 @@ void main() {
   late MockUserSignUp userSignUp;
   late MockWatchAuthStateChanges watchAuthStateChanges;
 
-  const testUser = User(id: '123', name: 'Test User', email: 'test@test.com');
+  const testUser = UserEntity(
+    id: '123',
+    name: 'Test User',
+    email: 'test@test.com',
+  );
 
   setUp(() {
     userSignIn = MockUserSignIn();

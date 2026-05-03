@@ -7,14 +7,14 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blogs_count.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_feed_slice_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_blog_changes.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_feed/blog_feed_bloc.dart';
 
-class MockWatchBlogsPage extends Mock implements WatchBlogsPage {}
+class MockWatchBlogsPage extends Mock implements WatchFeedSliceUseCase {}
 
 class MockGetBlogsCount extends Mock implements GetBlogsCount {}
 
@@ -89,7 +89,7 @@ void main() {
   test(
     'given the bloc is created when reading state then state is BlogsLoading',
     () {
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -110,7 +110,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(2));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -181,7 +181,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(2));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -214,7 +214,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(2));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -273,7 +273,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(1));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -326,7 +326,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(1));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,
@@ -373,7 +373,7 @@ void main() {
       when(() => getBlogsCount(any())).thenAnswer((_) async => const Right(2));
       when(() => watchBlogsPage(1)).thenAnswer((_) => controller.stream);
 
-      final bloc = BlogsBloc(
+      final bloc = BlogFeedBloc(
         watchBlogsPage: watchBlogsPage,
         getBlogsCount: getBlogsCount,
         watchBlogChanges: watchBlogChanges,

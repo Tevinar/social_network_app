@@ -23,13 +23,14 @@ class AppDatabase extends _$AppDatabase {
 
   // You should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async => m.createAll(),
     onUpgrade: (m, from, to) async {
       if (from < 2) await _migrateTo2(m);
+      if (from < 3) await _migrateTo3(m);
 
       // Add more migration steps here as needed
       // when you increase the schema version.
@@ -38,5 +39,10 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> _migrateTo2(Migrator m) async {
     await m.createTable(appSettings);
+  }
+
+  Future<void> _migrateTo3(Migrator m) async {
+    await m.deleteTable(cachedBlogs.actualTableName);
+    await m.createTable(cachedBlogs);
   }
 }

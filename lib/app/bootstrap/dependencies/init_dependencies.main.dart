@@ -79,9 +79,15 @@ void _initAuth() {
       ),
     )
     // Usecases
-    ..registerLazySingleton(() => UserSignUp(authRepository: serviceLocator()))
-    ..registerLazySingleton(() => UserSignIn(authRepositoy: serviceLocator()))
-    ..registerLazySingleton(() => UserSignOut(authRepository: serviceLocator()))
+    ..registerLazySingleton(
+      () => UserSignUpUseCase(authRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => UserSignInUseCase(authRepositoy: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => UserSignOutUseCase(authRepository: serviceLocator()),
+    )
     ..registerLazySingleton(
       () => WatchAuthStateChanges(authRepository: serviceLocator()),
     )
@@ -112,11 +118,13 @@ void _initBlog() {
       ),
     )
     // Usecases
-    ..registerLazySingleton(() => CreateBlog(blogRepository: serviceLocator()))
-    ..registerLazySingleton(() => GetBlogById(serviceLocator()))
+    ..registerLazySingleton(
+      () => CreateBlogUseCase(blogRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(() => GetBlogByIdUseCase(serviceLocator()))
     ..registerLazySingleton(() => WatchBlogById(serviceLocator()))
     ..registerLazySingleton(
-      () => WatchBlogsPage(blogRepository: serviceLocator()),
+      () => WatchFeedSliceUseCase(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(
       () => GetBlogsCount(blogRepository: serviceLocator()),
@@ -127,7 +135,7 @@ void _initBlog() {
     // BLoC
     ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
     ..registerLazySingleton(
-      () => BlogsBloc(
+      () => BlogFeedBloc(
         watchBlogsPage: serviceLocator(),
         getBlogsCount: serviceLocator(),
         watchBlogChanges: serviceLocator(),

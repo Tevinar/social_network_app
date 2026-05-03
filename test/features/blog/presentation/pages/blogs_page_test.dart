@@ -8,8 +8,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/blogs_bloc.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_feed/blog_feed_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blogs_page.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
@@ -18,7 +18,7 @@ class MockAppUserCubit extends MockCubit<AppUserState>
     implements AppUserCubit {}
 
 class MockBlogsBloc extends MockBloc<BlogsEvent, BlogsState>
-    implements BlogsBloc {}
+    implements BlogFeedBloc {}
 
 void main() {
   late MockAppUserCubit appUserCubit;
@@ -46,7 +46,7 @@ void main() {
     blogsBloc = MockBlogsBloc();
     scrollController = ScrollController();
 
-    serviceLocator.registerFactory<BlogsBloc>(() => blogsBloc);
+    serviceLocator.registerFactory<BlogFeedBloc>(() => blogsBloc);
 
     when(() => appUserCubit.signOut()).thenAnswer((_) async {});
     when(() => blogsBloc.scrollController).thenReturn(scrollController);

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
@@ -54,8 +54,8 @@ void main() {
           state: const ChatEditorLoaded(
             chatId: 'chat-1',
             chatMembers: [
-              User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
-              User(id: 'user-2', name: 'Bob', email: 'bob@test.com'),
+              UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+              UserEntity(id: 'user-2', name: 'Bob', email: 'bob@test.com'),
             ],
           ),
           isMe: true,
@@ -78,9 +78,9 @@ void main() {
           state: const ChatEditorLoaded(
             chatId: 'chat-1',
             chatMembers: [
-              User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
-              User(id: 'user-2', name: 'Bob', email: 'bob@test.com'),
-              User(id: 'user-3', name: 'Cara', email: 'cara@test.com'),
+              UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+              UserEntity(id: 'user-2', name: 'Bob', email: 'bob@test.com'),
+              UserEntity(id: 'user-3', name: 'Cara', email: 'cara@test.com'),
             ],
           ),
           isMe: false,

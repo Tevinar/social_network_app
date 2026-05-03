@@ -7,7 +7,7 @@ import 'package:social_app/core/utils/calculate_reading_time.dart';
 import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
 
 /// A blog viewer page widget.
 class BlogViewerPage extends StatelessWidget {

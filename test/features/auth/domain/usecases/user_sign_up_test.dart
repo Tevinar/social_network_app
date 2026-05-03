@@ -2,17 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late MockAuthRepository authRepository;
-  late UserSignUp userSignUp;
+  late UserSignUpUseCase userSignUp;
 
-  const testUser = User(
+  const testUser = UserEntity(
     id: '123',
     name: 'Test User',
     email: 'test@test.com',
@@ -20,7 +20,7 @@ void main() {
 
   setUp(() {
     authRepository = MockAuthRepository();
-    userSignUp = UserSignUp(authRepository: authRepository);
+    userSignUp = UserSignUpUseCase(authRepository: authRepository);
   });
 
   group('UserSignUp', () {
@@ -48,7 +48,7 @@ void main() {
         // Assert
         expect(
           result,
-          isA<Right<Failure, User>>()
+          isA<Right<Failure, UserEntity>>()
               .having((r) => r.value.id, 'id', testUser.id)
               .having((r) => r.value.name, 'name', testUser.name)
               .having((r) => r.value.email, 'email', testUser.email),
@@ -85,7 +85,7 @@ void main() {
         final result = await userSignUp(params);
 
         // Assert
-        expect(result, isA<Left<Failure, User>>());
+        expect(result, isA<Left<Failure, UserEntity>>());
         result.fold(
           (failure) => expect(failure, isA<ValidationFailure>()),
           (_) => fail('Expected a failure'),

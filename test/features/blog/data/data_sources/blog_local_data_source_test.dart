@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/core/local_database/app_database.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_local_data_source.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 void main() {
   late AppDatabase database;

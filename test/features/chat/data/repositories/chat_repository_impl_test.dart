@@ -8,7 +8,7 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:social_app/features/chat/data/models/chat_message_model.dart';
 import 'package:social_app/features/chat/data/models/chat_model.dart';
@@ -24,7 +24,7 @@ void main() {
   late MockAppLogger logger;
   late ChatRepositoryImpl repository;
 
-  const user = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
+  const user = UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com');
   const userModel = UserModel(
     id: 'user-1',
     name: 'Alice',

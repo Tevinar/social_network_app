@@ -9,7 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/utils/format_date.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
@@ -32,12 +32,16 @@ void main() {
   late ScrollController scrollController;
   late StreamController<ChatEditorState> chatEditorStateController;
 
-  const currentUser = User(
+  const currentUser = UserEntity(
     id: 'user-1',
     name: 'Alice',
     email: 'alice@test.com',
   );
-  const otherUser = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
+  const otherUser = UserEntity(
+    id: 'user-2',
+    name: 'Bob',
+    email: 'bob@test.com',
+  );
 
   final message = ChatMessage(
     id: 'message-1',

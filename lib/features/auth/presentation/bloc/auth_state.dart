@@ -23,7 +23,7 @@ final class AuthSignedIn extends AuthState {
   const AuthSignedIn(this.user);
 
   /// The user.
-  final User user;
+  final UserEntity user;
 }
 
 /// Represents auth failure.

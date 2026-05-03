@@ -13,8 +13,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/services/image_picker_service.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/add_new_blog_page.dart';
 
@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(
       buildTestableWidget(
         appUserState: const AppUserSignedIn(
-          User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+          UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
         ),
         blogEditorState: BlogInitial(),
       ),
@@ -115,7 +115,7 @@ void main() {
     await tester.pumpWidget(
       buildTestableWidget(
         appUserState: const AppUserSignedIn(
-          User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+          UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
         ),
         blogEditorState: BlogInitial(),
       ),
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpWidget(
         buildTestableWidget(
           appUserState: const AppUserSignedIn(
-            User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+            UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
           ),
           blogEditorState: BlogInitial(),
         ),
@@ -164,7 +164,7 @@ void main() {
       await tester.pumpWidget(
         buildTestableWidget(
           appUserState: const AppUserSignedIn(
-            User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+            UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
           ),
           blogEditorState: BlogInitial(),
         ),
@@ -192,7 +192,7 @@ void main() {
       await tester.pumpWidget(
         buildTestableWidget(
           appUserState: const AppUserSignedIn(
-            User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+            UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
           ),
           blogEditorState: BlogInitial(),
         ),
@@ -218,7 +218,7 @@ void main() {
       await tester.pumpWidget(
         buildTestableWidget(
           appUserState: const AppUserSignedIn(
-            User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+            UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
           ),
           blogEditorState: BlogInitial(),
         ),
@@ -246,7 +246,7 @@ void main() {
     await tester.pumpWidget(
       buildTestableWidget(
         appUserState: const AppUserSignedIn(
-          User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+          UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
         ),
         blogEditorState: BlogInitial(),
       ),
@@ -299,7 +299,7 @@ void main() {
     await tester.pumpWidget(
       buildTestableWidget(
         appUserState: const AppUserSignedIn(
-          User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+          UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
         ),
         blogEditorState: BlogInitial(),
       ),
@@ -340,7 +340,7 @@ void main() {
   testWidgets('shows a snackbar when BlogFailure is emitted', (tester) async {
     when(() => appUserCubit.state).thenReturn(
       const AppUserSignedIn(
-        User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+        UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
       ),
     );
     when(() => blogEditorBloc.state).thenReturn(BlogInitial());
@@ -376,7 +376,7 @@ void main() {
     await tester.pumpWidget(
       buildTestableWidget(
         appUserState: const AppUserSignedIn(
-          User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+          UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
         ),
         blogEditorState: BlogLoading(),
       ),
@@ -388,7 +388,7 @@ void main() {
   testWidgets('pops back when BlogUploadSuccess is emitted', (tester) async {
     when(() => appUserCubit.state).thenReturn(
       const AppUserSignedIn(
-        User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+        UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
       ),
     );
     when(() => blogEditorBloc.state).thenReturn(BlogInitial());

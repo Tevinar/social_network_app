@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
 import 'package:social_app/features/chat/presentation/pages/new_chat_page.dart';
@@ -28,13 +28,21 @@ void main() {
   late ScrollController scrollController;
   late StreamController<ChatEditorState> chatEditorStateController;
 
-  const currentUser = User(
+  const currentUser = UserEntity(
     id: 'user-1',
     name: 'Alice',
     email: 'alice@test.com',
   );
-  const otherUser = User(id: 'user-2', name: 'Bob', email: 'bob@test.com');
-  const thirdUser = User(id: 'user-3', name: 'Cara', email: 'cara@test.com');
+  const otherUser = UserEntity(
+    id: 'user-2',
+    name: 'Bob',
+    email: 'bob@test.com',
+  );
+  const thirdUser = UserEntity(
+    id: 'user-3',
+    name: 'Cara',
+    email: 'cara@test.com',
+  );
 
   setUpAll(() {
     registerFallbackValue(AddChat(chatMembers: const [currentUser]));

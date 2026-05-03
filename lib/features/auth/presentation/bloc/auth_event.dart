@@ -36,5 +36,5 @@ class _AuthStateChanged extends AuthEvent {
   _AuthStateChanged(this.authState);
 
   /// The auth state.
-  final Either<Failure, User?> authState;
+  final Either<Failure, UserEntity?> authState;
 }

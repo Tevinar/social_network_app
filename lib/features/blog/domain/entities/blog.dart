@@ -1,4 +1,4 @@
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 /// Domain entity representing a blog post displayed in the app.
 class Blog {
@@ -10,6 +10,7 @@ class Blog {
     required this.content,
     required this.imageUrl,
     required this.topics,
+    required this.createdAt,
     required this.updatedAt,
     required this.posterName,
   });
@@ -32,7 +33,10 @@ class Blog {
   /// Topics associated with the blog.
   final List<BlogTopic> topics;
 
-  /// Last update date used for ordering and display.
+  /// Creation date of the blog.
+  final DateTime createdAt;
+
+  /// Last update date of the blog.
   final DateTime updatedAt;
 
   /// Poster name resolved for display purposes.

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
 
 void main() {
-  const user = User(id: 'user-1', name: 'Alice', email: 'alice@test.com');
+  const user = UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com');
 
   test('given UsersLoading when it is created then it exposes its values', () {
     const state = UsersLoading(

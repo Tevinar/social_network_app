@@ -21,6 +21,9 @@ class CachedBlogs extends Table {
   /// The JSON string representing the topics of the blog.
   TextColumn get topicsJson => text()();
 
+  /// The date and time when the blog was created.
+  DateTimeColumn get createdAt => dateTime()();
+
   /// The date and time when the blog was last updated.
   DateTimeColumn get updatedAt => dateTime()();
 

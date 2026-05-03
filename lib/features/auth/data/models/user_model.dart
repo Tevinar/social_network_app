@@ -1,4 +1,5 @@
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/core/serialization/json_reader.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 
 /// Data model used to serialize user payloads from auth and profile sources.
 class UserModel {
@@ -9,17 +10,17 @@ class UserModel {
     required this.email,
   });
 
-  /// Creates a [UserModel] from a domain [User].
-  factory UserModel.fromEntity(User user) {
+  /// Creates a [UserModel] from a domain [UserEntity].
+  factory UserModel.fromEntity(UserEntity user) {
     return UserModel(id: user.id, name: user.name, email: user.email);
   }
 
   /// Creates a [UserModel] from json.
   factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] as String,
-      email: map['email'] as String,
-      name: map['name'] as String,
+      id: JsonReader.readString(map, 'id'),
+      email: JsonReader.readString(map, 'email'),
+      name: JsonReader.readString(map, 'name'),
     );
   }
 
@@ -46,8 +47,8 @@ class UserModel {
     );
   }
 
-  /// Converts the model to the domain [User] entity.
-  User toEntity() {
-    return User(id: id, name: name, email: email);
+  /// Converts the model to the domain [UserEntity] entity.
+  UserEntity toEntity() {
+    return UserEntity(id: id, name: name, email: email);
   }
 }

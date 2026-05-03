@@ -12,9 +12,9 @@ import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_blog_by_id.dart';
-import 'package:social_app/features/blog/presentation/blocs/blog_viewer/bloc/blog_viewer_bloc.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
 import 'package:social_app/features/blog/presentation/pages/blog_viewer_page.dart';
 
 class MockWatchBlogById extends Mock implements WatchBlogById {}

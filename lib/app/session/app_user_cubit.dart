@@ -5,9 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
-import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 
 part 'app_user_state.dart';
 
@@ -24,15 +24,16 @@ part 'app_user_state.dart';
 class AppUserCubit extends Cubit<AppUserState> {
   /// Creates a [AppUserCubit].
   AppUserCubit({
-    required UserSignOut userSignOut,
+    required UserSignOutUseCase userSignOut,
     required WatchAuthStateChanges watchAuthStateChanges,
   }) : _userSignOut = userSignOut,
        _watchAuthStateChanges = watchAuthStateChanges,
        super(AppUserLoading()) {
     _subscribeToAuthStateChanges();
   }
-  final UserSignOut _userSignOut;
-  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
+  final UserSignOutUseCase _userSignOut;
+  late final StreamSubscription<Either<Failure, UserEntity?>>
+  _authStateChangesSub;
   final WatchAuthStateChanges _watchAuthStateChanges;
 
   @override

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 
@@ -89,7 +89,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         );
       },
       (usersNextPage) {
-        final newUsers = <User>[...state.users, ...usersNextPage];
+        final newUsers = <UserEntity>[...state.users, ...usersNextPage];
         emit(
           UsersSuccess(
             users: newUsers,

@@ -22,7 +22,9 @@ enum BlogTopic {
   static BlogTopic fromValue(String value) {
     return BlogTopic.values.firstWhere(
       (topic) => topic.value == value,
-      orElse: () => BlogTopic.technology, // or unknown
+      orElse: () => throw FormatException(
+        'Unknown blog topic: $value',
+      ),
     );
   }
 }

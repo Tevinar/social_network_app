@@ -1,3 +1,4 @@
+import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 
 /// Data model representing a locally persisted authenticated session.
@@ -14,15 +15,17 @@ class AuthSessionModel {
   /// Creates an [AuthSessionModel] from a JSON map.
   factory AuthSessionModel.fromJson(Map<String, dynamic> map) {
     return AuthSessionModel(
-      accessToken: map['accessToken'] as String,
-      refreshToken: map['refreshToken'] as String,
-      accessTokenExpiresAt: DateTime.parse(
-        map['accessTokenExpiresAt'] as String,
+      accessToken: JsonReader.readString(map, 'accessToken'),
+      refreshToken: JsonReader.readString(map, 'refreshToken'),
+      accessTokenExpiresAt: JsonReader.readDateTime(
+        map,
+        'accessTokenExpiresAt',
       ),
-      refreshTokenExpiresAt: DateTime.parse(
-        map['refreshTokenExpiresAt'] as String,
+      refreshTokenExpiresAt: JsonReader.readDateTime(
+        map,
+        'refreshTokenExpiresAt',
       ),
-      user: UserModel.fromJson(map['user'] as Map<String, dynamic>),
+      user: UserModel.fromJson(JsonReader.readObject(map, 'user')),
     );
   }
 

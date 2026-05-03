@@ -5,7 +5,7 @@ import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/utils/format_date.dart';
 import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
@@ -21,7 +21,7 @@ class ChatMessagesPage extends StatefulWidget {
 
 class _ChatMessagesPageState extends State<ChatMessagesPage> {
   late final TextEditingController _messageController;
-  late final User _currentUser;
+  late final UserEntity _currentUser;
 
   @override
   void initState() {

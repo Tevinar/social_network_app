@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
@@ -24,5 +24,5 @@ class GetChatByMembersParams {
   GetChatByMembersParams({required this.members});
 
   /// The members.
-  final List<User> members;
+  final List<UserEntity> members;
 }

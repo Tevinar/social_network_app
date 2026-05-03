@@ -4,17 +4,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late MockAuthRepository authRepository;
-  late UserSignOut userSignOut;
+  late UserSignOutUseCase userSignOut;
 
   setUp(() {
     authRepository = MockAuthRepository();
-    userSignOut = UserSignOut(authRepository: authRepository);
+    userSignOut = UserSignOutUseCase(authRepository: authRepository);
   });
 
   group('UserSignOut', () {

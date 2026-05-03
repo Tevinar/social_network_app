@@ -10,7 +10,7 @@ class AddChat extends ChatEditorEvent {
   AddChat({required this.chatMembers});
 
   /// Members selected for the chat.
-  final List<User> chatMembers;
+  final List<UserEntity> chatMembers;
 }
 
 /// Requests creation of the first message for a newly drafted chat.
@@ -31,5 +31,5 @@ class SelectChat extends ChatEditorEvent {
   final String chatId;
 
   /// Members belonging to the selected chat.
-  final List<User> chatMembers;
+  final List<UserEntity> chatMembers;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 void main() {
   final updatedAt = DateTime(2025, 1, 1, 12);

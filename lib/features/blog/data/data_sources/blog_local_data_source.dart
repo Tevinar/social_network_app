@@ -2,17 +2,17 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:social_app/core/local_database/app_database.dart';
+import 'package:social_app/features/blog/data/models/blog_feed_slice_model.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
-import 'package:social_app/features/blog/domain/constants/blog_paging.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 /// A blog local data source.
 abstract interface class BlogLocalDataSource {
   /// Upserts a list of blogs into the local data source.
   Future<void> upsertBlogs(List<BlogModel> blogs);
 
-  /// Gets a page of blogs from the local data source.
-  Future<List<BlogModel>> getBlogsPage(int pageNumber);
+  /// Gets the first slice of the blog feed from the local data source.
+  Future<BlogFeedSliceModel> getFirstFeedSlice({required int limit});
 
   /// Gets a blog by its ID from the local data source.
   Future<BlogModel?> getBlogById(String blogId);
@@ -48,6 +48,7 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
                 topicsJson: jsonEncode(
                   blog.topics.map((topic) => topic.value).toList(),
                 ),
+                createdAt: blog.createdAt,
                 updatedAt: blog.updatedAt,
                 posterName: blog.posterName,
               ),
@@ -58,36 +59,30 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
   }
 
   @override
-  Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
-    final from = (pageNumber - 1) * blogPageSize;
-
+  Future<BlogFeedSliceModel> getFirstFeedSlice({
+    required int limit,
+  }) async {
     final cachedBlogs =
         await (_database.select(_database.cachedBlogs)
               ..orderBy([
                 (table) => OrderingTerm(
-                  expression: table.updatedAt,
+                  expression: table.createdAt,
+                  mode: OrderingMode.desc,
+                ),
+                (table) => OrderingTerm(
+                  expression: table.id,
                   mode: OrderingMode.desc,
                 ),
               ])
-              ..limit(blogPageSize, offset: from))
+              ..limit(limit))
             .get();
 
-    return cachedBlogs
-        .map(
-          (cachedBlog) => BlogModel(
-            id: cachedBlog.id,
-            posterId: cachedBlog.posterId,
-            title: cachedBlog.title,
-            content: cachedBlog.content,
-            imageUrl: cachedBlog.imageUrl,
-            topics: List<String>.from(
-              jsonDecode(cachedBlog.topicsJson) as List<dynamic>,
-            ).map(BlogTopic.fromValue).toList(),
-            updatedAt: cachedBlog.updatedAt,
-            posterName: cachedBlog.posterName,
-          ),
-        )
-        .toList();
+    final items = cachedBlogs.map(_toBlogModel).toList();
+
+    return BlogFeedSliceModel(
+      items: items,
+      nextCursor: null,
+    );
   }
 
   @override
@@ -101,18 +96,7 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
       return null;
     }
 
-    return BlogModel(
-      id: cachedBlog.id,
-      posterId: cachedBlog.posterId,
-      title: cachedBlog.title,
-      content: cachedBlog.content,
-      imageUrl: cachedBlog.imageUrl,
-      topics: List<String>.from(
-        jsonDecode(cachedBlog.topicsJson) as List<dynamic>,
-      ).map(BlogTopic.fromValue).toList(),
-      updatedAt: cachedBlog.updatedAt,
-      posterName: cachedBlog.posterName,
-    );
+    return _toBlogModel(cachedBlog);
   }
 
   @override
@@ -125,5 +109,21 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
   @override
   Future<void> clearAll() async {
     await _database.delete(_database.cachedBlogs).go();
+  }
+
+  BlogModel _toBlogModel(CachedBlog cachedBlog) {
+    return BlogModel(
+      id: cachedBlog.id,
+      posterId: cachedBlog.posterId,
+      posterName: cachedBlog.posterName,
+      title: cachedBlog.title,
+      content: cachedBlog.content,
+      imageUrl: cachedBlog.imageUrl,
+      topics: List<String>.from(
+        jsonDecode(cachedBlog.topicsJson) as List<dynamic>,
+      ).map(BlogTopic.fromValue).toList(),
+      createdAt: cachedBlog.createdAt,
+      updatedAt: cachedBlog.updatedAt,
+    );
   }
 }

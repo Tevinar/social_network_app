@@ -4,7 +4,7 @@ import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
     'chat_editor_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/user/'
@@ -20,8 +20,8 @@ class NewChatPage extends StatefulWidget {
 }
 
 class _NewChatPageState extends State<NewChatPage> {
-  final List<User> _selectedUsers = [];
-  late final User _currentUser;
+  final List<UserEntity> _selectedUsers = [];
+  late final UserEntity _currentUser;
 
   @override
   void initState() {
@@ -77,11 +77,11 @@ class _NewChatPageState extends State<NewChatPage> {
     return _buildUserSelectionTile(user);
   }
 
-  bool _isCurrentUser(User user) {
+  bool _isCurrentUser(UserEntity user) {
     return user.id == _currentUser.id;
   }
 
-  Widget _buildUserSelectionTile(User user) {
+  Widget _buildUserSelectionTile(UserEntity user) {
     return CheckboxListTile(
       secondary: const CircleAvatar(child: Icon(Icons.person)),
       title: Text(user.name),
@@ -98,7 +98,7 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  void _toggleUserSelection(User user, bool? value) {
+  void _toggleUserSelection(UserEntity user, bool? value) {
     setState(() {
       if (value == true) {
         _selectedUsers.add(user);
@@ -193,7 +193,7 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  List<User> _chatMembersForCreation() {
+  List<UserEntity> _chatMembersForCreation() {
     return [
       ..._selectedUsers,
       _currentUser,

@@ -5,11 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
-import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -26,12 +25,12 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// Creates a [AuthBloc].
   AuthBloc({
-    required UserSignUp userSignUp,
-    required UserSignIn userSignIn,
-    required WatchAuthStateChanges watchAuthStateChanges,
-  }) : _userSignUp = userSignUp,
-       _userSignIn = userSignIn,
-       _watchAuthStateChanges = watchAuthStateChanges,
+    required UserSignUpUseCase userSignUpUseCase,
+    required UserSignInUseCase userSignInUseCase,
+    required WatchAuthStateChanges watchAuthStateChangesUseCase,
+  }) : _userSignUpUseCase = userSignUpUseCase,
+       _userSignInUseCase = userSignInUseCase,
+       _watchAuthStateChangesUseCase = watchAuthStateChangesUseCase,
        super(AuthLoading()) {
     on<AuthSignup>(_onAuthSignUp);
     on<AuthSignIn>(_onAuthSignIn);
@@ -39,10 +38,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     _subscribeToAuthStateChanges();
   }
-  final UserSignUp _userSignUp;
-  final UserSignIn _userSignIn;
-  final WatchAuthStateChanges _watchAuthStateChanges;
-  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
+  final UserSignUpUseCase _userSignUpUseCase;
+  final UserSignInUseCase _userSignInUseCase;
+  final WatchAuthStateChanges _watchAuthStateChangesUseCase;
+  late final StreamSubscription<Either<Failure, UserEntity?>>
+  _authStateChangesSub;
 
   @override
   Future<void> close() async {
@@ -66,14 +66,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _subscribeToAuthStateChanges() {
-    _authStateChangesSub = _watchAuthStateChanges(const NoParams()).listen(
+    _authStateChangesSub = _watchAuthStateChangesUseCase().listen(
       (event) => add(_AuthStateChanged(event)),
     );
   }
 
   Future<void> _onAuthSignUp(AuthSignup event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final res = await _userSignUp(
+    final res = await _userSignUpUseCase(
       UserSignUpParams(
         name: event.name,
         email: event.email,
@@ -89,7 +89,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final res = await _userSignIn(
+    final res = await _userSignInUseCase(
       UserSignInParams(email: event.email, password: event.password),
     );
 

@@ -6,11 +6,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
-import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
+import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 
-class MockCreateBlog extends Mock implements CreateBlog {}
+class MockCreateBlog extends Mock implements CreateBlogUseCase {}
 
 class FakeCreateBlogParams extends Fake implements CreateBlogParams {}
 

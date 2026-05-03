@@ -4,15 +4,16 @@ import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 
-/// A get blog by ID.
-class GetBlogById implements UseCase<Blog, String> {
-  /// Creates a [GetBlogById].
-  GetBlogById(this.repository);
+/// Retrieves one blog by its stable identifier.
+class GetBlogByIdUseCase implements UseCase<Blog, String> {
+  /// Creates a [GetBlogByIdUseCase].
+  GetBlogByIdUseCase(this.repository);
 
-  /// The blog repository.
+  /// Repository used to load blog details.
   final BlogRepository repository;
 
   @override
+  /// Loads the blog identified by [blogId].
   Future<Either<Failure, Blog>> call(String blogId) {
     return repository.getBlogById(blogId);
   }

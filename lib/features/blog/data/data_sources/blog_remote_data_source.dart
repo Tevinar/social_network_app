@@ -1,235 +1,120 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:social_app/core/constants/supabase_schema/buckets.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/'
-    'blog_fields.dart';
-import 'package:social_app/core/constants/supabase_schema/fields/'
-    'profile_fields.dart';
-import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
-import 'package:social_app/core/constants/supabase_schema/tables.dart';
+import 'package:dio/dio.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
+import 'package:social_app/core/network/sse/sse_client.dart';
+import 'package:social_app/features/blog/data/models/blog_feed_event_model.dart';
+import 'package:social_app/features/blog/data/models/blog_feed_slice_model.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
-import 'package:social_app/features/blog/domain/constants/blog_paging.dart';
-import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// A blog remote data source.
+/// Remote blog data source backed by the HTTP API and SSE feed endpoints.
 abstract interface class BlogRemoteDataSource {
-  /// The post blog.
-  Future<BlogModel> postBlog(BlogModel blog);
+  /// Creates a new blog remotely and returns the persisted payload.
+  Future<BlogModel> createBlog({
+    required String title,
+    required String content,
+    required File image,
+    required List<String> topics,
+  });
 
-  /// The upload blog image.
-  Future<String> uploadBlogImage({required File image, required String blogId});
+  /// Fetches one cursor-based slice of the remote blog feed.
+  Future<BlogFeedSliceModel> getBlogFeedSlice({
+    int limit = 20,
+    String? cursor,
+  });
 
-  /// The get blogs page.
-  Future<List<BlogModel>> getBlogsPage(int page);
-
-  // Returns the total number of blogs in the database
-  /// The get blogs count.
-  Future<int> getBlogsCount();
-
-  /// The watch blog changes.
-  Stream<BlogChange> watchBlogChanges();
-
-  /// The get blog by ID.
+  /// Fetches one blog by its stable identifier.
   Future<BlogModel> getBlogById(String blogId);
+
+  /// Opens the remote Server-Sent Events stream of blog feed events.
+  Stream<BlogFeedEventModel> watchBlogFeedEvents();
 }
 
-/// A blog remote data source impl.
+/// Default [BlogRemoteDataSource] implementation using Dio and a generic SSE
+/// client.
 class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   /// Creates a [BlogRemoteDataSourceImpl].
-  BlogRemoteDataSourceImpl({required this.supabaseClient});
+  const BlogRemoteDataSourceImpl({
+    required Dio dio,
+    required SseClient sseClient,
+  }) : _dio = dio,
+       _sseClient = sseClient;
 
-  /// The supabase client.
-  SupabaseClient supabaseClient;
-
-  @override
-  Future<BlogModel> postBlog(BlogModel blog) async {
-    return guardRemoteDataSourceCall(() async {
-      final blogData = await supabaseClient
-          .from(Tables.blogs)
-          .insert(blog.toSupabaseInsertJson())
-          .select();
-
-      return BlogModel.fromSupabaseJson(blogData.first);
-    });
-  }
+  final Dio _dio;
+  final SseClient _sseClient;
 
   @override
-  Future<String> uploadBlogImage({
+  Future<BlogModel> createBlog({
+    required String title,
+    required String content,
     required File image,
-    required String blogId,
-  }) async {
+    required List<String> topics,
+  }) {
     return guardRemoteDataSourceCall(() async {
-      await supabaseClient.storage
-          .from(Buckets.blogImages)
-          .upload(blogId, image);
-      return supabaseClient.storage
-          .from(Buckets.blogImages)
-          .getPublicUrl(blogId);
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/blogs',
+        data: FormData.fromMap({
+          'title': title,
+          'content': content,
+          'topics': topics,
+          'image': await MultipartFile.fromFile(
+            image.path,
+          ),
+        }),
+      );
+
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(message: 'Create blog response is empty');
+      }
+
+      return BlogModel.fromJson(body);
     });
   }
 
   @override
-  Future<List<BlogModel>> getBlogsPage(int pageNumber) async {
+  Future<BlogFeedSliceModel> getBlogFeedSlice({
+    int limit = 20,
+    String? cursor,
+  }) {
     return guardRemoteDataSourceCall(() async {
-      final from = (pageNumber - 1) * blogPageSize;
-      final to = from + blogPageSize - 1;
-
-      final rawBlogs = await supabaseClient
-          .from(Tables.blogs)
-          .select('*, ${Tables.profiles} (${ProfileFields.name})')
-          .range(from, to)
-          .order(BlogFields.updatedAt, ascending: false);
-
-      return rawBlogs.map(
-        (rawBlog) {
-          final profile = rawBlog[Tables.profiles] as Map<String, dynamic>?;
-          final posterName = profile?[ProfileFields.name] as String?;
-          return BlogModel.fromSupabaseJson(rawBlog).copyWith(
-            posterName: posterName,
-          );
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/blogs',
+        queryParameters: {
+          'limit': limit,
+          if (cursor != null) 'cursor': cursor,
         },
-      ).toList();
+      );
+
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(message: 'List blogs response is empty');
+      }
+
+      return BlogFeedSliceModel.fromJson(body);
     });
-  }
-
-  @override
-  Future<int> getBlogsCount() async {
-    return guardRemoteDataSourceCall(() async {
-      return await supabaseClient.from(Tables.blogs).count();
-    });
-  }
-
-  /// Watches real-time changes on the `blogs` table and emits domain-level
-  /// [BlogChange] events (insert / update / delete).
-  ///
-  /// ### Why a `StreamController` is used
-  /// Supabase Realtime exposes a **callback-based API**, not a Dart `Stream`.
-  /// This method acts as an **adapter** that converts imperative callbacks
-  /// (`onPostgresChanges`) into a composable Dart `Stream`.
-  ///
-  /// The `StreamController` is responsible for:
-  /// - manually emitting events (`add`)
-  /// - emitting errors (`addError`)
-  /// - managing the subscription lifecycle
-  ///
-  /// ### Emitted events
-  /// Each Postgres change is translated into a domain-specific event:
-  /// - INSERT  → [BlogInserted]
-  /// - UPDATE  → [BlogUpdated]
-  /// - DELETE  → [BlogDeleted]
-  ///
-  /// This keeps the domain and presentation layers independent from
-  /// Supabase-specific payloads.
-  ///
-  /// ### Stream lifecycle
-  /// - The Realtime channel is created and subscribed **when the first listener
-  ///   subscribes** to the stream (`onListen`).
-  /// - The channel is unsubscribed **when the last listener cancels** the
-  ///   subscription (`onCancel`).
-  ///
-  /// This ensures:
-  /// - no unnecessary open connections
-  /// - proper cleanup when the stream is no longer needed
-  ///
-  /// ### Error handling
-  /// - Errors thrown while parsing or mapping payloads are added to the stream
-  ///   via `addError`.
-  /// - The stream itself is **not closed** on error.
-  /// - Higher layers (repository) are responsible for translating errors into
-  ///   domain failures.
-  ///
-  /// ### Architectural note
-  /// This method belongs to the **data layer** and performs infrastructure
-  /// adaptation only. It must not:
-  /// - emit UI states
-  /// - apply business rules
-  /// - translate errors into domain failures
-  ///
-  /// Those responsibilities are intentionally handled in upper layers.
-  @override
-  Stream<BlogChange> watchBlogChanges() {
-    late final StreamController<BlogChange> controller;
-    late final RealtimeChannel channel;
-
-    controller = StreamController<BlogChange>(
-      onListen: () {
-        channel =
-            supabaseClient.realtime.channel(
-                '${SchemaTypes.public}:${Tables.blogs}',
-              )
-              ..onPostgresChanges(
-                event: PostgresChangeEvent.all,
-                schema: SchemaTypes.public,
-                table: Tables.blogs,
-                callback: (payload) {
-                  try {
-                    switch (payload.eventType) {
-                      case PostgresChangeEvent.insert:
-                        controller.add(
-                          BlogInserted(
-                            BlogModel.fromSupabaseJson(
-                              payload.newRecord,
-                            ).toEntity(),
-                          ),
-                        );
-
-                      case PostgresChangeEvent.update:
-                        controller.add(
-                          BlogUpdated(
-                            BlogModel.fromSupabaseJson(
-                              payload.newRecord,
-                            ).toEntity(),
-                          ),
-                        );
-
-                      case PostgresChangeEvent.delete:
-                        final deletedBlogId =
-                            payload.oldRecord[BlogFields.id] as String;
-                        controller.add(BlogDeleted(deletedBlogId));
-
-                      case PostgresChangeEvent.all:
-                        // Required for exhaustive handling
-                        // but never emitted here.
-                        break;
-                    }
-                  } on Exception catch (e, stack) {
-                    controller.addError(
-                      ServerException(message: e.toString()),
-                      stack,
-                    );
-                  }
-                },
-              )
-              ..subscribe();
-      },
-      onCancel: () async {
-        await controller.close();
-        await channel.unsubscribe();
-      },
-    );
-
-    return controller.stream;
   }
 
   @override
   Future<BlogModel> getBlogById(String blogId) {
     return guardRemoteDataSourceCall(() async {
-      final blogData = await supabaseClient
-          .from(Tables.blogs)
-          .select('*, ${Tables.profiles} (${ProfileFields.name})')
-          .eq(BlogFields.id, blogId)
-          .single();
+      final response = await _dio.get<Map<String, dynamic>>('/blogs/$blogId');
 
-      final profile = blogData[Tables.profiles] as Map<String, dynamic>?;
-      final posterName = profile?[ProfileFields.name] as String?;
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(message: 'Get blog response is empty');
+      }
 
-      return BlogModel.fromSupabaseJson(blogData).copyWith(
-        posterName: posterName,
-      );
+      return BlogModel.fromJson(body);
     });
+  }
+
+  @override
+  Stream<BlogFeedEventModel> watchBlogFeedEvents() {
+    return _sseClient
+        .connect('/blogs/events')
+        .map(BlogFeedEventModel.fromSseEvent);
   }
 }

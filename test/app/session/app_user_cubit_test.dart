@@ -5,11 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/usecases/usecase.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_out.dart';
-import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 
-class MockUserSignOut extends Mock implements UserSignOut {}
+class MockUserSignOut extends Mock implements UserSignOutUseCase {}
 
 class MockWatchAuthStateChanges extends Mock implements WatchAuthStateChanges {}
 
@@ -17,7 +17,7 @@ void main() {
   late MockUserSignOut mockUserSignOut;
   late MockWatchAuthStateChanges mockWatchAuthStateChanges;
 
-  const testUser = User(
+  const testUser = UserEntity(
     id: '123',
     name: 'Test User',
     email: 'test@test.com',

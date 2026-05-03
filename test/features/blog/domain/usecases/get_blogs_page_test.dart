@@ -3,16 +3,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blogs_page.dart';
+import 'package:social_app/features/blog/domain/usecases/watch_feed_slice_use_case.dart';
 
 class MockBlogRepository extends Mock implements BlogRepository {}
 
 void main() {
   late MockBlogRepository blogRepository;
-  late WatchBlogsPage usecase;
+  late WatchFeedSliceUseCase usecase;
 
   final snapshot = BlogsPageSnapshot(
     pageNumber: 2,
@@ -33,7 +33,7 @@ void main() {
 
   setUp(() {
     blogRepository = MockBlogRepository();
-    usecase = WatchBlogsPage(blogRepository: blogRepository);
+    usecase = WatchFeedSliceUseCase(blogRepository: blogRepository);
   });
 
   test(

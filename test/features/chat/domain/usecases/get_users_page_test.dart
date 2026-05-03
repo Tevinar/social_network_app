@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 
@@ -13,7 +13,7 @@ void main() {
   late GetUsersPage usecase;
 
   const users = [
-    User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+    UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
   ];
 
   setUp(() {
@@ -27,13 +27,13 @@ void main() {
       // Arrange
       when(
         () => usersRepository.getUsersPage(2),
-      ).thenAnswer((_) async => right<Failure, List<User>>(users));
+      ).thenAnswer((_) async => right<Failure, List<UserEntity>>(users));
 
       // Act
       final result = await usecase(2);
 
       // Assert
-      expect(result, right<Failure, List<User>>(users));
+      expect(result, right<Failure, List<UserEntity>>(users));
       verify(() => usersRepository.getUsersPage(2)).called(1);
     },
   );

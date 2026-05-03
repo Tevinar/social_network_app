@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
@@ -25,7 +25,7 @@ void main() {
         updatedAt: DateTime(2025),
       ),
       members: const [
-        User(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
+        UserEntity(id: 'user-1', name: 'Alice', email: 'alice@test.com'),
       ],
     ),
   ];

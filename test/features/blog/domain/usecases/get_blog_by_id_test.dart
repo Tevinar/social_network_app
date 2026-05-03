@@ -3,15 +3,15 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
-import 'package:social_app/features/blog/domain/usecases/get_blog_by_id.dart';
+import 'package:social_app/features/blog/domain/usecases/get_blog_by_id_use_case.dart';
 
 class MockBlogRepository extends Mock implements BlogRepository {}
 
 void main() {
   late MockBlogRepository blogRepository;
-  late GetBlogById usecase;
+  late GetBlogByIdUseCase usecase;
 
   final blog = Blog(
     id: 'blog-1',
@@ -26,7 +26,7 @@ void main() {
 
   setUp(() {
     blogRepository = MockBlogRepository();
-    usecase = GetBlogById(blogRepository);
+    usecase = GetBlogByIdUseCase(blogRepository);
   });
 
   test(

@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 
@@ -8,7 +8,7 @@ import 'package:social_app/features/chat/domain/entities/chat_change.dart';
 abstract interface class ChatRepository {
   /// Create chat.
   Future<Either<Failure, Chat>> createChat(
-    List<User> members,
+    List<UserEntity> members,
     String firstMessageContent,
   );
 
@@ -22,5 +22,5 @@ abstract interface class ChatRepository {
   Stream<Either<Failure, ChatChange>> watchChatChanges();
 
   /// Gets the chat by members.
-  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members);
+  Future<Either<Failure, Chat?>> getChatByMembers(List<UserEntity> members);
 }

@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 
-// for convert stream to listenable
-/// A stream to listenable.
+/// Adapts one or more streams into a [Listenable] that notifies listeners
+/// whenever any source stream emits.
 class StreamToListenable extends ChangeNotifier {
-  /// Creates a [StreamToListenable].
+  /// Creates a [StreamToListenable] from [streams].
   StreamToListenable(List<Stream<void>> streams) {
     _subscriptions = streams.map((stream) {
       return stream.asBroadcastStream().listen(
@@ -23,6 +23,7 @@ class StreamToListenable extends ChangeNotifier {
 
     notifyListeners();
   }
+
   late final List<StreamSubscription<void>> _subscriptions;
 
   @override

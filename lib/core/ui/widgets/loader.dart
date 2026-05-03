@@ -6,7 +6,7 @@ class Loader extends StatelessWidget {
   /// Creates a [Loader].
   const Loader({super.key, this.size});
 
-  /// The double.
+  /// Optional square size constraint applied to the progress indicator.
   final double? size;
 
   @override

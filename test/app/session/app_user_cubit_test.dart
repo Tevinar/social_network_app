@@ -4,7 +4,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_cases/use_case.dart';
 import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
@@ -23,17 +22,13 @@ void main() {
     email: 'test@test.com',
   );
 
-  setUpAll(() {
-    registerFallbackValue(const NoParams());
-  });
-
   setUp(() {
     mockUserSignOut = MockUserSignOut();
     mockWatchAuthStateChanges = MockWatchAuthStateChanges();
 
-    when(
-      () => mockWatchAuthStateChanges(any()),
-    ).thenAnswer((_) => const Stream.empty());
+    when(() => mockWatchAuthStateChanges()).thenAnswer(
+      (_) => const Stream.empty(),
+    );
   });
 
   test(
@@ -57,9 +52,9 @@ void main() {
     'emits AppUserSignedOut',
     build: () {
       // Arrange
-      when(
-        () => mockWatchAuthStateChanges(any()),
-      ).thenAnswer((_) => Stream.value(const Right(null)));
+      when(() => mockWatchAuthStateChanges()).thenAnswer(
+        (_) => Stream.value(const Right(null)),
+      );
 
       // Act
       return AppUserCubit(
@@ -78,9 +73,9 @@ void main() {
     'emits AppUserSignedIn',
     build: () {
       // Arrange
-      when(
-        () => mockWatchAuthStateChanges(any()),
-      ).thenAnswer((_) => Stream.value(const Right(testUser)));
+      when(() => mockWatchAuthStateChanges()).thenAnswer(
+        (_) => Stream.value(const Right(testUser)),
+      );
 
       // Act
       return AppUserCubit(
@@ -103,9 +98,9 @@ void main() {
     build: () {
       const failure = NetworkFailure();
       // Arrange
-      when(
-        () => mockWatchAuthStateChanges(any()),
-      ).thenAnswer((_) => Stream.value(left(failure)));
+      when(() => mockWatchAuthStateChanges()).thenAnswer(
+        (_) => Stream.value(left(failure)),
+      );
 
       // Act
       return AppUserCubit(
@@ -128,9 +123,9 @@ void main() {
     'AppUserLoading and AppUserSignedOut',
     build: () {
       // Arrange
-      when(
-        () => mockUserSignOut(any()),
-      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(() => mockUserSignOut()).thenAnswer(
+        (_) async => const Right<Failure, void>(null),
+      );
 
       return AppUserCubit(
         userSignOut: mockUserSignOut,
@@ -154,9 +149,7 @@ void main() {
     build: () {
       const failure = UnauthorizedFailure();
       // Arrange
-      when(
-        () => mockUserSignOut(any()),
-      ).thenAnswer((_) async => left(failure));
+      when(() => mockUserSignOut()).thenAnswer((_) async => left(failure));
 
       return AppUserCubit(
         userSignOut: mockUserSignOut,
@@ -180,12 +173,12 @@ void main() {
 
   test(
     'given signOut is called when the cubit invokes the use case then calls '
-    'UserSignOut with NoParams',
+    'UserSignOutUseCase',
     () async {
       // Arrange
-      when(
-        () => mockUserSignOut(any()),
-      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(() => mockUserSignOut()).thenAnswer(
+        (_) async => const Right<Failure, void>(null),
+      );
 
       final appUserCubit = AppUserCubit(
         userSignOut: mockUserSignOut,
@@ -197,9 +190,7 @@ void main() {
       await appUserCubit.signOut();
 
       // Assert
-      verify(
-        () => mockUserSignOut(any(that: isA<NoParams>())),
-      ).called(1);
+      verify(() => mockUserSignOut()).called(1);
     },
   );
 }

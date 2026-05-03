@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_cases/use_case.dart';
 import 'package:social_app/features/auth/domain/entities/user_entity.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
@@ -34,7 +33,7 @@ void main() {
         (_) => Stream.value(const Right<Failure, UserEntity?>(user)),
       );
 
-      final emissions = await watchAuthStateChanges(const NoParams()).toList();
+      final emissions = await watchAuthStateChanges().toList();
 
       expect(emissions, [const Right<Failure, UserEntity?>(user)]);
       verify(() => authRepository.authStateChanges()).called(1);

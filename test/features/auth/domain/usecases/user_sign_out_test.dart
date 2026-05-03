@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_cases/use_case.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
 
@@ -28,7 +27,7 @@ void main() {
         ).thenAnswer((_) async => const Right<Failure, void>(null));
 
         // Act
-        final result = await userSignOut(const NoParams());
+        final result = await userSignOut();
 
         // Assert
         expect(result, isA<Right<Failure, void>>());
@@ -46,7 +45,7 @@ void main() {
         ).thenAnswer((_) async => left(const UnauthorizedFailure()));
 
         // Act
-        final result = await userSignOut(const NoParams());
+        final result = await userSignOut();
 
         // Assert
         expect(result, isA<Left<Failure, void>>());

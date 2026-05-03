@@ -50,12 +50,7 @@ void _initCore() {
     ..registerLazySingleton<ConnectionChecker>(
       () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
     )
-    ..registerLazySingleton<ImageFileCache>(ImageFileCacheImpl.new)
-    // Image picker service
-    ..registerLazySingleton(ImagePicker.new)
-    ..registerLazySingleton<ImagePickerService>(
-      () => ImagePickerServiceImpl(serviceLocator()),
-    );
+    ..registerLazySingleton<ImageFileCache>(ImageFileCacheImpl.new);
 }
 
 void _initAuth() {

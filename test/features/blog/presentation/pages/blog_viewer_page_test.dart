@@ -9,7 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/local_storage/image_file_cache.dart';
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
 import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';

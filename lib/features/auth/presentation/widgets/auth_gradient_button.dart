@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
 /// A auth gradient button widget.

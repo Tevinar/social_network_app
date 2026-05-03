@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
+import 'package:social_app/core/use_cases/use_case.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 

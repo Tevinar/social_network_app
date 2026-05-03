@@ -4,10 +4,10 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:social_app/app/media/image_picker.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/app/media/image_picker.dart';
 import 'package:social_app/core/ui/feedback/show_snackbar.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
@@ -77,7 +77,7 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         if (state is BlogFailure) {
           showSnackBar(context, state.error);
         } else if (state is BlogUploadSuccess) {
-          context.pop(true);
+          context.pop(state.blog);
         }
       },
       builder: (context, state) {
@@ -119,8 +119,6 @@ class _AddNewBlogPageState extends State<AddNewBlogPage> {
         content: contentController.text.trim(),
         topics: selectedTopics,
         image: image!,
-        posterId: state.user.id,
-        posterName: state.user.name,
       ),
     );
   }

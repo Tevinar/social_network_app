@@ -34,6 +34,7 @@ class BlogFeedBloc extends Bloc<BlogFeedBlocEvent, BlogFeedState> {
     on<LoadInitialFeed>(_onLoadInitialFeed);
     on<LoadMoreFeed>(_onLoadMoreFeed);
     on<RefreshFeed>(_onRefreshFeed);
+    on<PrependCreatedBlog>(_onPrependCreatedBlog);
     on<_FeedSliceReceived>(_onFeedSliceReceived);
     on<_FeedEventReceived>(_onFeedEventReceived);
 
@@ -124,6 +125,27 @@ class BlogFeedBloc extends Bloc<BlogFeedBlocEvent, BlogFeedState> {
     Emitter<BlogFeedState> emit,
   ) async {
     add(const LoadInitialFeed());
+  }
+
+  void _onPrependCreatedBlog(
+    PrependCreatedBlog event,
+    Emitter<BlogFeedState> emit,
+  ) {
+    final updatedBlogs = [
+      event.blog,
+      ...state.blogs.where((blog) => blog.id != event.blog.id),
+    ];
+
+    emit(
+      BlogFeedSuccess(
+        blogs: updatedBlogs,
+        nextCursor: state.nextCursor,
+        hasNewContentAvailable: false,
+        isLoadingMore: false,
+        isFromCache: state.isFromCache,
+        refreshError: state.refreshError,
+      ),
+    );
   }
 
   Future<void> _onLoadMoreFeed(

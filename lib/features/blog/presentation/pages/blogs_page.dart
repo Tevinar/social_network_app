@@ -4,8 +4,9 @@ import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/core/ui/feedback/show_snackbar.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_feed/blog_feed_bloc.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
@@ -76,14 +77,14 @@ class BlogsPage extends StatelessWidget {
 
   Future<void> _openAddBlogPage(BuildContext context) async {
     final blogFeedBloc = context.read<BlogFeedBloc>();
-    final created = await const AddNewBlogPageRoute().push<bool>(context);
+    final createdBlog = await const AddNewBlogPageRoute().push<Blog>(context);
 
-    if (created != true) {
+    if (createdBlog == null) {
       return;
     }
 
+    blogFeedBloc.add(PrependCreatedBlog(createdBlog));
     await blogFeedBloc.scrollToTop();
-    blogFeedBloc.add(const RefreshFeed());
   }
 
   Widget _buildBody(BuildContext context, BlogFeedState state) {

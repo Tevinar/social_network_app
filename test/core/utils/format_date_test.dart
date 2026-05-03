@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/core/ui/formatting/format_date.dart';
 
 void main() {
   group('formatToDay', () {

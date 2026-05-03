@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:social_app/core/network/connection_checker.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
+import 'package:social_app/core/ui/feedback/show_snackbar.dart';
 
 /// Checks connectivity once on startup and shows an offline snackbar if needed.
 class OfflineStartupSnackbar extends StatefulWidget {

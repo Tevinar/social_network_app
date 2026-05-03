@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:social_app/app/services/image_picker_service_impl.dart';
+import 'package:social_app/app/media/image_picker_service_impl.dart';
 
 class MockImagePicker extends Mock implements ImagePicker {}
 

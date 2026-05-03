@@ -25,6 +25,15 @@ final class RefreshFeed extends BlogFeedBlocEvent {
   const RefreshFeed();
 }
 
+/// Prepends a newly created blog to the top of the currently visible feed.
+final class PrependCreatedBlog extends BlogFeedBlocEvent {
+  /// Creates a [PrependCreatedBlog].
+  const PrependCreatedBlog(this.blog);
+
+  /// Blog created successfully by the backend.
+  final Blog blog;
+}
+
 final class _FeedSliceReceived extends BlogFeedBlocEvent {
   const _FeedSliceReceived({
     required this.result,

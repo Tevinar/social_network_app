@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
+import 'package:social_app/core/ui/feedback/show_snackbar.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_gradient_button.dart';

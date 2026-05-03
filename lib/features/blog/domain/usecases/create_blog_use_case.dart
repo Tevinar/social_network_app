@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
+import 'package:social_app/core/use_cases/use_case.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 /// Validates blog input data and delegates blog creation to the repository.
 class CreateBlogUseCase implements UseCase<Blog, CreateBlogParams> {
@@ -28,9 +28,6 @@ class CreateBlogUseCase implements UseCase<Blog, CreateBlogParams> {
     if (params.content.isEmpty) {
       return left(const ValidationFailure('Content cannot be empty'));
     }
-    if (params.posterId.isEmpty) {
-      return left(const ValidationFailure('Poster ID cannot be empty'));
-    }
     if (params.topics.isEmpty) {
       return left(
         const ValidationFailure('At least one topic must be selected'),
@@ -50,19 +47,11 @@ class CreateBlogUseCase implements UseCase<Blog, CreateBlogParams> {
 class CreateBlogParams {
   /// Creates a [CreateBlogParams].
   CreateBlogParams({
-    required this.posterId,
-    required this.posterName,
     required this.title,
     required this.content,
     required this.image,
     required this.topics,
   });
-
-  /// Identifier of the user creating the blog.
-  final String posterId;
-
-  /// Name of the user creating the blog.
-  final String posterName;
 
   /// Blog title.
   final String title;

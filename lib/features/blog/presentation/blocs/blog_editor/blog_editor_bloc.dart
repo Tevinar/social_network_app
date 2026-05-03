@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
 
@@ -22,8 +23,6 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   Future<void> _onAddBlog(AddBlog event, Emitter<BlogEditorState> emit) async {
     final res = await _uploadBlog.call(
       CreateBlogParams(
-        posterId: event.posterId,
-        posterName: event.posterName,
         title: event.title,
         content: event.content,
         image: event.image,
@@ -32,7 +31,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
     );
     res.fold(
       (l) => emit(BlogFailure(l.message)),
-      (r) => emit(BlogUploadSuccess()),
+      (r) => emit(BlogUploadSuccess(r)),
     );
   }
 }

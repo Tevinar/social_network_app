@@ -166,6 +166,7 @@ void _initBlog() {
       () => BlogRepositoryImpl(
         blogRemoteDataSource: serviceLocator(),
         blogLocalDataSource: serviceLocator(),
+        imageFileCache: serviceLocator(),
       ),
     )
     // Usecases
@@ -173,6 +174,9 @@ void _initBlog() {
       () => CreateBlogUseCase(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(() => GetBlogByIdUseCase(serviceLocator()))
+    ..registerLazySingleton(
+      () => GetBlogImageUseCase(blogRepository: serviceLocator()),
+    )
     ..registerLazySingleton(
       () => WatchFeedSliceUseCase(blogRepository: serviceLocator()),
     )
@@ -188,7 +192,10 @@ void _initBlog() {
       ),
     )
     ..registerFactory(
-      () => BlogViewerBloc(getBlogByIdUseCase: serviceLocator()),
+      () => BlogViewerBloc(
+        getBlogByIdUseCase: serviceLocator(),
+        getBlogImageUseCase: serviceLocator(),
+      ),
     );
 }
 

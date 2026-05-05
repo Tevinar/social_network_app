@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
+import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_local_data_source.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
@@ -23,6 +24,7 @@ class BlogRepositoryImpl implements BlogRepository {
   BlogRepositoryImpl({
     required this.blogRemoteDataSource,
     required this.blogLocalDataSource,
+    required this.imageFileCache,
   });
 
   /// Remote data source used for backend blog operations and feed events.
@@ -31,6 +33,9 @@ class BlogRepositoryImpl implements BlogRepository {
   /// Local data source used for caching the first feed slice and individual
   /// blog records.
   final BlogLocalDataSource blogLocalDataSource;
+
+  /// Cache used to persist blog images locally after download.
+  final ImageFileCache imageFileCache;
 
   @override
   /// Creates a blog remotely, updates the local cache, and returns the
@@ -205,6 +210,32 @@ class BlogRepositoryImpl implements BlogRepository {
 
       if (cachedBlog != null) {
         return right(cachedBlog.toEntity());
+      }
+
+      return left(failure);
+    }
+  }
+
+  @override
+  /// Returns the image file for [blog] from cache or downloads it when
+  /// needed.
+  Future<Either<Failure, File?>> getBlogImage(Blog blog) async {
+    try {
+      final imageFile = await imageFileCache.getOrDownload(
+        cacheKey: blog.id,
+        imageUrl: blog.imageUrl,
+      );
+
+      return right(imageFile);
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
+
+      if (failure is UnexpectedFailure) {
+        appLogger.error(
+          'Unexpected error in BlogRepositoryImpl.getBlogImage',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
 
       return left(failure);

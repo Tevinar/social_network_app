@@ -84,7 +84,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         '/blogs',
         queryParameters: {
           'limit': limit,
-          if (cursor != null) 'cursor': cursor,
+          'cursor': ?cursor,
         },
       );
 

@@ -32,6 +32,7 @@ import 'package:social_app/features/blog/data/repositories/blog_repository_impl.
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/get_blog_by_id_use_case.dart';
+import 'package:social_app/features/blog/domain/usecases/get_blog_image_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_feed_events_use_case.dart';
 import 'package:social_app/features/blog/domain/usecases/watch_feed_slice_use_case.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';

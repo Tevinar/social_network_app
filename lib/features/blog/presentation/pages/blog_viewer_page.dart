@@ -1,12 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
-import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/core/ui/text/calculate_reading_time.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
-import 'package:social_app/features/blog/domain/entities/blog.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
 
 /// A blog viewer page widget.
@@ -67,7 +67,7 @@ class BlogViewerPage extends StatelessWidget {
   Widget _buildBlogContent(BuildContext context, BlogViewerSuccess state) {
     final blog = state.blog;
     return FutureBuilder(
-      future: _prepareBlogImage(context, blog),
+      future: _prepareBlogImage(context, state.imageFile),
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return const Loader();
@@ -104,7 +104,7 @@ class BlogViewerPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _displayBlogImage(context, asyncSnapshot.data, blog),
+                  _displayBlogImage(asyncSnapshot.data),
                   const SizedBox(height: 20),
                   Text(
                     blog.content,
@@ -119,11 +119,7 @@ class BlogViewerPage extends StatelessWidget {
     );
   }
 
-  Widget _displayBlogImage(
-    BuildContext context,
-    ImageProvider<Object>? imageProvider,
-    Blog blog,
-  ) {
+  Widget _displayBlogImage(ImageProvider<Object>? imageProvider) {
     if (imageProvider == null) {
       return Container(
         height: 220,
@@ -144,27 +140,16 @@ class BlogViewerPage extends StatelessWidget {
     }
   }
 
-  Future<ImageProvider<Object>?> _resolveBlogImage(Blog blog) async {
-    final downloadedFile = await serviceLocator<ImageFileCache>().getOrDownload(
-      cacheKey: blog.id,
-      imageUrl: blog.imageUrl,
-    );
-
-    if (downloadedFile == null) {
-      return null;
-    }
-
-    return FileImage(downloadedFile);
-  }
-
   Future<ImageProvider<Object>?> _prepareBlogImage(
     BuildContext context,
-    Blog blog,
+    File? imageFile,
   ) async {
-    final resolvedImageProvider = await _resolveBlogImage(blog);
-    if (resolvedImageProvider == null) {
+    if (imageFile == null) {
       return null;
     }
+
+    final resolvedImageProvider = FileImage(imageFile);
+
     if (!context.mounted) {
       return resolvedImageProvider;
     }

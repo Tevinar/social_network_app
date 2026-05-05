@@ -14,13 +14,18 @@ final class BlogViewerLoading extends BlogViewerState {}
 /// The success state of the [BlogViewerBloc] when a blog is successfully
 /// loaded.
 final class BlogViewerSuccess extends BlogViewerState {
-  /// Creates a [BlogViewerSuccess] state with the loaded [blog].
+  /// Creates a [BlogViewerSuccess] state with the loaded [blog] and optional
+  /// locally cached image file.
   BlogViewerSuccess({
     required this.blog,
+    required this.imageFile,
   });
 
   /// The loaded blog that can be displayed in the UI.
   final Blog blog;
+
+  /// The locally cached or downloaded image file for [blog], when available.
+  final File? imageFile;
 }
 
 /// The failure state of the [BlogViewerBloc] when an error occurs.

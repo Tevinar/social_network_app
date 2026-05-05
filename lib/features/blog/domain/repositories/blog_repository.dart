@@ -30,4 +30,7 @@ abstract interface class BlogRepository {
 
   /// Retrieves a single blog by its stable identifier.
   Future<Either<Failure, Blog>> getBlogById(String blogId);
+
+  /// Retrieves the locally cached or downloaded image file for [blog].
+  Future<Either<Failure, File?>> getBlogImage(Blog blog);
 }

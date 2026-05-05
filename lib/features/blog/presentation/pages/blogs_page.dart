@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
 import 'package:social_app/app/router/routes/routes.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/feedback/show_snackbar.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';

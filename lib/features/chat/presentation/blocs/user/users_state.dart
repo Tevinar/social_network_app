@@ -10,7 +10,7 @@ sealed class UsersState {
   });
 
   /// The users.
-  final List<UserEntity> users;
+  final List<User> users;
 
   /// The int.
   final int pageNumber;

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 
 void main() {
-  const testUser = UserEntity(
+  const testUser = User(
     id: '123',
     name: 'Test User',
     email: 'test@test.com',

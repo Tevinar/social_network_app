@@ -1,20 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/features/auth/data/models/auth_session_model.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 
 void main() {
-  const user = UserModel(
-    id: '123',
-    name: 'Test User',
-    email: 'test@test.com',
-  );
-
   final session = AuthSessionModel(
     accessToken: 'access-token',
     refreshToken: 'refresh-token',
     accessTokenExpiresAt: DateTime.utc(2026),
     refreshTokenExpiresAt: DateTime.utc(2026, 2),
-    user: user,
   );
 
   final sessionJson = <String, dynamic>{
@@ -22,11 +14,6 @@ void main() {
     'refreshToken': 'refresh-token',
     'accessTokenExpiresAt': '2026-01-01T00:00:00.000Z',
     'refreshTokenExpiresAt': '2026-02-01T00:00:00.000Z',
-    'user': <String, dynamic>{
-      'id': '123',
-      'name': 'Test User',
-      'email': 'test@test.com',
-    },
   };
 
   group('AuthSessionModel.fromJson', () {
@@ -42,9 +29,6 @@ void main() {
         expect(result.refreshToken, 'refresh-token');
         expect(result.accessTokenExpiresAt, DateTime.utc(2026));
         expect(result.refreshTokenExpiresAt, DateTime.utc(2026, 2));
-        expect(result.user.id, '123');
-        expect(result.user.name, 'Test User');
-        expect(result.user.email, 'test@test.com');
       },
     );
   });

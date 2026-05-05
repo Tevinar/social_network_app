@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
 
@@ -12,7 +12,7 @@ void main() {
   late MockAuthRepository authRepository;
   late UserSignInUseCase userSignIn;
 
-  const testUser = UserEntity(
+  const testUser = User(
     id: '123',
     name: 'Test User',
     email: 'test@test.com',
@@ -46,7 +46,7 @@ void main() {
         // Assert
         expect(
           result,
-          isA<Right<Failure, UserEntity>>()
+          isA<Right<Failure, User>>()
               .having((r) => r.value.id, 'id', testUser.id)
               .having((r) => r.value.name, 'name', testUser.name)
               .having((r) => r.value.email, 'email', testUser.email),
@@ -80,7 +80,7 @@ void main() {
         final result = await userSignIn(params);
 
         // Assert
-        expect(result, isA<Left<Failure, UserEntity>>());
+        expect(result, isA<Left<Failure, User>>());
         result.fold(
           (failure) => expect(failure, isA<NetworkFailure>()),
           (_) => fail('Expected a failure'),

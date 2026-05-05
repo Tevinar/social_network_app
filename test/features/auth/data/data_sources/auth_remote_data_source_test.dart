@@ -4,11 +4,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/local_database/app_settings_store.dart';
 import 'package:social_app/core/local_database/schema/app_settings.dart';
-import 'package:social_app/features/auth/data/data_sources/'
-    'auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
+import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/models/auth_session_model.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 
 class MockDio extends Mock implements Dio {}
 
@@ -43,11 +42,6 @@ void main() {
         refreshToken: 'fallback-refresh-token',
         accessTokenExpiresAt: DateTime.utc(2026),
         refreshTokenExpiresAt: DateTime.utc(2026, 2),
-        user: const UserModel(
-          id: 'fallback-user-id',
-          name: 'Fallback User',
-          email: 'fallback@test.com',
-        ),
       ),
     );
   });
@@ -68,9 +62,6 @@ void main() {
       ),
     ).thenAnswer((_) async => deviceId);
     when(
-      () => authSessionStore.saveSession(any()),
-    ).thenAnswer((_) async {});
-    when(
       () => authSessionStore.clearSession(),
     ).thenAnswer((_) async {});
   });
@@ -78,7 +69,7 @@ void main() {
   group('signInWithEmailPassword', () {
     test(
       'given backend returns an auth session when signing in then returns '
-      'the user and stores the session',
+      'the authenticated user payload',
       () async {
         // Arrange
         when(
@@ -102,28 +93,25 @@ void main() {
         // Assert
         expect(
           result,
-          isA<UserModel>()
-              .having((user) => user.id, 'id', '123')
-              .having((user) => user.name, 'name', 'Test User')
-              .having((user) => user.email, 'email', 'test@test.com'),
+          isA<AuthenticatedUserModel>()
+              .having((value) => value.user.id, 'user.id', '123')
+              .having((value) => value.user.name, 'user.name', 'Test User')
+              .having(
+                (value) => value.user.email,
+                'user.email',
+                'test@test.com',
+              )
+              .having(
+                (value) => value.session.accessToken,
+                'session.accessToken',
+                'access-token',
+              )
+              .having(
+                (value) => value.session.refreshToken,
+                'session.refreshToken',
+                'refresh-token',
+              ),
         );
-        verify(
-          () => authSessionStore.saveSession(
-            any(
-              that: isA<AuthSessionModel>()
-                  .having(
-                    (session) => session.accessToken,
-                    'accessToken',
-                    'access-token',
-                  )
-                  .having(
-                    (session) => session.refreshToken,
-                    'refreshToken',
-                    'refresh-token',
-                  ),
-            ),
-          ),
-        ).called(1);
 
         final capturedData = verify(
           () => dio.post<Map<String, dynamic>>(
@@ -202,7 +190,7 @@ void main() {
   group('signUpWithEmailPassword', () {
     test(
       'given backend returns an auth session when signing up then returns '
-      'the user and stores the session',
+      'the authenticated user payload',
       () async {
         // Arrange
         when(
@@ -225,20 +213,10 @@ void main() {
         );
 
         // Assert
-        expect(result.id, '123');
-        expect(result.name, 'Test User');
-        expect(result.email, 'test@test.com');
-        verify(
-          () => authSessionStore.saveSession(
-            any(
-              that: isA<AuthSessionModel>().having(
-                (session) => session.accessToken,
-                'accessToken',
-                'access-token',
-              ),
-            ),
-          ),
-        ).called(1);
+        expect(result.user.id, '123');
+        expect(result.user.name, 'Test User');
+        expect(result.user.email, 'test@test.com');
+        expect(result.session.accessToken, 'access-token');
 
         final capturedData = verify(
           () => dio.post<Map<String, dynamic>>(
@@ -301,7 +279,6 @@ void main() {
         await dataSource.signOut();
 
         // Assert
-        verify(() => authSessionStore.clearSession()).called(1);
         verifyNever(
           () => dio.post<void>(
             any(),
@@ -313,7 +290,7 @@ void main() {
 
     test(
       'given a stored session when signing out then revokes the backend '
-      'session and clears local state',
+      'session',
       () async {
         // Arrange
         when(
@@ -334,8 +311,6 @@ void main() {
         await dataSource.signOut();
 
         // Assert
-        verify(() => authSessionStore.clearSession()).called(1);
-
         final capturedData = verify(
           () => dio.post<void>(
             '/auth/sign-out',

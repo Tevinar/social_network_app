@@ -1,7 +1,6 @@
 import 'package:social_app/core/serialization/json_reader.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 
-/// Data model representing a locally persisted authenticated session.
+/// Data model representing a locally persisted authenticated token session.
 class AuthSessionModel {
   /// Creates an [AuthSessionModel].
   const AuthSessionModel({
@@ -9,7 +8,6 @@ class AuthSessionModel {
     required this.refreshToken,
     required this.accessTokenExpiresAt,
     required this.refreshTokenExpiresAt,
-    required this.user,
   });
 
   /// Creates an [AuthSessionModel] from a JSON map.
@@ -25,7 +23,6 @@ class AuthSessionModel {
         map,
         'refreshTokenExpiresAt',
       ),
-      user: UserModel.fromJson(JsonReader.readObject(map, 'user')),
     );
   }
 
@@ -41,9 +38,6 @@ class AuthSessionModel {
   /// Expiration timestamp for [refreshToken].
   final DateTime refreshTokenExpiresAt;
 
-  /// Authenticated user associated with this session.
-  final UserModel user;
-
   /// Converts the model to a serializable JSON map.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -51,7 +45,6 @@ class AuthSessionModel {
       'refreshToken': refreshToken,
       'accessTokenExpiresAt': accessTokenExpiresAt.toIso8601String(),
       'refreshTokenExpiresAt': refreshTokenExpiresAt.toIso8601String(),
-      'user': user.toJson(),
     };
   }
 }

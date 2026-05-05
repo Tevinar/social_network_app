@@ -6,7 +6,7 @@ sealed class ChatEditorState {
   const ChatEditorState({required this.chatMembers});
 
   /// The chat members.
-  final List<UserEntity> chatMembers;
+  final List<User> chatMembers;
 }
 
 /// A chat editor drafted.

@@ -5,14 +5,36 @@ final GetIt serviceLocator = GetIt.instance;
 
 /// The init dependencies.
 Future<void> initDependencies() async {
-  serviceLocator.registerLazySingleton<Dio>(
-    () => Dio(
-      BaseOptions(
-        baseUrl: Env.backendBaseUrl,
-        headers: {'content-type': 'application/json'},
+  serviceLocator
+    ..registerLazySingleton<Dio>(
+      () => Dio(
+        BaseOptions(
+          baseUrl: Env.backendBaseUrl,
+          headers: {'content-type': 'application/json'},
+        ),
       ),
-    ),
-  );
+      instanceName: 'publicDio',
+    )
+    ..registerLazySingleton<Dio>(
+      () {
+        final dio = Dio(
+          BaseOptions(
+            baseUrl: Env.backendBaseUrl,
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+
+        dio.interceptors.add(
+          AuthDioInterceptor(
+            dio: dio,
+            authTokenManager: serviceLocator(),
+          ),
+        );
+
+        return dio;
+      },
+      instanceName: 'authedDio',
+    );
 
   // app
   _initApp();
@@ -59,8 +81,25 @@ void _initAuth() {
     ..registerLazySingleton<AuthSessionStore>(
       () => SecureAuthSessionStore(serviceLocator()),
     )
+    ..registerLazySingleton<CurrentAuthUserStore>(
+      () => DriftCurrentAuthUserStore(serviceLocator()),
+    )
     ..registerLazySingleton<AppSettingsStore>(
       () => DriftAppSettingsStore(serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => BackendAuthSessionRefresher(
+        dio: serviceLocator(instanceName: 'publicDio'),
+        appSettingsStore: serviceLocator(),
+        authSessionStore: serviceLocator(),
+      ),
+    )
+    ..registerLazySingleton(
+      () => AuthTokenManager(
+        authSessionStore: serviceLocator(),
+        currentAuthUserStore: serviceLocator(),
+        authSessionRefresher: serviceLocator(),
+      ),
     )
     // Datasources
     // We register the interface type because AuthRepositoryImpl depends on
@@ -69,7 +108,7 @@ void _initAuth() {
     ..registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(
         appSettingsStore: serviceLocator(),
-        dio: serviceLocator(),
+        dio: serviceLocator(instanceName: 'publicDio'),
         authSessionStore: serviceLocator(),
       ),
     )
@@ -78,6 +117,7 @@ void _initAuth() {
       () => AuthRepositoryImpl(
         authRemoteDataSource: serviceLocator(),
         authSessionStore: serviceLocator(),
+        currentAuthUserStore: serviceLocator(),
       ),
     )
     // Usecases
@@ -112,12 +152,12 @@ void _initBlog() {
     ..registerLazySingleton<SseClient>(
       () => HttpSseClient(
         baseUrl: Env.backendBaseUrl,
-        authSessionStore: serviceLocator(),
+        authTokenManager: serviceLocator(),
       ),
     )
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(
-        dio: serviceLocator(),
+        dio: serviceLocator(instanceName: 'authedDio'),
         sseClient: serviceLocator(),
       ),
     )

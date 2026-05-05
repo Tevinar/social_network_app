@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:social_app/app/media/image_picker.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/feedback/show_snackbar.dart';

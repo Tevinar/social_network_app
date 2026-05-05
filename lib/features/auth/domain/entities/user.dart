@@ -1,7 +1,7 @@
 /// Domain entity representing an authenticated application user.
-class UserEntity {
-  /// Creates a [UserEntity].
-  const UserEntity({required this.id, required this.name, required this.email});
+class User {
+  /// Creates a [User].
+  const User({required this.id, required this.name, required this.email});
 
   /// Unique user identifier.
   final String id;

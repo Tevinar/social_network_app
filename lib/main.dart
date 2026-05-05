@@ -8,7 +8,7 @@ import 'package:social_app/app/logging/app_bloc_observer.dart';
 import 'package:social_app/app/logging/app_talker_logger.dart';
 import 'package:social_app/app/logging/talker_config.dart';
 import 'package:social_app/app/router/app.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/'

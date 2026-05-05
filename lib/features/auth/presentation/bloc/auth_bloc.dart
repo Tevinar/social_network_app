@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
@@ -41,8 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserSignUpUseCase _userSignUpUseCase;
   final UserSignInUseCase _userSignInUseCase;
   final WatchAuthStateChanges _watchAuthStateChangesUseCase;
-  late final StreamSubscription<Either<Failure, UserEntity?>>
-  _authStateChangesSub;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
 
   @override
   Future<void> close() async {

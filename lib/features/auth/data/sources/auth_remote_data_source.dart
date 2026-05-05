@@ -3,27 +3,28 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/core/local_database/app_settings_store.dart';
 import 'package:social_app/core/local_database/schema/app_settings.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
-import 'package:social_app/features/auth/data/models/auth_session_model.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
+import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
 import 'package:uuid/uuid.dart';
 
 /// Remote boundary for backend authentication requests.
 abstract interface class AuthRemoteDataSource {
-  /// Registers a user through the backend and returns the authenticated user.
-  Future<UserModel> signUpWithEmailPassword({
+  /// Registers a user through the backend and returns the authenticated user
+  /// payload.
+  Future<AuthenticatedUserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   });
 
-  /// Authenticates a user through the backend and returns the signed-in user.
-  Future<UserModel> signInWithEmailPassword({
+  /// Authenticates a user through the backend and returns the signed-in user
+  /// payload.
+  Future<AuthenticatedUserModel> signInWithEmailPassword({
     required String email,
     required String password,
   });
 
-  /// Revokes the current backend refresh session and clears local auth state.
+  /// Revokes the current backend refresh session.
   Future<void> signOut();
 }
 
@@ -33,8 +34,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   ///
   /// [dio] must be configured with the backend base URL. [appSettingsStore]
   /// provides the stable device identifier required by the auth API, and
-  /// [authSessionStore] persists the token session returned by sign-in and
-  /// sign-up.
+  /// [authSessionStore] provides the refresh token required by sign-out.
   const AuthRemoteDataSourceImpl({
     required AppSettingsStore appSettingsStore,
     required Dio dio,
@@ -48,7 +48,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final AuthSessionStore _authSessionStore;
 
   @override
-  Future<UserModel> signInWithEmailPassword({
+  Future<AuthenticatedUserModel> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
@@ -73,24 +73,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const ServerException(message: 'Sign in response body is empty');
       }
 
-      final userJson = body['user'];
-
-      if (userJson is! Map<String, dynamic>) {
-        throw const ServerException(
-          message: 'Sign in response user is invalid',
-        );
-      }
-
-      await _authSessionStore.saveSession(
-        AuthSessionModel.fromJson(body),
-      );
-
-      return UserModel.fromJson(userJson);
+      return AuthenticatedUserModel.fromJson(body);
     });
   }
 
   @override
-  Future<UserModel> signUpWithEmailPassword({
+  Future<AuthenticatedUserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
@@ -117,19 +105,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const ServerException(message: 'Sign up response body is empty');
       }
 
-      final userJson = body['user'];
-
-      if (userJson is! Map<String, dynamic>) {
-        throw const ServerException(
-          message: 'Sign up response user is invalid',
-        );
-      }
-
-      await _authSessionStore.saveSession(
-        AuthSessionModel.fromJson(body),
-      );
-
-      return UserModel.fromJson(userJson);
+      return AuthenticatedUserModel.fromJson(body);
     });
   }
 
@@ -139,7 +115,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final session = await _authSessionStore.getSession();
 
       if (session == null) {
-        await _authSessionStore.clearSession();
         return;
       }
 
@@ -155,8 +130,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'deviceId': deviceId,
         },
       );
-
-      await _authSessionStore.clearSession();
     });
   }
 }

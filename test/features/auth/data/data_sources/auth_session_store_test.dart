@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/models/auth_session_model.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
@@ -13,18 +12,11 @@ void main() {
   late MockFlutterSecureStorage storage;
   late SecureAuthSessionStore store;
 
-  const user = UserModel(
-    id: '123',
-    name: 'Test User',
-    email: 'test@test.com',
-  );
-
   final session = AuthSessionModel(
     accessToken: 'access-token',
     refreshToken: 'refresh-token',
     accessTokenExpiresAt: DateTime.utc(2026),
     refreshTokenExpiresAt: DateTime.utc(2026, 2),
-    user: user,
   );
 
   setUp(() {
@@ -64,7 +56,7 @@ void main() {
         // Assert
         expect(result?.accessToken, 'access-token');
         expect(result?.refreshToken, 'refresh-token');
-        expect(result?.user.id, '123');
+        expect(result?.accessTokenExpiresAt, DateTime.utc(2026));
       },
     );
   });

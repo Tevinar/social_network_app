@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_cases/use_case.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/core/use_case_interfaces/use_case.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
@@ -38,7 +38,7 @@ class CreateChatParams {
   });
 
   /// Members who should belong to the created chat.
-  final List<UserEntity> members;
+  final List<User> members;
 
   /// First message content sent with the new chat.
   final String firstMessageContent;

@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_cases/use_case.dart';
+import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 
 /// Signs out the current authenticated user.

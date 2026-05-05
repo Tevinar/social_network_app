@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_out_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 
@@ -30,10 +30,21 @@ class AppUserCubit extends Cubit<AppUserState> {
        super(AppUserLoading()) {
     _subscribeToAuthStateChanges();
   }
+
   final UserSignOutUseCase _userSignOut;
-  late final StreamSubscription<Either<Failure, UserEntity?>>
-  _authStateChangesSub;
+  late final StreamSubscription<Either<Failure, User?>> _authStateChangesSub;
   final WatchAuthStateChanges _watchAuthStateChanges;
+
+  /// Returns the currently signed-in user, or `null` when signed out.
+  User? get currentUser {
+    final currentState = state;
+
+    if (currentState is AppUserSignedIn) {
+      return currentState.user;
+    }
+
+    return null;
+  }
 
   @override
   Future<void> close() async {

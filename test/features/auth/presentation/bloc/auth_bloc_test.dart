@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
 import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
@@ -22,7 +22,7 @@ void main() {
   late MockUserSignUp userSignUp;
   late MockWatchAuthStateChanges watchAuthStateChanges;
 
-  const testUser = UserEntity(
+  const testUser = User(
     id: '123',
     name: 'Test User',
     email: 'test@test.com',

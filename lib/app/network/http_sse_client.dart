@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/network/sse/sse_client.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
+import 'package:social_app/features/auth/data/session/auth_token_manager.dart';
 
 /// HTTP-based [SseClient] that opens authenticated Server-Sent Events
 /// subscriptions against the backend API.
@@ -12,12 +12,12 @@ class HttpSseClient implements SseClient {
   /// Creates an [HttpSseClient].
   const HttpSseClient({
     required String baseUrl,
-    required AuthSessionStore authSessionStore,
+    required AuthTokenManager authTokenManager,
   }) : _baseUrl = baseUrl,
-       _authSessionStore = authSessionStore;
+       _authTokenManager = authTokenManager;
 
   final String _baseUrl;
-  final AuthSessionStore _authSessionStore;
+  final AuthTokenManager _authTokenManager;
 
   @override
   Stream<SseEvent> connect(String path) {
@@ -30,9 +30,8 @@ class HttpSseClient implements SseClient {
       // the stream gets its first listener.
       onListen: () async {
         try {
-          final session = await _authSessionStore.getSession();
-
-          if (session == null) {
+          final accessToken = await _authTokenManager.getValidAccessToken();
+          if (accessToken == null) {
             throw const UnauthorizedException(
               message: 'Missing auth session for SSE connection',
             );
@@ -51,7 +50,7 @@ class HttpSseClient implements SseClient {
           // is sent.
           request.headers.set(
             HttpHeaders.authorizationHeader,
-            'Bearer ${session.accessToken}',
+            'Bearer $accessToken',
           );
           // Tell the backend this request expects a Server-Sent Events stream.
           request.headers.set(HttpHeaders.acceptHeader, 'text/event-stream');

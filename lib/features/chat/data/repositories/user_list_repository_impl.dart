@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/data/data_sources/users_remote_data_source.dart';
 import 'package:social_app/features/chat/domain/repositories/users_repository.dart';
 
@@ -15,7 +15,7 @@ class UsersRepositoryImpl implements UsersRepository {
   UsersRemoteDataSource usersRemoteDataSource;
 
   @override
-  Future<Either<Failure, List<UserEntity>>> getUsersPage(int pageNumber) async {
+  Future<Either<Failure, List<User>>> getUsersPage(int pageNumber) async {
     try {
       final users = await usersRemoteDataSource.getUsersPage(
         pageNumber,

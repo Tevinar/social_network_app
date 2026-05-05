@@ -7,24 +7,28 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/data_sources/'
-    'auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_session_store.dart';
+import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
 import 'package:social_app/features/auth/data/models/auth_session_model.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/repositories/'
     'auth_repository_impl.dart';
-import 'package:social_app/features/auth/domain/entities/user_entity.dart';
+import 'package:social_app/features/auth/domain/entities/user.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
 
 class MockAuthSessionStore extends Mock implements AuthSessionStore {}
+
+class MockCurrentAuthUserStore extends Mock implements CurrentAuthUserStore {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
   late MockAuthRemoteDataSource remote;
   late MockAuthSessionStore sessionStore;
+  late MockCurrentAuthUserStore currentAuthUserStore;
   late MockAppLogger logger;
   late AuthRepositoryImpl repository;
 
@@ -33,18 +37,45 @@ void main() {
     email: 'test@test.com',
     name: 'Test',
   );
+  final sessionModel = AuthSessionModel(
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+    accessTokenExpiresAt: DateTime.utc(2026),
+    refreshTokenExpiresAt: DateTime.utc(2026, 2),
+  );
+  late AuthenticatedUserModel authenticatedUserModel;
+
+  setUpAll(() {
+    registerFallbackValue(userModel);
+    registerFallbackValue(sessionModel);
+  });
 
   setUp(() async {
     await GetIt.I.reset();
     remote = MockAuthRemoteDataSource();
     sessionStore = MockAuthSessionStore();
+    currentAuthUserStore = MockCurrentAuthUserStore();
     logger = MockAppLogger();
+    authenticatedUserModel = AuthenticatedUserModel(
+      session: sessionModel,
+      user: userModel,
+    );
 
     GetIt.I.registerSingleton<AppLogger>(logger);
+
+    when(() => currentAuthUserStore.saveCurrentUser(any())).thenAnswer(
+      (_) async {},
+    );
+    when(
+      () => currentAuthUserStore.clearCurrentUser(),
+    ).thenAnswer((_) async {});
+    when(() => sessionStore.saveSession(any())).thenAnswer((_) async {});
+    when(() => sessionStore.clearSession()).thenAnswer((_) async {});
 
     repository = AuthRepositoryImpl(
       authRemoteDataSource: remote,
       authSessionStore: sessionStore,
+      currentAuthUserStore: currentAuthUserStore,
     );
   });
 
@@ -63,7 +94,7 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => userModel);
+        ).thenAnswer((_) async => authenticatedUserModel);
 
         // Act
         final result = await repository.signInWithEmailPassword(
@@ -74,11 +105,13 @@ void main() {
         // Assert
         expect(
           result,
-          isA<Right<Failure, UserEntity>>()
+          isA<Right<Failure, User>>()
               .having((r) => r.value.id, 'id', '123')
               .having((r) => r.value.email, 'email', 'test@test.com')
               .having((r) => r.value.name, 'name', 'Test'),
         );
+        verify(() => currentAuthUserStore.saveCurrentUser(userModel)).called(1);
+        verify(() => sessionStore.saveSession(sessionModel)).called(1);
       },
     );
 
@@ -101,7 +134,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, UserEntity>>());
+        expect(result, isA<Left<Failure, User>>());
         result.fold(
           (failure) => expect(failure, isA<NetworkFailure>()),
           (_) => fail('Expected failure'),
@@ -129,7 +162,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, UserEntity>>());
+        expect(result, isA<Left<Failure, User>>());
         result.fold(
           (failure) => expect(failure, isA<UnexpectedFailure>()),
           (_) => fail('Expected failure'),
@@ -158,7 +191,7 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => userModel);
+        ).thenAnswer((_) async => authenticatedUserModel);
 
         // Act
         final result = await repository.signUpWithEmailPassword(
@@ -168,7 +201,9 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Right<Failure, UserEntity>>());
+        expect(result, isA<Right<Failure, User>>());
+        verify(() => currentAuthUserStore.saveCurrentUser(userModel)).called(1);
+        verify(() => sessionStore.saveSession(sessionModel)).called(1);
       },
     );
 
@@ -193,7 +228,7 @@ void main() {
         );
 
         // Assert
-        expect(result, isA<Left<Failure, UserEntity>>());
+        expect(result, isA<Left<Failure, User>>());
 
         result.fold(
           (failure) => expect(failure, isA<UnexpectedFailure>()),
@@ -224,6 +259,8 @@ void main() {
         // Assert
         expect(result, isA<Right<Failure, void>>());
         verify(() => remote.signOut()).called(1);
+        verify(() => sessionStore.clearSession()).called(1);
+        verify(() => currentAuthUserStore.clearCurrentUser()).called(1);
       },
     );
 
@@ -280,22 +317,14 @@ void main() {
   });
 
   group('authStateChanges', () {
-    final authSession = AuthSessionModel(
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
-      accessTokenExpiresAt: DateTime.utc(2026),
-      refreshTokenExpiresAt: DateTime.utc(2026, 2),
-      user: userModel,
-    );
-
     test(
-      'Given session store emits a session when listening to auth changes, '
+      'Given current user store emits a user when listening to auth changes, '
       'then Right<User> is emitted',
       () async {
         // Arrange
         when(
-          () => sessionStore.watchSession(),
-        ).thenAnswer((_) => Stream.value(authSession));
+          () => currentAuthUserStore.watchCurrentUser(),
+        ).thenAnswer((_) => Stream.value(userModel));
 
         // Act
         final stream = repository.authStateChanges();
@@ -304,7 +333,7 @@ void main() {
         await expectLater(
           stream,
           emitsInOrder([
-            isA<Right<Failure, UserEntity?>>()
+            isA<Right<Failure, User?>>()
                 .having((r) => r.value!.id, 'id', '123')
                 .having((r) => r.value!.email, 'email', 'test@test.com')
                 .having((r) => r.value!.name, 'name', 'Test'),
@@ -315,46 +344,46 @@ void main() {
     );
 
     test(
-      'Given session store emits null when listening to auth changes, then '
+      'Given current user store emits null when listening to auth changes, then '
       'Right(null) is emitted',
       () async {
         // Arrange
         when(
-          () => sessionStore.watchSession(),
+          () => currentAuthUserStore.watchCurrentUser(),
         ).thenAnswer((_) => Stream.value(null));
 
         // Act & Assert
         await expectLater(
           repository.authStateChanges(),
-          emits(const Right<Failure, UserEntity?>(null)),
+          emits(const Right<Failure, User?>(null)),
         );
       },
     );
 
     test(
-      'Given session store stream throws when listening to auth changes, then '
+      'Given current user store stream throws when listening to auth changes, then '
       'Left<Failure> is emitted',
       () async {
         // Arrange
-        when(() => sessionStore.watchSession()).thenAnswer(
+        when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(
           (_) => Stream.error(const NetworkException(message: 'boom')),
         );
 
         // Act & Assert
         await expectLater(
           repository.authStateChanges(),
-          emits(isA<Left<Failure, UserEntity?>>()),
+          emits(isA<Left<Failure, User?>>()),
         );
       },
     );
 
     test(
-      'Given session store stream throws an unexpected exception when '
+      'Given current user store stream throws an unexpected exception when '
       'listening to auth changes, then Left<Failure> is emitted and the error '
       'is logged',
       () async {
         // Arrange
-        when(() => sessionStore.watchSession()).thenAnswer(
+        when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(
           (_) => Stream.error(const ServerException(message: 'stream error')),
         );
 
@@ -362,7 +391,7 @@ void main() {
         final stream = repository.authStateChanges();
 
         // Assert
-        await expectLater(stream, emits(isA<Left<Failure, UserEntity?>>()));
+        await expectLater(stream, emits(isA<Left<Failure, User?>>()));
         verify(
           () => logger.error(
             'Unexpected error in AuthRepositoryImpl.authStateChanges',

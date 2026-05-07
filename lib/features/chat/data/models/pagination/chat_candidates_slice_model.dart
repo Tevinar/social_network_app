@@ -1,5 +1,6 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_user_summary_model.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_candidates_slice.dart';
 
 /// Data-layer representation of one cursor-based chat-candidates slice.
 class ChatCandidatesSliceModel {
@@ -30,4 +31,12 @@ class ChatCandidatesSliceModel {
 
   /// Opaque cursor to request the next slice, when available.
   final String? nextCursor;
+
+  /// Converts the model to the domain [ChatCandidatesSlice] entity.
+  ChatCandidatesSlice toSlice() {
+    return ChatCandidatesSlice(
+      candidates: candidates.map((candidate) => candidate.toEntity()).toList(),
+      nextCursor: nextCursor,
+    );
+  }
 }

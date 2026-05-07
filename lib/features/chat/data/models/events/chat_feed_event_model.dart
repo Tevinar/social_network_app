@@ -1,7 +1,7 @@
 import 'package:social_app/core/network/sse/sse_client.dart';
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
-import 'package:social_app/features/chat/domain/entities/chat_change.dart';
+import 'package:social_app/features/chat/domain/events/chat_change.dart';
 
 /// Data-layer representation of one chat-feed event received over SSE.
 class ChatFeedEventModel {
@@ -26,12 +26,10 @@ class ChatFeedEventModel {
   final ChatModel item;
 
   /// Converts the model to the domain-level [ChatChange] entity.
-  ChatChange toEntity() {
+  ChatChange toEvent() {
     switch (type) {
       case 'feed.chat_added':
         return ChatInserted(item.toEntity());
-      case 'feed.chat_updated':
-        return ChatUpdated(item.toEntity());
       default:
         throw FormatException('Unsupported chat feed event type: $type');
     }

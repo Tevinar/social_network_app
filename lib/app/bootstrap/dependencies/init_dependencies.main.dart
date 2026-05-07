@@ -203,33 +203,22 @@ void _initChat() {
   serviceLocator
     // Datasources
     ..registerLazySingleton<ChatRemoteDataSource>(
-      () => ChatRemoteDataSourceImpl(supabaseClient: serviceLocator()),
-    )
-    ..registerLazySingleton<UsersRemoteDataSource>(
-      () => UsersRemoteDataSourceImpl(supabaseClient: serviceLocator()),
-    )
-    ..registerLazySingleton<ChatMessageRemoteDataSource>(
-      () => ChatMessageRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+      () => ChatRemoteDataSourceImpl(
+        dio: serviceLocator(instanceName: 'authedDio'),
+        sseClient: serviceLocator(),
+      ),
     )
     // Repositories
     ..registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(chatRemoteDataSource: serviceLocator()),
     )
-    ..registerLazySingleton<UsersRepository>(
-      () => UsersRepositoryImpl(usersRemoteDataSource: serviceLocator()),
-    )
-    ..registerLazySingleton<ChatMessageRepository>(
-      () => ChatMessageRepositoryImpl(
-        chatMessageRemoteDataSource: serviceLocator(),
-      ),
-    )
     // Usecases
     ..registerLazySingleton(() => CreateChat(chatRepository: serviceLocator()))
     ..registerLazySingleton(
-      () => GetUsersPage(usersRepository: serviceLocator()),
+      () => GetUsersPage(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetUsersCount(usersRepository: serviceLocator()),
+      () => GetUsersCount(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
       () => GetChatsCount(chatRepository: serviceLocator()),
@@ -238,13 +227,13 @@ void _initChat() {
       () => GetChatsPage(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatMessagesPage(chatMessageRepository: serviceLocator()),
+      () => GetChatMessagesPage(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatMessagesCount(chatMessageRepository: serviceLocator()),
+      () => GetChatMessagesCount(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => CreateChatMessage(chatMessageRepository: serviceLocator()),
+      () => CreateChatMessage(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
       () => GetChatByMembers(chatRepository: serviceLocator()),
@@ -253,7 +242,7 @@ void _initChat() {
       () => WatchChatChanges(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => WatchChatMessageChanges(chatMessageRepository: serviceLocator()),
+      () => WatchChatMessageChanges(chatRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(

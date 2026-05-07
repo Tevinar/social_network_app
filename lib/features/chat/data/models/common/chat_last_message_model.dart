@@ -1,5 +1,6 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_user_summary_model.dart';
+import 'package:social_app/features/chat/domain/entities/chat_last_message.dart';
 
 /// Data-layer representation of the latest message preview shown for one chat.
 class ChatLastMessageModel {
@@ -36,4 +37,14 @@ class ChatLastMessageModel {
 
   /// Message creation timestamp.
   final DateTime createdAt;
+
+  /// Converts the model to the domain [ChatLastMessage] entity.
+  ChatLastMessage toEntity() {
+    return ChatLastMessage(
+      id: id,
+      author: author?.toEntity(),
+      content: content,
+      createdAt: createdAt,
+    );
+  }
 }

@@ -8,9 +8,9 @@ import 'package:social_app/features/chat/data/models/common/chat_model.dart';
 import 'package:social_app/features/chat/data/models/events/chat_feed_event_model.dart';
 import 'package:social_app/features/chat/data/models/events/chat_message_event_model.dart';
 import 'package:social_app/features/chat/data/models/results/chat_write_result_model.dart';
-import 'package:social_app/features/chat/data/models/slices/chat_candidates_slice_model.dart';
-import 'package:social_app/features/chat/data/models/slices/chat_feed_slice_model.dart';
-import 'package:social_app/features/chat/data/models/slices/chat_message_feed_slice_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_candidates_slice_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_feed_slice_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_message_feed_slice_model.dart';
 
 /// Remote data source contract for all chat-related backend calls.
 abstract interface class ChatRemoteDataSource {
@@ -36,6 +36,8 @@ abstract interface class ChatRemoteDataSource {
   Stream<ChatFeedEventModel> watchChatFeedEvents();
 
   /// Looks up one existing chat by its exact member set.
+  /// The current user is implicitly included in the member set.
+  /// Passing it explicitly is optional but allowed for convenience.
   Future<ChatModel?> getChatByMembers({
     required List<String> memberIds,
   });

@@ -38,15 +38,9 @@ import 'package:social_app/features/blog/domain/usecases/watch_feed_slice_use_ca
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_feed/blog_feed_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
-import 'package:social_app/features/chat/data/data_sources/chat_message_remote_data_source.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_remote_data_source.dart';
-import 'package:social_app/features/chat/data/data_sources/users_remote_data_source.dart';
-import 'package:social_app/features/chat/data/repositories/chat_message_repository_impl.dart';
 import 'package:social_app/features/chat/data/repositories/chat_repository_impl.dart';
-import 'package:social_app/features/chat/data/repositories/user_list_repository_impl.dart';
-import 'package:social_app/features/chat/domain/repositories/chat_message_repository.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
-import 'package:social_app/features/chat/domain/repositories/users_repository.dart';
 import 'package:social_app/features/chat/domain/usecases/create_chat.dart';
 import 'package:social_app/features/chat/domain/usecases/create_chat_message.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chat_by_members.dart';

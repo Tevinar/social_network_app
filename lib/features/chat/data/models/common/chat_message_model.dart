@@ -65,7 +65,8 @@ class ChatMessageModel {
   ChatMessage toEntity() {
     return ChatMessage(
       id: id,
-      authorId: author?.id ?? '',
+      chatId: chatId,
+      author: author?.toEntity(),
       content: content,
       createdAt: createdAt,
       updatedAt: updatedAt,

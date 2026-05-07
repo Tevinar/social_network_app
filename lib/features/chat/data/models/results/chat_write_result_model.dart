@@ -1,6 +1,7 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_message_model.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
+import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
 /// Data-layer representation of one successful chat write response.
 class ChatWriteResultModel {
@@ -40,4 +41,12 @@ class ChatWriteResultModel {
 
   /// Newly created message payload returned by the backend.
   final ChatMessageModel chatMessage;
+
+  /// Converts the model to the domain [ChatWriteResult] entity.
+  ChatWriteResult toResult() {
+    return ChatWriteResult(
+      chat: chat.toEntity(),
+      chatMessage: chatMessage.toEntity(),
+    );
+  }
 }

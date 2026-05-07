@@ -1,6 +1,5 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_last_message_model.dart';
-import 'package:social_app/features/chat/data/models/common/chat_message_model.dart';
 import 'package:social_app/features/chat/data/models/common/chat_user_summary_model.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 
@@ -52,7 +51,7 @@ class ChatModel {
 
     return Chat(
       id: id,
-      lastMessage: ChatMessageModel.fromLastMessage(lastMessage).toEntity(),
+      lastMessage: lastMessage.toEntity(),
       members: members.map((member) => member.toEntity()).toList(),
     );
   }

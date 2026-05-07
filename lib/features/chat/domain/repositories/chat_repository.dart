@@ -1,26 +1,56 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
-import 'package:social_app/features/chat/domain/entities/chat_change.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_candidates_slice.dart';
+import 'package:social_app/features/chat/domain/events/chat_change.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_feed_slice.dart';
+import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_feed_slice.dart';
+import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
-/// A chat repository.
+/// Domain contract aligned with the remote chat API.
 abstract interface class ChatRepository {
-  /// Create chat.
-  Future<Either<Failure, Chat>> createChat(
-    List<User> members,
-    String firstMessageContent,
-  );
+  /// Fetches one cursor-based slice of chat candidates.
+  Future<Either<Failure, ChatCandidatesSlice>> getChatCandidatesSlice({
+    required int limit,
+    String? cursor,
+  });
 
-  /// Gets the chats page.
-  Future<Either<Failure, List<Chat>>> getChatsPage(int pageNumber);
+  /// Creates one new chat with its first message.
+  Future<Either<Failure, ChatWriteResult>> createChat({
+    required List<String> memberIds,
+    required String firstMessageContent,
+  });
 
-  /// Gets the chats count.
-  Future<Either<Failure, int>> getChatsCount();
+  /// Fetches one cursor-based slice of chats ordered by recent activity.
+  Future<Either<Failure, ChatFeedSlice>> getChatFeedSlice({
+    required int limit,
+    String? cursor,
+  });
 
-  /// Returns the watch chat changes stream.
-  Stream<Either<Failure, ChatChange>> watchChatChanges();
+  /// Opens the realtime chat-feed event stream.
+  Stream<Either<Failure, ChatChange>> watchChatFeedEvents();
 
-  /// Gets the chat by members.
-  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members);
+  /// Looks up one existing chat by its exact member set.
+  /// The current user is implicitly included in the member set.
+  /// Passing it explicitly is optional but allowed for convenience.
+  Future<Either<Failure, Chat?>> getChatByMembers({
+    required List<String> memberIds,
+  });
+
+  /// Fetches one cursor-based slice of messages inside the target chat.
+  Future<Either<Failure, ChatMessageFeedSlice>> getChatMessageFeedSlice({
+    required String chatId,
+    required int limit,
+    String? cursor,
+  });
+
+  /// Creates one new message inside the target chat.
+  Future<Either<Failure, ChatWriteResult>> createChatMessage({
+    required String chatId,
+    required String content,
+  });
+
+  /// Opens the realtime chat-message event stream.
+  Stream<Either<Failure, ChatMessageChange>> watchChatMessageChanges();
 }

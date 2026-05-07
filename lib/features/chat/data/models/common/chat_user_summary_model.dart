@@ -1,5 +1,5 @@
 import 'package:social_app/core/serialization/json_reader.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
 
 /// Data-layer representation of one public chat user summary.
 class ChatUserSummaryModel {
@@ -23,15 +23,11 @@ class ChatUserSummaryModel {
   /// Public display name.
   final String name;
 
-  /// Converts the model to the auth/domain [User] entity.
-  ///
-  /// The chat backend does not expose emails in these payloads, so the field is
-  /// mapped to an empty string for now.
-  User toEntity() {
-    return User(
+  /// Converts the model to the domain [ChatUserSummary] entity.
+  ChatUserSummary toEntity() {
+    return ChatUserSummary(
       id: id,
       name: name,
-      email: '',
     );
   }
 }

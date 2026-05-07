@@ -1,7 +1,7 @@
 import 'package:social_app/core/network/sse/sse_client.dart';
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_message_model.dart';
-import 'package:social_app/features/chat/domain/entities/chat_message_change.dart';
+import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
 
 /// Data-layer representation of one chat-message event received over SSE.
 class ChatMessageEventModel {
@@ -28,7 +28,7 @@ class ChatMessageEventModel {
   final ChatMessageModel item;
 
   /// Converts the model to the domain-level [ChatMessageChange] entity.
-  ChatMessageChange toEntity() {
+  ChatMessageChange toEvent() {
     switch (type) {
       case 'message.added':
         return ChatMessageInserted(

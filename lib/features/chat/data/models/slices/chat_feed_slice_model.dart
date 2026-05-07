@@ -1,0 +1,31 @@
+import 'package:social_app/core/serialization/json_reader.dart';
+import 'package:social_app/features/chat/data/models/common/chat_model.dart';
+
+/// Data-layer representation of one cursor-based chat-feed slice.
+class ChatFeedSliceModel {
+  /// Creates a [ChatFeedSliceModel].
+  const ChatFeedSliceModel({
+    required this.chats,
+    required this.nextCursor,
+  });
+
+  /// Builds a [ChatFeedSliceModel] from a backend JSON payload.
+  factory ChatFeedSliceModel.fromJson(Map<String, dynamic> json) {
+    final chats = JsonReader.readList(json, 'chats');
+
+    return ChatFeedSliceModel(
+      chats: chats
+          .map(
+            (chat) => ChatModel.fromJson(JsonReader.asObject(chat, 'chats[]')),
+          )
+          .toList(),
+      nextCursor: JsonReader.readNullableString(json, 'nextCursor'),
+    );
+  }
+
+  /// Chats returned in the current slice.
+  final List<ChatModel> chats;
+
+  /// Opaque cursor to request the next slice, when available.
+  final String? nextCursor;
+}

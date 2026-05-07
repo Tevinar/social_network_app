@@ -1,197 +1,238 @@
 import 'dart:async';
 
-import 'package:social_app/core/constants/supabase_schema/fields/'
-    'chat_fields.dart';
-import 'package:social_app/core/constants/supabase_schema/schema_names.dart';
-import 'package:social_app/core/constants/supabase_schema/tables.dart';
+import 'package:dio/dio.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/chat/data/models/chat_message_model.dart';
-import 'package:social_app/features/chat/data/models/chat_model.dart';
-import 'package:social_app/features/chat/domain/entities/chat_change.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:social_app/core/network/sse/sse_client.dart';
+import 'package:social_app/features/chat/data/models/common/chat_model.dart';
+import 'package:social_app/features/chat/data/models/events/chat_feed_event_model.dart';
+import 'package:social_app/features/chat/data/models/events/chat_message_event_model.dart';
+import 'package:social_app/features/chat/data/models/results/chat_write_result_model.dart';
+import 'package:social_app/features/chat/data/models/slices/chat_candidates_slice_model.dart';
+import 'package:social_app/features/chat/data/models/slices/chat_feed_slice_model.dart';
+import 'package:social_app/features/chat/data/models/slices/chat_message_feed_slice_model.dart';
 
-/// A chat remote data source.
+/// Remote data source contract for all chat-related backend calls.
 abstract interface class ChatRemoteDataSource {
-  /// Creates a chat with the given members and an initial message.
-  /// Returns the created chat with its first message.
-  Future<ChatModel> createChat(
-    List<UserModel> members,
-    String firstMessageContent,
-  );
+  /// Fetches one cursor-based slice of chat candidates.
+  Future<ChatCandidatesSliceModel> getChatCandidatesSlice({
+    required int limit,
+    String? cursor,
+  });
 
-  /// Fetches a paginated list of chats ordered by last activity.
-  Future<List<ChatModel>> getChatsPage(int pageNumber);
+  /// Creates a new chat with its first message.
+  Future<ChatWriteResultModel> createChat({
+    required List<String> memberIds,
+    required String firstMessageContent,
+  });
 
-  /// Returns the total number of chats in the database.
-  Future<int> getChatsCount();
+  /// Fetches one cursor-based slice of chats ordered by recent activity.
+  Future<ChatFeedSliceModel> getChatFeedSlice({
+    required int limit,
+    String? cursor,
+  });
 
-  /// Emits chat insert/update/delete events in realtime.
-  Stream<ChatChange> watchChatChanges();
+  /// Opens the realtime chat-feed event stream.
+  Stream<ChatFeedEventModel> watchChatFeedEvents();
 
-  /// Fetches a single chat with members and last message.
-  Future<ChatModel> getChatById(String chatId);
+  /// Looks up one existing chat by its exact member set.
+  Future<ChatModel?> getChatByMembers({
+    required List<String> memberIds,
+  });
 
-  /// The get chat by members.
-  Future<ChatModel?> getChatByMembers(List<UserModel> members);
+  /// Fetches one cursor-based slice of messages inside the target chat.
+  Future<ChatMessageFeedSliceModel> getChatMessageFeedSlice({
+    required String chatId,
+    required int limit,
+    String? cursor,
+  });
+
+  /// Creates one new message inside the target chat.
+  Future<ChatWriteResultModel> createChatMessage({
+    required String chatId,
+    required String content,
+  });
+
+  /// Opens the realtime chat-message event stream.
+  Stream<ChatMessageEventModel> watchChatMessageChanges();
 }
 
-/// A chat remote data source impl.
+/// Default [ChatRemoteDataSource] implementation backed by the HTTP API and
+/// SSE chat endpoints.
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   /// Creates a [ChatRemoteDataSourceImpl].
-  ChatRemoteDataSourceImpl({required this.supabaseClient});
+  const ChatRemoteDataSourceImpl({
+    required Dio dio,
+    required SseClient sseClient,
+  }) : _dio = dio,
+       _sseClient = sseClient;
 
-  /// The supabase client.
-  SupabaseClient supabaseClient;
-
-  /// Shared select clause used to fetch a fully hydrated chat.
-  ///
-  /// Includes:
-  /// - chat id
-  /// - members with profiles
-  /// - last message via foreign key
-  final String _chatSelect =
-      '''
-        ${ChatFields.id},
-        ${Tables.chatMembers} (
-          ${Tables.profiles} (*)
-        ),
-        ${Tables.chatMessages}!${ChatForeignKeys.lastMessageFkey} (*)
-      ''';
+  final Dio _dio;
+  final SseClient _sseClient;
 
   @override
-  Future<ChatModel> createChat(
-    List<UserModel> members,
-    String firstMessageContent,
-  ) async {
+  Future<ChatCandidatesSliceModel> getChatCandidatesSlice({
+    required int limit,
+    String? cursor,
+  }) {
     return guardRemoteDataSourceCall(() async {
-      final firstMessageData = await supabaseClient.rpc<Map<String, dynamic>>(
-        'create_chat_with_members',
-        params: {
-          'member_ids': members.map((e) => e.id).toList(),
-          'first_message_content': firstMessageContent,
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/chats/candidates',
+        queryParameters: {
+          'limit': limit,
+          'cursor': ?cursor,
         },
       );
 
-      final chatMessageModel = ChatMessageModel.fromJson(
-        firstMessageData,
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(
+          message: 'Chat candidates slice response body is null',
+        );
+      }
+
+      return ChatCandidatesSliceModel.fromJson(body);
+    });
+  }
+
+  @override
+  Future<ChatWriteResultModel> createChat({
+    required List<String> memberIds,
+    required String firstMessageContent,
+  }) {
+    return guardRemoteDataSourceCall(() async {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/chats',
+        data: {
+          'members': memberIds,
+          'firstMessageContent': firstMessageContent,
+        },
       );
 
-      return ChatModel(
-        id: chatMessageModel.chatId,
-        lastMessage: chatMessageModel,
-        members: members,
-      );
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(
+          message: 'Create chat response body is null',
+        );
+      }
+
+      return ChatWriteResultModel.fromCreateChatJson(body);
     });
   }
 
   @override
-  Future<List<ChatModel>> getChatsPage(int pageNumber) async {
+  Future<ChatFeedSliceModel> getChatFeedSlice({
+    required int limit,
+    String? cursor,
+  }) {
     return guardRemoteDataSourceCall(() async {
-      const pageSize = 20;
-      final from = (pageNumber - 1) * pageSize;
-      final to = from + pageSize - 1;
-
-      final rawChats = await supabaseClient
-          .from(Tables.chats)
-          .select(_chatSelect)
-          .range(from, to)
-          .order(ChatFields.lastMessageAt, ascending: false);
-      return rawChats.map(ChatModel.fromJson).toList();
-    });
-  }
-
-  @override
-  Future<int> getChatsCount() async {
-    return guardRemoteDataSourceCall(() async {
-      return await supabaseClient.from(Tables.chats).count();
-    });
-  }
-
-  @override
-  Stream<ChatChange> watchChatChanges() {
-    late final StreamController<ChatChange> controller;
-    late final RealtimeChannel channel;
-
-    controller = StreamController<ChatChange>(
-      onListen: () {
-        channel =
-            supabaseClient.realtime.channel(
-                '${SchemaTypes.public}:${Tables.chats}',
-              )
-              /// No need to filter by user here, as the RLS policies will
-              /// ensure that only relevant changes are sent to the client.
-              ..onPostgresChanges(
-                event: PostgresChangeEvent.all,
-                schema: SchemaTypes.public,
-                table: Tables.chats,
-                callback: (payload) async {
-                  try {
-                    switch (payload.eventType) {
-                      case PostgresChangeEvent.insert:
-                        final chatId =
-                            payload.newRecord[ChatFields.id] as String;
-                        final chat = await getChatById(chatId);
-                        controller.add(ChatInserted(chat.toEntity()));
-
-                      case PostgresChangeEvent.update:
-                        final chatId =
-                            payload.newRecord[ChatFields.id] as String;
-                        final chat = await getChatById(chatId);
-                        controller.add(ChatUpdated(chat.toEntity()));
-
-                      case PostgresChangeEvent.delete:
-                        final deletedChatId =
-                            payload.oldRecord[ChatFields.id] as String;
-                        controller.add(ChatDeleted(deletedChatId));
-
-                      case PostgresChangeEvent.all:
-                        // Required for exhaustive handling
-                        // but never emitted here.
-                        break;
-                    }
-                  } on Exception catch (e, stack) {
-                    controller.addError(
-                      ServerException(message: e.toString()),
-                      stack,
-                    );
-                  }
-                },
-              )
-              ..subscribe();
-      },
-      onCancel: () async {
-        await controller.close();
-        await channel.unsubscribe();
-      },
-    );
-
-    return controller.stream;
-  }
-
-  @override
-  Future<ChatModel> getChatById(String chatId) async {
-    return guardRemoteDataSourceCall(() async {
-      final result = await supabaseClient
-          .from(Tables.chats)
-          .select(_chatSelect)
-          .eq(ChatFields.id, chatId)
-          .single();
-      return ChatModel.fromJson(result);
-    });
-  }
-
-  @override
-  Future<ChatModel?> getChatByMembers(List<UserModel> members) {
-    return guardRemoteDataSourceCall(() async {
-      final result = await supabaseClient.rpc<Map<String, dynamic>?>(
-        'get_chat_by_members',
-        params: {'member_ids': members.map((e) => e.id).toList()},
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/chats',
+        queryParameters: {
+          'limit': limit,
+          'cursor': ?cursor,
+        },
       );
 
-      if (result == null) return null;
-      return ChatModel.fromJson(result);
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(
+          message: 'Chat feed slice response body is null',
+        );
+      }
+
+      return ChatFeedSliceModel.fromJson(body);
     });
+  }
+
+  @override
+  Stream<ChatFeedEventModel> watchChatFeedEvents() {
+    return _sseClient
+        .connect('/chats/feed/events')
+        .map(ChatFeedEventModel.fromSseEvent);
+  }
+
+  @override
+  Future<ChatModel?> getChatByMembers({
+    required List<String> memberIds,
+  }) {
+    return guardRemoteDataSourceCall(() async {
+      final response = await _dio.get<Object?>(
+        '/chats/by-members',
+        queryParameters: {
+          'members': memberIds.join(','),
+        },
+      );
+
+      final body = response.data;
+      if (body == null) {
+        return null;
+      }
+
+      if (body is! Map<String, dynamic>) {
+        throw const ServerException(
+          message: 'Get chat by members response body has an invalid shape',
+        );
+      }
+
+      return ChatModel.fromJson(body);
+    });
+  }
+
+  @override
+  Future<ChatMessageFeedSliceModel> getChatMessageFeedSlice({
+    required String chatId,
+    required int limit,
+    String? cursor,
+  }) {
+    return guardRemoteDataSourceCall(() async {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/chats/$chatId/messages',
+        queryParameters: {
+          'limit': limit,
+          'cursor': ?cursor,
+        },
+      );
+
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(
+          message: 'Chat message feed slice response body is null',
+        );
+      }
+
+      return ChatMessageFeedSliceModel.fromJson(body);
+    });
+  }
+
+  @override
+  Future<ChatWriteResultModel> createChatMessage({
+    required String chatId,
+    required String content,
+  }) {
+    return guardRemoteDataSourceCall(() async {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/chats/$chatId/messages',
+        data: {
+          'content': content,
+        },
+      );
+
+      final body = response.data;
+      if (body == null) {
+        throw const ServerException(
+          message: 'Create chat message response body is null',
+        );
+      }
+
+      return ChatWriteResultModel.fromCreateChatMessageJson(body);
+    });
+  }
+
+  @override
+  Stream<ChatMessageEventModel> watchChatMessageChanges() {
+    return _sseClient
+        .connect('/chats/messages/events')
+        .map(ChatMessageEventModel.fromSseEvent);
   }
 }

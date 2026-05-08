@@ -1,9 +1,9 @@
 import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
 
 /// Domain entity representing one cursor-based slice of chat candidates.
-class ChatCandidatesSlice {
-  /// Creates a [ChatCandidatesSlice].
-  const ChatCandidatesSlice({
+class ChatCandidateListSlice {
+  /// Creates a [ChatCandidateListSlice].
+  const ChatCandidateListSlice({
     required this.candidates,
     required this.nextCursor,
   });

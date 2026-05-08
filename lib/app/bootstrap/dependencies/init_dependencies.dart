@@ -50,8 +50,9 @@ import 'package:social_app/features/chat/domain/usecases/get_chats_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_page.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
-import 'package:social_app/features/chat/domain/usecases/watch_chat_changes.dart';
-import 'package:social_app/features/chat/domain/usecases/watch_chat_message_changes.dart';
+import 'package:social_app/features/chat/domain/usecases/subscribe_to_chat_list.dart';
+import 'package:social_app/features/chat/domain/usecases/'
+    'subscribe_to_chat_message_list.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';

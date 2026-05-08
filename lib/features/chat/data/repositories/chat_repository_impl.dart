@@ -8,9 +8,9 @@ import 'package:social_app/features/chat/data/data_sources/chat_remote_data_sour
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/events/chat_change.dart';
 import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_candidates_slice.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_feed_slice.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_message_feed_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_candidate_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_list_slice.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
@@ -23,12 +23,12 @@ class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource chatRemoteDataSource;
 
   @override
-  Future<Either<Failure, ChatCandidatesSlice>> getChatCandidatesSlice({
+  Future<Either<Failure, ChatCandidateListSlice>> getChatCandidateListSlice({
     required int limit,
     String? cursor,
   }) async {
     try {
-      final sliceModel = await chatRemoteDataSource.getChatCandidatesSlice(
+      final sliceModel = await chatRemoteDataSource.getChatCandidateListSlice(
         limit: limit,
         cursor: cursor,
       );
@@ -37,7 +37,7 @@ class ChatRepositoryImpl implements ChatRepository {
       return _mapFailure(
         error,
         stackTrace,
-        'Unexpected error in ChatRepositoryImpl.getChatCandidatesSlice',
+        'Unexpected error in ChatRepositoryImpl.getChatCandidateListSlice',
       );
     }
   }
@@ -65,12 +65,12 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatFeedSlice>> getChatFeedSlice({
+  Future<Either<Failure, ChatListSlice>> getChatListSlice({
     required int limit,
     String? cursor,
   }) async {
     try {
-      final sliceModel = await chatRemoteDataSource.getChatFeedSlice(
+      final sliceModel = await chatRemoteDataSource.getChatListSlice(
         limit: limit,
         cursor: cursor,
       );
@@ -79,23 +79,23 @@ class ChatRepositoryImpl implements ChatRepository {
       return _mapFailure(
         error,
         stackTrace,
-        'Unexpected error in ChatRepositoryImpl.getChatFeedSlice',
+        'Unexpected error in ChatRepositoryImpl.getChatListSlice',
       );
     }
   }
 
   @override
-  Stream<Either<Failure, ChatChange>> watchChatFeedEvents() async* {
+  Stream<Either<Failure, ChatListChange>> subscribeToChatList() async* {
     try {
       await for (final eventModel
-          in chatRemoteDataSource.watchChatFeedEvents()) {
+          in chatRemoteDataSource.subscribeToChatList()) {
         yield right(eventModel.toEvent());
       }
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.watchChatFeedEvents',
+          'Unexpected error in ChatRepositoryImpl.subscribeToChatList',
           error: error,
           stackTrace: stackTrace,
         );
@@ -123,13 +123,13 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatMessageFeedSlice>> getChatMessageFeedSlice({
+  Future<Either<Failure, ChatMessageListSlice>> getChatMessageListSlice({
     required String chatId,
     required int limit,
     String? cursor,
   }) async {
     try {
-      final sliceModel = await chatRemoteDataSource.getChatMessageFeedSlice(
+      final sliceModel = await chatRemoteDataSource.getChatMessageListSlice(
         chatId: chatId,
         limit: limit,
         cursor: cursor,
@@ -139,7 +139,7 @@ class ChatRepositoryImpl implements ChatRepository {
       return _mapFailure(
         error,
         stackTrace,
-        'Unexpected error in ChatRepositoryImpl.getChatMessageFeedSlice',
+        'Unexpected error in ChatRepositoryImpl.getChatMessageListSlice',
       );
     }
   }
@@ -167,17 +167,19 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<Either<Failure, ChatMessageChange>> watchChatMessageChanges() async* {
+  Stream<Either<Failure, ChatMessageListChange>> subscribeToChatMessageList({
+    required String chatId,
+  }) async* {
     try {
       await for (final eventModel
-          in chatRemoteDataSource.watchChatMessageChanges()) {
+          in chatRemoteDataSource.subscribeToChatMessageList(chatId: chatId)) {
         yield right(eventModel.toEvent());
       }
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.watchChatMessageChanges',
+          'Unexpected error in ChatRepositoryImpl.subscribeToChatMessageList',
           error: error,
           stackTrace: stackTrace,
         );

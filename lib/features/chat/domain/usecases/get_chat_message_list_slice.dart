@@ -1,14 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_message_feed_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_list_slice.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Loads one cursor-based slice of messages for a chat.
-class GetChatMessageFeedSlice
-    implements UseCase<ChatMessageFeedSlice, GetChatMessageFeedSliceParams> {
-  /// Creates a [GetChatMessageFeedSlice].
-  GetChatMessageFeedSlice({required ChatRepository chatRepository})
+class GetChatMessageListSlice
+    implements UseCase<ChatMessageListSlice, GetChatMessageListSliceParams> {
+  /// Creates a [GetChatMessageListSlice].
+  GetChatMessageListSlice({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to load chat messages.
@@ -16,8 +16,8 @@ class GetChatMessageFeedSlice
 
   @override
   /// Validates the slice size, then loads the messages.
-  Future<Either<Failure, ChatMessageFeedSlice>> call(
-    GetChatMessageFeedSliceParams params,
+  Future<Either<Failure, ChatMessageListSlice>> call(
+    GetChatMessageListSliceParams params,
   ) {
     if (params.limit <= 0) {
       return Future.value(
@@ -25,7 +25,7 @@ class GetChatMessageFeedSlice
       );
     }
 
-    return _chatRepository.getChatMessageFeedSlice(
+    return _chatRepository.getChatMessageListSlice(
       chatId: params.chatId,
       limit: params.limit,
       cursor: params.cursor,
@@ -34,9 +34,9 @@ class GetChatMessageFeedSlice
 }
 
 /// Parameters required to load one chat-message slice.
-class GetChatMessageFeedSliceParams {
-  /// Creates a [GetChatMessageFeedSliceParams].
-  const GetChatMessageFeedSliceParams({
+class GetChatMessageListSliceParams {
+  /// Creates a [GetChatMessageListSliceParams].
+  const GetChatMessageListSliceParams({
     required this.chatId,
     required this.limit,
     this.cursor,

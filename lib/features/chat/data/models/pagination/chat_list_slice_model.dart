@@ -1,20 +1,20 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_feed_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart';
 
-/// Data-layer representation of one cursor-based chat-feed slice.
-class ChatFeedSliceModel {
-  /// Creates a [ChatFeedSliceModel].
-  const ChatFeedSliceModel({
+/// Data-layer representation of one cursor-based chat-list slice.
+class ChatListSliceModel {
+  /// Creates a [ChatListSliceModel].
+  const ChatListSliceModel({
     required this.chats,
     required this.nextCursor,
   });
 
-  /// Builds a [ChatFeedSliceModel] from a backend JSON payload.
-  factory ChatFeedSliceModel.fromJson(Map<String, dynamic> json) {
+  /// Builds a [ChatListSliceModel] from a backend JSON payload.
+  factory ChatListSliceModel.fromJson(Map<String, dynamic> json) {
     final chats = JsonReader.readList(json, 'chats');
 
-    return ChatFeedSliceModel(
+    return ChatListSliceModel(
       chats: chats
           .map(
             (chat) => ChatModel.fromJson(JsonReader.asObject(chat, 'chats[]')),
@@ -30,9 +30,9 @@ class ChatFeedSliceModel {
   /// Opaque cursor to request the next slice, when available.
   final String? nextCursor;
 
-  /// Converts the model to the domain [ChatFeedSlice] value.
-  ChatFeedSlice toSlice() {
-    return ChatFeedSlice(
+  /// Converts the model to the domain [ChatListSlice] value.
+  ChatListSlice toSlice() {
+    return ChatListSlice(
       chats: chats.map((chat) => chat.toEntity()).toList(),
       nextCursor: nextCursor,
     );

@@ -5,17 +5,17 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/core/network/sse/sse_client.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
-import 'package:social_app/features/chat/data/models/events/chat_feed_event_model.dart';
-import 'package:social_app/features/chat/data/models/events/chat_message_event_model.dart';
+import 'package:social_app/features/chat/data/models/events/chat_list_event_model.dart';
+import 'package:social_app/features/chat/data/models/events/chat_message_list_event_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_candidate_list_slice_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_list_slice_model.dart';
+import 'package:social_app/features/chat/data/models/pagination/chat_message_list_slice_model.dart';
 import 'package:social_app/features/chat/data/models/results/chat_write_result_model.dart';
-import 'package:social_app/features/chat/data/models/pagination/chat_candidates_slice_model.dart';
-import 'package:social_app/features/chat/data/models/pagination/chat_feed_slice_model.dart';
-import 'package:social_app/features/chat/data/models/pagination/chat_message_feed_slice_model.dart';
 
 /// Remote data source contract for all chat-related backend calls.
 abstract interface class ChatRemoteDataSource {
   /// Fetches one cursor-based slice of chat candidates.
-  Future<ChatCandidatesSliceModel> getChatCandidatesSlice({
+  Future<ChatCandidateListSliceModel> getChatCandidateListSlice({
     required int limit,
     String? cursor,
   });
@@ -27,13 +27,13 @@ abstract interface class ChatRemoteDataSource {
   });
 
   /// Fetches one cursor-based slice of chats ordered by recent activity.
-  Future<ChatFeedSliceModel> getChatFeedSlice({
+  Future<ChatListSliceModel> getChatListSlice({
     required int limit,
     String? cursor,
   });
 
-  /// Opens the realtime chat-feed event stream.
-  Stream<ChatFeedEventModel> watchChatFeedEvents();
+  /// Opens the realtime chat-list event stream.
+  Stream<ChatListEventModel> subscribeToChatList();
 
   /// Looks up one existing chat by its exact member set.
   /// The current user is implicitly included in the member set.
@@ -43,7 +43,7 @@ abstract interface class ChatRemoteDataSource {
   });
 
   /// Fetches one cursor-based slice of messages inside the target chat.
-  Future<ChatMessageFeedSliceModel> getChatMessageFeedSlice({
+  Future<ChatMessageListSliceModel> getChatMessageListSlice({
     required String chatId,
     required int limit,
     String? cursor,
@@ -55,8 +55,10 @@ abstract interface class ChatRemoteDataSource {
     required String content,
   });
 
-  /// Opens the realtime chat-message event stream.
-  Stream<ChatMessageEventModel> watchChatMessageChanges();
+  /// Opens the realtime chat-message event stream for one chat.
+  Stream<ChatMessageListEventModel> subscribeToChatMessageList({
+    required String chatId,
+  });
 }
 
 /// Default [ChatRemoteDataSource] implementation backed by the HTTP API and
@@ -73,7 +75,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final SseClient _sseClient;
 
   @override
-  Future<ChatCandidatesSliceModel> getChatCandidatesSlice({
+  Future<ChatCandidateListSliceModel> getChatCandidateListSlice({
     required int limit,
     String? cursor,
   }) {
@@ -93,7 +95,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         );
       }
 
-      return ChatCandidatesSliceModel.fromJson(body);
+      return ChatCandidateListSliceModel.fromJson(body);
     });
   }
 
@@ -123,7 +125,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<ChatFeedSliceModel> getChatFeedSlice({
+  Future<ChatListSliceModel> getChatListSlice({
     required int limit,
     String? cursor,
   }) {
@@ -139,19 +141,19 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final body = response.data;
       if (body == null) {
         throw const ServerException(
-          message: 'Chat feed slice response body is null',
+          message: 'Chat list slice response body is null',
         );
       }
 
-      return ChatFeedSliceModel.fromJson(body);
+      return ChatListSliceModel.fromJson(body);
     });
   }
 
   @override
-  Stream<ChatFeedEventModel> watchChatFeedEvents() {
+  Stream<ChatListEventModel> subscribeToChatList() {
     return _sseClient
-        .connect('/chats/feed/events')
-        .map(ChatFeedEventModel.fromSseEvent);
+        .connect('/chats/events')
+        .map(ChatListEventModel.fromSseEvent);
   }
 
   @override
@@ -176,7 +178,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<ChatMessageFeedSliceModel> getChatMessageFeedSlice({
+  Future<ChatMessageListSliceModel> getChatMessageListSlice({
     required String chatId,
     required int limit,
     String? cursor,
@@ -193,11 +195,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final body = response.data;
       if (body == null) {
         throw const ServerException(
-          message: 'Chat message feed slice response body is null',
+          message: 'Chat message list slice response body is null',
         );
       }
 
-      return ChatMessageFeedSliceModel.fromJson(body);
+      return ChatMessageListSliceModel.fromJson(body);
     });
   }
 
@@ -226,9 +228,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Stream<ChatMessageEventModel> watchChatMessageChanges() {
+  Stream<ChatMessageListEventModel> subscribeToChatMessageList({
+    required String chatId,
+  }) {
     return _sseClient
-        .connect('/chats/messages/events')
-        .map(ChatMessageEventModel.fromSseEvent);
+        .connect('/chats/$chatId/messages/events')
+        .map(ChatMessageListEventModel.fromSseEvent);
   }
 }

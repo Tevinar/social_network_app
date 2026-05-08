@@ -1,24 +1,24 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_message_model.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_message_feed_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_list_slice.dart';
 
 /// Data-layer representation of one cursor-based chat-message slice.
-class ChatMessageFeedSliceModel {
-  /// Creates a [ChatMessageFeedSliceModel].
-  const ChatMessageFeedSliceModel({
+class ChatMessageListSliceModel {
+  /// Creates a [ChatMessageListSliceModel].
+  const ChatMessageListSliceModel({
     required this.chatMessages,
     required this.nextCursor,
   });
 
-  /// Builds a [ChatMessageFeedSliceModel] from a backend JSON payload.
-  factory ChatMessageFeedSliceModel.fromJson(Map<String, dynamic> json) {
+  /// Builds a [ChatMessageListSliceModel] from a backend JSON payload.
+  factory ChatMessageListSliceModel.fromJson(Map<String, dynamic> json) {
     final chatMessages = JsonReader.readList(json, 'chatMessages');
 
-    return ChatMessageFeedSliceModel(
+    return ChatMessageListSliceModel(
       chatMessages: chatMessages
           .map(
-            (item) => ChatMessageModel.fromJson(
-              JsonReader.asObject(item, 'chatMessages[]'),
+            (chatMessage) => ChatMessageModel.fromJson(
+              JsonReader.asObject(chatMessage, 'chatMessages[]'),
             ),
           )
           .toList(),
@@ -32,9 +32,9 @@ class ChatMessageFeedSliceModel {
   /// Opaque cursor to request the next slice, when available.
   final String? nextCursor;
 
-  /// Converts the model to the domain [ChatMessageFeedSlice] value.
-  ChatMessageFeedSlice toSlice() {
-    return ChatMessageFeedSlice(
+  /// Converts the model to the domain [ChatMessageListSlice] value.
+  ChatMessageListSlice toSlice() {
+    return ChatMessageListSlice(
       chatMessages: chatMessages
           .map((chatMessage) => chatMessage.toEntity())
           .toList(),

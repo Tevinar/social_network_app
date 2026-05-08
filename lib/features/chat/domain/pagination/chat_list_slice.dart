@@ -1,9 +1,9 @@
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 
-/// Domain entity representing one cursor-based slice of the chat feed.
-class ChatFeedSlice {
-  /// Creates a [ChatFeedSlice].
-  const ChatFeedSlice({
+/// Domain entity representing one cursor-based slice of the chat list.
+class ChatListSlice {
+  /// Creates a [ChatListSlice].
+  const ChatListSlice({
     required this.chats,
     required this.nextCursor,
   });

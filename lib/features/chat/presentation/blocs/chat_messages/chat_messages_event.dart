@@ -34,5 +34,5 @@ final class ChatMessageChangeReceived extends ChatMessagesEvent {
   ChatMessageChangeReceived(this.chatMessageChange);
 
   /// The chat message change.
-  final Either<Failure, ChatMessageChange> chatMessageChange;
+  final Either<Failure, ChatMessageListChange> chatMessageChange;
 }

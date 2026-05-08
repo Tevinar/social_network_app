@@ -1,17 +1,17 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_candidates_slice.dart';
 import 'package:social_app/features/chat/domain/events/chat_change.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_feed_slice.dart';
 import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
-import 'package:social_app/features/chat/domain/pagination/chat_message_feed_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_candidate_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_list_slice.dart';
 import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
 /// Domain contract aligned with the remote chat API.
 abstract interface class ChatRepository {
   /// Fetches one cursor-based slice of chat candidates.
-  Future<Either<Failure, ChatCandidatesSlice>> getChatCandidatesSlice({
+  Future<Either<Failure, ChatCandidateListSlice>> getChatCandidateListSlice({
     required int limit,
     String? cursor,
   });
@@ -23,13 +23,13 @@ abstract interface class ChatRepository {
   });
 
   /// Fetches one cursor-based slice of chats ordered by recent activity.
-  Future<Either<Failure, ChatFeedSlice>> getChatFeedSlice({
+  Future<Either<Failure, ChatListSlice>> getChatListSlice({
     required int limit,
     String? cursor,
   });
 
-  /// Opens the realtime chat-feed event stream.
-  Stream<Either<Failure, ChatChange>> watchChatFeedEvents();
+  /// Opens the realtime chat-list event stream.
+  Stream<Either<Failure, ChatListChange>> subscribeToChatList();
 
   /// Looks up one existing chat by its exact member set.
   /// The current user is implicitly included in the member set.
@@ -39,7 +39,7 @@ abstract interface class ChatRepository {
   });
 
   /// Fetches one cursor-based slice of messages inside the target chat.
-  Future<Either<Failure, ChatMessageFeedSlice>> getChatMessageFeedSlice({
+  Future<Either<Failure, ChatMessageListSlice>> getChatMessageListSlice({
     required String chatId,
     required int limit,
     String? cursor,
@@ -51,6 +51,8 @@ abstract interface class ChatRepository {
     required String content,
   });
 
-  /// Opens the realtime chat-message event stream.
-  Stream<Either<Failure, ChatMessageChange>> watchChatMessageChanges();
+  /// Opens the realtime chat-message event stream for one chat.
+  Stream<Either<Failure, ChatMessageListChange>> subscribeToChatMessageList({
+    required String chatId,
+  });
 }

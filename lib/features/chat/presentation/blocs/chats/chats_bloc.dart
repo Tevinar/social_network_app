@@ -7,9 +7,9 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/events/chat_change.dart';
+import 'package:social_app/features/chat/domain/usecases/subscribe_to_chat_list.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_chats_page.dart';
-import 'package:social_app/features/chat/domain/usecases/watch_chat_changes.dart';
 
 part 'chats_event.dart';
 part 'chats_state.dart';
@@ -25,7 +25,7 @@ part 'chats_state.dart';
 /// converted into events to ensure all state mutations flow through the
 /// BLoC event system.
 
-/// Manages the chat feed state, including pagination, loading states,
+/// Manages the chat list state, including pagination, loading states,
 /// and real-time updates to already loaded chats.
 class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   /// Creates the ChatsBloc and immediately:
@@ -35,10 +35,10 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   ChatsBloc({
     required GetChatsPage getChatsPage,
     required GetChatsCount getChatsCount,
-    required WatchChatChanges watchChatChanges,
+    required SubscribeToChatList subscribeToChatList,
   }) : _getChatsPage = getChatsPage,
        _getChatsCount = getChatsCount,
-       _watchChatChanges = watchChatChanges,
+       _subscribeToChatList = subscribeToChatList,
        super(const ChatsLoading(chats: [], pageNumber: 1)) {
     on<LoadChatsNextPage>(_onLoadChatsNextPage);
     on<ChatChangeReceived>(_onChatChangeReceived);
@@ -50,11 +50,11 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   }
   final GetChatsPage _getChatsPage;
   final GetChatsCount _getChatsCount;
-  final WatchChatChanges _watchChatChanges;
+  final SubscribeToChatList _subscribeToChatList;
 
   final ScrollController _scrollController = ScrollController();
 
-  late final StreamSubscription<Either<Failure, ChatChange>> _chatChangeSub;
+  late final StreamSubscription<Either<Failure, ChatListChange>> _chatChangeSub;
 
   @override
   Future<void> close() async {
@@ -87,7 +87,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   /// ensure that all state updates go through the BLoC event pipeline
   /// (streams must never emit states directly).
   void _addListenerToSubscription() {
-    _chatChangeSub = _watchChatChanges(const NoParams()).listen((
+    _chatChangeSub = _subscribeToChatList().listen((
       event,
     ) {
       add(ChatChangeReceived(event));

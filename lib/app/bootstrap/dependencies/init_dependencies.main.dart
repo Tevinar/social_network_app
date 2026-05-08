@@ -239,10 +239,10 @@ void _initChat() {
       () => GetChatByMembers(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => WatchChatChanges(chatRepository: serviceLocator()),
+      () => SubscribeToChatList(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => WatchChatMessageChanges(chatRepository: serviceLocator()),
+      () => SubscribeToChatMessageList(chatRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(
@@ -261,14 +261,14 @@ void _initChat() {
       () => ChatsBloc(
         getChatsPage: serviceLocator(),
         getChatsCount: serviceLocator(),
-        watchChatChanges: serviceLocator(),
+        subscribeToChatList: serviceLocator(),
       ),
     )
     ..registerFactory(
       () => ChatMessagesBloc(
         getChatMessagesPage: serviceLocator(),
         getChatMessagesCount: serviceLocator(),
-        watchChatMessageChanges: serviceLocator(),
+        subscribeToChatMessageList: serviceLocator(),
         createChatMessage: serviceLocator(),
       ),
     );

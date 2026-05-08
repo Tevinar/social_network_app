@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
 import 'package:social_app/features/chat/domain/usecases/'
@@ -14,7 +13,7 @@ import 'package:social_app/features/chat/domain/usecases/'
 import 'package:social_app/features/chat/domain/usecases/'
     'get_chat_messages_page.dart';
 import 'package:social_app/features/chat/domain/usecases/'
-    'watch_chat_message_changes.dart';
+    'subscribe_to_chat_message_list.dart';
 
 part 'chat_messages_event.dart';
 part 'chat_messages_state.dart';
@@ -30,7 +29,7 @@ part 'chat_messages_state.dart';
 /// converted into events to ensure all state mutations flow through the
 /// BLoC event system.
 
-/// Manages the chatMessages feed state, including pagination, loading states,
+/// Manages the chatMessages list state, including pagination, loading states,
 /// and real-time updates to already loaded chatMessages.
 class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   /// Creates the ChatMessagesBloc and immediately:
@@ -40,11 +39,11 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   ChatMessagesBloc({
     required GetChatMessagesPage getChatMessagesPage,
     required GetChatMessagesCount getChatMessagesCount,
-    required WatchChatMessageChanges watchChatMessageChanges,
+    required SubscribeToChatMessageList subscribeToChatMessageList,
     required CreateChatMessage createChatMessage,
   }) : _getChatMessagesPage = getChatMessagesPage,
        _getChatMessagesCount = getChatMessagesCount,
-       _watchChatMessageChanges = watchChatMessageChanges,
+       _subscribeToChatMessageList = subscribeToChatMessageList,
        _createChatMessage = createChatMessage,
        super(
          const ChatMessagesLoading(chatId: '', chatMessages: [], pageNumber: 1),
@@ -55,22 +54,21 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     on<AddChatMessage>(_onAddChatMessage);
 
     _addListenerToScrollController();
-    _addListenerToSubscription();
   }
   final GetChatMessagesPage _getChatMessagesPage;
   final GetChatMessagesCount _getChatMessagesCount;
-  final WatchChatMessageChanges _watchChatMessageChanges;
+  final SubscribeToChatMessageList _subscribeToChatMessageList;
   final CreateChatMessage _createChatMessage;
 
   final ScrollController _scrollController = ScrollController();
 
-  late final StreamSubscription<Either<Failure, ChatMessageChange>>
+  StreamSubscription<Either<Failure, ChatMessageListChange>>?
   _chatMessageChangeSub;
 
   @override
   Future<void> close() async {
     try {
-      await _chatMessageChangeSub.cancel();
+      await _chatMessageChangeSub?.cancel();
     } finally {
       try {
         _scrollController.dispose();
@@ -97,12 +95,16 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   /// Stream emissions are converted into `ChatChangeReceived` events to
   /// ensure that all state updates go through the BLoC event pipeline
   /// (streams must never emit states directly).
-  void _addListenerToSubscription() {
-    _chatMessageChangeSub = _watchChatMessageChanges(const NoParams()).listen((
-      event,
-    ) {
-      add(ChatMessageChangeReceived(event));
-    });
+  void _addListenerToSubscription(String chatId) {
+    unawaited(_chatMessageChangeSub?.cancel());
+    _chatMessageChangeSub =
+        _subscribeToChatMessageList(
+          SubscribeToChatMessageListParams(chatId: chatId),
+        ).listen((
+          event,
+        ) {
+          add(ChatMessageChangeReceived(event));
+        });
   }
 
   Future<void> _onAddChatMessage(
@@ -135,6 +137,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     LoadInitialChatMessagesPage event,
     Emitter<ChatMessagesState> emit,
   ) {
+    _addListenerToSubscription(event.chatId);
     emit(
       ChatMessagesLoading(
         chatId: event.chatId,
@@ -175,7 +178,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
   }
 
   void _applyChatMessageChange(
-    ChatMessageChange chatMessageChange,
+    ChatMessageListChange chatMessageChange,
     Emitter<ChatMessagesState> emit,
   ) {
     // Ignore changes for other chats - they will be handled
@@ -196,7 +199,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessagesState> {
     }
   }
 
-  String _chatIdOfChange(ChatMessageChange chatMessageChange) {
+  String _chatIdOfChange(ChatMessageListChange chatMessageChange) {
     return switch (chatMessageChange) {
       ChatMessageInserted(:final chatId) => chatId,
       ChatMessageUpdated(:final chatId) => chatId,

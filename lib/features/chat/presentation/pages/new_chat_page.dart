@@ -5,10 +5,8 @@ import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
-    'chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/'
-    'users_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidates_bloc.dart';
 
 /// A new chat page widget.
 class NewChatPage extends StatefulWidget {
@@ -33,14 +31,14 @@ class _NewChatPageState extends State<NewChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New Chat')),
-      body: BlocBuilder<UsersBloc, UsersState>(
+      body: BlocBuilder<UsersBloc, ChatCandidatesState>(
         builder: _buildBody,
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  Widget _buildBody(BuildContext context, UsersState state) {
+  Widget _buildBody(BuildContext context, ChatCandidatesState state) {
     if (state is UsersFailure) {
       return Center(
         child: Text('Error loading users : ${state.error}'),
@@ -55,7 +53,7 @@ class _NewChatPageState extends State<NewChatPage> {
     return _buildUsersList(context, state);
   }
 
-  Widget _buildUsersList(BuildContext context, UsersState state) {
+  Widget _buildUsersList(BuildContext context, ChatCandidatesState state) {
     return ListView.builder(
       controller: context.read<UsersBloc>().scrollController,
       itemCount: _userItemCount(state),
@@ -63,7 +61,7 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  Widget _buildUserListItem(UsersState state, int index) {
+  Widget _buildUserListItem(ChatCandidatesState state, int index) {
     if (index == state.users.length) {
       return const Loader(size: 30);
     }
@@ -108,7 +106,7 @@ class _NewChatPageState extends State<NewChatPage> {
     });
   }
 
-  int _userItemCount(UsersState state) {
+  int _userItemCount(ChatCandidatesState state) {
     return state.users.length == state.totalUsersInDatabase
         ? state.users.length
         : state.users.length + 1;
@@ -121,7 +119,7 @@ class _NewChatPageState extends State<NewChatPage> {
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
+      child: BlocConsumer<ChatEditorBloc, ChatSessionState>(
         listener: _onChatEditorStateChanged,
         builder: _buildCreateChatButton,
       ),
@@ -130,15 +128,15 @@ class _NewChatPageState extends State<NewChatPage> {
 
   void _onChatEditorStateChanged(
     BuildContext context,
-    ChatEditorState state,
+    ChatSessionState state,
   ) {
-    if (state is ChatEditorWaitingForFirstMessage ||
-        state is ChatEditorLoaded) {
+    if (state is ChatSessionWaitingForFirstMessage ||
+        state is ChatSessionLoaded) {
       const ChatMessagesPageRoute().pushReplacement(context);
     }
   }
 
-  Widget _buildCreateChatButton(BuildContext context, ChatEditorState state) {
+  Widget _buildCreateChatButton(BuildContext context, ChatSessionState state) {
     return TextButton.icon(
       onPressed: () => _startChat(context, state),
       label: _buildCreateChatButtonLabel(context, state),
@@ -149,9 +147,9 @@ class _NewChatPageState extends State<NewChatPage> {
 
   Widget _buildCreateChatButtonLabel(
     BuildContext context,
-    ChatEditorState state,
+    ChatSessionState state,
   ) {
-    if (state is ChatEditorLoading) {
+    if (state is ChatSessionLoading) {
       return const Loader(size: 25);
     }
 
@@ -161,8 +159,8 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  Widget? _buildCreateChatButtonIcon(ChatEditorState state) {
-    if (state is ChatEditorLoading) {
+  Widget? _buildCreateChatButtonIcon(ChatSessionState state) {
+    if (state is ChatSessionLoading) {
       return null;
     }
 
@@ -183,8 +181,8 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  void _startChat(BuildContext context, ChatEditorState state) {
-    if (state is ChatEditorLoading) {
+  void _startChat(BuildContext context, ChatSessionState state) {
+    if (state is ChatSessionLoading) {
       return;
     }
 

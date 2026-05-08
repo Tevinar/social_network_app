@@ -1,5 +1,4 @@
 import 'package:social_app/core/serialization/json_reader.dart';
-import 'package:social_app/features/chat/data/models/common/chat_last_message_model.dart';
 import 'package:social_app/features/chat/data/models/common/chat_user_summary_model.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 
@@ -28,18 +27,6 @@ class ChatMessageModel {
       content: JsonReader.readString(json, 'content'),
       createdAt: JsonReader.readDateTime(json, 'createdAt'),
       updatedAt: JsonReader.readDateTime(json, 'updatedAt'),
-    );
-  }
-
-  /// Builds a [ChatMessageModel] from a chat last-message payload.
-  factory ChatMessageModel.fromLastMessage(ChatLastMessageModel lastMessage) {
-    return ChatMessageModel(
-      id: lastMessage.id,
-      chatId: '',
-      author: lastMessage.author,
-      content: lastMessage.content,
-      createdAt: lastMessage.createdAt,
-      updatedAt: lastMessage.createdAt,
     );
   }
 

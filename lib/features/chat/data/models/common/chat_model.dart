@@ -1,23 +1,22 @@
 import 'package:social_app/core/serialization/json_reader.dart';
-import 'package:social_app/features/chat/data/models/common/chat_last_message_model.dart';
 import 'package:social_app/features/chat/data/models/common/chat_user_summary_model.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 
 /// Data-layer representation of one chat payload returned by the backend.
 class ChatModel {
   /// Creates a [ChatModel].
-  const ChatModel({
+  const ChatModel._chatModel({
     required this.id,
     required this.members,
-    required this.lastMessage,
-  });
+    required _ChatLastMessageModel? lastMessage,
+  }) : _lastMessage = lastMessage;
 
   /// Builds a [ChatModel] from a backend JSON payload.
   factory ChatModel.fromJson(Map<String, dynamic> json) {
     final members = JsonReader.readList(json, 'members');
     final lastMessageJson = json['lastMessage'];
 
-    return ChatModel(
+    return ChatModel._chatModel(
       id: JsonReader.readString(json, 'id'),
       members: members
           .map(
@@ -27,7 +26,7 @@ class ChatModel {
           )
           .toList(),
       lastMessage: lastMessageJson is Map<String, dynamic>
-          ? ChatLastMessageModel.fromJson(lastMessageJson)
+          ? _ChatLastMessageModel.fromJson(lastMessageJson)
           : null,
     );
   }
@@ -39,20 +38,61 @@ class ChatModel {
   final List<ChatUserSummaryModel> members;
 
   /// Latest message preview shown for the chat.
-  final ChatLastMessageModel? lastMessage;
+  final _ChatLastMessageModel? _lastMessage;
 
   /// Converts the data model into the domain [Chat] entity.
   Chat toEntity() {
-    final lastMessage = this.lastMessage;
-
-    if (lastMessage == null) {
-      throw StateError('ChatModel.lastMessage must not be null');
-    }
-
     return Chat(
       id: id,
-      lastMessage: lastMessage.toEntity(),
+      lastMessage: _lastMessage?._toEntity(),
       members: members.map((member) => member.toEntity()).toList(),
+    );
+  }
+}
+
+/// Data-layer representation of the latest message preview shown for one chat.
+class _ChatLastMessageModel {
+  /// Creates a [_ChatLastMessageModel].
+  const _ChatLastMessageModel({
+    required this.id,
+    required this.author,
+    required this.content,
+    required this.createdAt,
+  });
+
+  /// Builds a [_ChatLastMessageModel] from a backend JSON payload.
+  factory _ChatLastMessageModel.fromJson(Map<String, dynamic> json) {
+    final authorJson = json['author'];
+
+    return _ChatLastMessageModel(
+      id: JsonReader.readString(json, 'id'),
+      author: authorJson is Map<String, dynamic>
+          ? ChatUserSummaryModel.fromJson(authorJson)
+          : null,
+      content: JsonReader.readString(json, 'content'),
+      createdAt: JsonReader.readDateTime(json, 'createdAt'),
+    );
+  }
+
+  /// Stable message identifier.
+  final String id;
+
+  /// Message author when still available.
+  final ChatUserSummaryModel? author;
+
+  /// Preview content shown in chat lists.
+  final String content;
+
+  /// Message creation timestamp.
+  final DateTime createdAt;
+
+  /// Converts the model to the domain [ChatLastMessage] entity.
+  ChatLastMessage _toEntity() {
+    return ChatLastMessage(
+      id: id,
+      author: author?.toEntity(),
+      content: content,
+      createdAt: createdAt,
     );
   }
 }

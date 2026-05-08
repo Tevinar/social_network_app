@@ -13,12 +13,10 @@ import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/'
     'blog_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
-    'chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/'
     'chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/'
-    'users_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidates_bloc.dart';
 
 void main() async {
   // Local logger available immediately during app startup, before GetIt and the

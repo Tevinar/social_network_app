@@ -8,14 +8,14 @@ class ChatFeedEventModel {
   /// Creates a [ChatFeedEventModel].
   const ChatFeedEventModel({
     required this.type,
-    required this.item,
+    required this.chat,
   });
 
   /// Builds a [ChatFeedEventModel] from one parsed SSE event.
   factory ChatFeedEventModel.fromSseEvent(SseEvent event) {
     return ChatFeedEventModel(
       type: event.type ?? JsonReader.readString(event.data, 'type'),
-      item: ChatModel.fromJson(JsonReader.readObject(event.data, 'item')),
+      chat: ChatModel.fromJson(JsonReader.readObject(event.data, 'item')),
     );
   }
 
@@ -23,13 +23,13 @@ class ChatFeedEventModel {
   final String type;
 
   /// Chat payload carried by the event.
-  final ChatModel item;
+  final ChatModel chat;
 
   /// Converts the model to the domain-level [ChatChange] entity.
   ChatChange toEvent() {
     switch (type) {
       case 'feed.chat_added':
-        return ChatInserted(item.toEntity());
+        return ChatInserted(chat.toEntity());
       default:
         throw FormatException('Unsupported chat feed event type: $type');
     }

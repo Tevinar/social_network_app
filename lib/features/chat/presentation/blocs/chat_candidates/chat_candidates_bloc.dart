@@ -7,11 +7,11 @@ import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 
-part 'users_event.dart';
-part 'users_state.dart';
+part 'chat_candidates_event.dart';
+part 'chat_candidates_state.dart';
 
 /// A users bloc.
-class UsersBloc extends Bloc<UsersEvent, UsersState> {
+class UsersBloc extends Bloc<UsersEvent, ChatCandidatesState> {
   /// Creates a [UsersBloc].
   UsersBloc({
     required GetUsersPage getUsersPage,
@@ -50,7 +50,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
 
   Future<void> _onLoadUsersNextPage(
     LoadUsersNextPage event,
-    Emitter<UsersState> emit,
+    Emitter<ChatCandidatesState> emit,
   ) async {
     if (state.totalUsersInDatabase == null) {
       await _initializeUsersCount(emit);
@@ -104,7 +104,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   /// The scroll controller.
   ScrollController get scrollController => _scrollController;
 
-  Future<void> _initializeUsersCount(Emitter<UsersState> emit) async {
+  Future<void> _initializeUsersCount(Emitter<ChatCandidatesState> emit) async {
     final result = await _getUsersCount(const NoParams());
     result.fold(
       (error) {

@@ -1,4 +1,4 @@
-part of 'users_bloc.dart';
+part of 'chat_candidates_bloc.dart';
 
 @immutable
 /// Represents users event.

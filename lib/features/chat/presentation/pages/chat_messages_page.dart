@@ -6,7 +6,7 @@ import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
 
@@ -41,14 +41,14 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: _createChatMessagesBloc,
-      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
+      child: BlocConsumer<ChatEditorBloc, ChatSessionState>(
         listener: _loadInitialChatMessagesPage,
         builder: _buildPage,
       ),
     );
   }
 
-  Widget _buildPage(BuildContext context, ChatEditorState chatEditorState) {
+  Widget _buildPage(BuildContext context, ChatSessionState chatEditorState) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_chatTitle(chatEditorState)),
@@ -56,7 +56,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       body: Column(
         children: [
           _buildMessagesSection(chatEditorState),
-          BlocBuilder<ChatEditorBloc, ChatEditorState>(
+          BlocBuilder<ChatEditorBloc, ChatSessionState>(
             builder: _buildComposer,
           ),
         ],
@@ -64,15 +64,15 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  String _chatTitle(ChatEditorState chatEditorState) {
+  String _chatTitle(ChatSessionState chatEditorState) {
     return chatEditorState.chatMembers
         .where((member) => member.id != _currentUser.id)
         .map((member) => member.name)
         .join(', ');
   }
 
-  Widget _buildMessagesSection(ChatEditorState chatEditorState) {
-    if (chatEditorState is! ChatEditorLoaded) {
+  Widget _buildMessagesSection(ChatSessionState chatEditorState) {
+    if (chatEditorState is! ChatSessionLoaded) {
       return const Expanded(child: SizedBox());
     }
 
@@ -91,7 +91,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
 
   Widget _buildChatMessagesList(
     BuildContext context,
-    ChatEditorLoaded chatEditorState,
+    ChatSessionLoaded chatEditorState,
     ChatMessagesState chatMessagesState,
   ) {
     return ListView.builder(
@@ -109,7 +109,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   Widget _buildChatMessageListItem(
-    ChatEditorLoaded chatEditorState,
+    ChatSessionLoaded chatEditorState,
     ChatMessagesState chatMessagesState,
     int index,
   ) {
@@ -152,7 +152,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
         : chatMessagesState.chatMessages.length + 1;
   }
 
-  String _authorName(ChatEditorLoaded chatEditorState, String authorId) {
+  String _authorName(ChatSessionLoaded chatEditorState, String authorId) {
     return chatEditorState.chatMembers
         .firstWhere((member) => member.id == authorId)
         .name;
@@ -176,7 +176,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  Widget _buildComposer(BuildContext context, ChatEditorState state) {
+  Widget _buildComposer(BuildContext context, ChatSessionState state) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -208,7 +208,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  Widget _buildSendButton(BuildContext context, ChatEditorState state) {
+  Widget _buildSendButton(BuildContext context, ChatSessionState state) {
     return IconButton.filled(
       style: const ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(
@@ -216,7 +216,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
         ),
       ),
       onPressed: () => _sendMessage(context, state),
-      icon: state is ChatEditorLoading
+      icon: state is ChatSessionLoading
           ? const Loader()
           : const Icon(
               Icons.send,
@@ -228,7 +228,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   ChatMessagesBloc _createChatMessagesBloc(BuildContext context) {
     final chatEditorState = context.read<ChatEditorBloc>().state;
 
-    if (chatEditorState is! ChatEditorLoaded) {
+    if (chatEditorState is! ChatSessionLoaded) {
       return serviceLocator<ChatMessagesBloc>();
     }
 
@@ -238,16 +238,16 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
 
   void _loadInitialChatMessagesPage(
     BuildContext context,
-    ChatEditorState state,
+    ChatSessionState state,
   ) {
-    if (state is ChatEditorLoaded) {
+    if (state is ChatSessionLoaded) {
       context.read<ChatMessagesBloc>().add(
         LoadInitialChatMessagesPage(state.chatId),
       );
     }
   }
 
-  void _sendMessage(BuildContext context, ChatEditorState state) {
+  void _sendMessage(BuildContext context, ChatSessionState state) {
     final messageText = _messageController.text.trim();
 
     if (messageText.isEmpty) {
@@ -255,10 +255,10 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     }
 
     switch (state) {
-      case ChatEditorLoaded():
+      case ChatSessionLoaded():
         _sendLoadedChatMessage(context, state.chatId, messageText);
 
-      case ChatEditorWaitingForFirstMessage():
+      case ChatSessionWaitingForFirstMessage():
         _sendFirstChatMessage(context, messageText);
 
       default:

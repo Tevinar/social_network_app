@@ -1,9 +1,9 @@
-part of 'users_bloc.dart';
+part of 'chat_candidates_bloc.dart';
 
 @immutable
 /// Represents users state.
-sealed class UsersState {
-  const UsersState({
+sealed class ChatCandidatesState {
+  const ChatCandidatesState({
     required this.users,
     required this.pageNumber,
     this.totalUsersInDatabase,
@@ -20,7 +20,7 @@ sealed class UsersState {
 }
 
 /// An users loading.
-final class UsersLoading extends UsersState {
+final class UsersLoading extends ChatCandidatesState {
   /// Creates a [UsersLoading].
   const UsersLoading({
     required super.users,
@@ -30,7 +30,7 @@ final class UsersLoading extends UsersState {
 }
 
 /// An users success.
-final class UsersSuccess extends UsersState {
+final class UsersSuccess extends ChatCandidatesState {
   /// Creates a [UsersSuccess].
   const UsersSuccess({
     required super.users,
@@ -40,7 +40,7 @@ final class UsersSuccess extends UsersState {
 }
 
 /// Represents users failure.
-final class UsersFailure extends UsersState {
+final class UsersFailure extends ChatCandidatesState {
   /// Creates a [UsersFailure].
   const UsersFailure({
     required this.error,

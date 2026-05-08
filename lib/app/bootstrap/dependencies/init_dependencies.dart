@@ -52,9 +52,9 @@ import 'package:social_app/features/chat/domain/usecases/get_users_count.dart';
 import 'package:social_app/features/chat/domain/usecases/get_users_page.dart';
 import 'package:social_app/features/chat/domain/usecases/watch_chat_changes.dart';
 import 'package:social_app/features/chat/domain/usecases/watch_chat_message_changes.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/users_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidates_bloc.dart';
 
 part 'init_dependencies.main.dart';

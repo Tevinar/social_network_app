@@ -159,7 +159,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     required List<String> memberIds,
   }) {
     return guardRemoteDataSourceCall(() async {
-      final response = await _dio.get<Object?>(
+      final response = await _dio.get<Map<String, dynamic>?>(
         '/chats/by-members',
         queryParameters: {
           'members': memberIds.join(','),
@@ -169,12 +169,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final body = response.data;
       if (body == null) {
         return null;
-      }
-
-      if (body is! Map<String, dynamic>) {
-        throw const ServerException(
-          message: 'Get chat by members response body has an invalid shape',
-        );
       }
 
       return ChatModel.fromJson(body);

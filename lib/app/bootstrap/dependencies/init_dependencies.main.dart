@@ -158,7 +158,6 @@ void _initBlog() {
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(
         dio: serviceLocator(instanceName: 'authedDio'),
-        sseClient: serviceLocator(),
       ),
     )
     // Repositories
@@ -173,27 +172,31 @@ void _initBlog() {
     ..registerLazySingleton(
       () => CreateBlogUseCase(blogRepository: serviceLocator()),
     )
-    ..registerLazySingleton(() => GetBlogByIdUseCase(serviceLocator()))
     ..registerLazySingleton(
       () => GetBlogImageUseCase(blogRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => WatchFeedSliceUseCase(blogRepository: serviceLocator()),
+      () => ObserveInitialBlogListSliceUseCase(
+        blogRepository: serviceLocator(),
+      ),
     )
     ..registerLazySingleton(
-      () => WatchFeedEventsUseCase(blogRepository: serviceLocator()),
+      () => GetBlogListSliceUseCase(blogRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
+      () => ObserveBlogByIdUseCase(serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(() => BlogEditorBloc(uploadBlog: serviceLocator()))
     ..registerLazySingleton(
-      () => BlogFeedBloc(
-        watchFeedSliceUseCase: serviceLocator(),
-        watchFeedEventsUseCase: serviceLocator(),
+      () => BlogListBloc(
+        observeInitialBlogListSliceUseCase: serviceLocator(),
+        getBlogListSliceUseCase: serviceLocator(),
       ),
     )
     ..registerFactory(
       () => BlogViewerBloc(
-        getBlogByIdUseCase: serviceLocator(),
+        observeBlogByIdUseCase: serviceLocator(),
         getBlogImageUseCase: serviceLocator(),
       ),
     );
@@ -239,6 +242,9 @@ void _initChat() {
       () => GetChatByMembers(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
+      () => GetChatCandidateListSlice(chatRepository: serviceLocator()),
+    )
+    ..registerLazySingleton(
       () => SubscribeToChatList(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
@@ -252,9 +258,8 @@ void _initChat() {
       ),
     )
     ..registerLazySingleton(
-      () => UsersBloc(
-        getUsersPage: serviceLocator(),
-        getUsersCount: serviceLocator(),
+      () => ChatCandidateListBloc(
+        getChatCandidateListSlice: serviceLocator(),
       ),
     )
     ..registerLazySingleton(

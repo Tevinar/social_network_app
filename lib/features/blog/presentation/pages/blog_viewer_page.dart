@@ -17,7 +17,12 @@ class BlogViewerPage extends StatelessWidget {
     super.key,
   });
 
-  /// The blog ID.
+  /// The stable blog identifier used to load the viewer content.
+  ///
+  /// The page intentionally accepts `blogId` instead of a full blog object so
+  /// the same route can be opened from deep links and push notifications. The
+  /// viewer then relies on a cache-first `observe...` flow so it can still
+  /// render quickly without requiring a rich navigation payload.
   final String blogId;
 
   /// Builds the blog viewer page.

@@ -8,14 +8,12 @@ import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_local_data_source.dart';
 import 'package:social_app/features/blog/data/data_sources/blog_remote_data_source.dart';
-import 'package:social_app/features/blog/data/models/blog_feed_event_model.dart';
-import 'package:social_app/features/blog/data/models/blog_feed_slice_model.dart';
+import 'package:social_app/features/blog/data/models/blog_list_slice_model.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/events/blog_feed_event.dart';
-import 'package:social_app/features/blog/domain/read_models/blog_feed_slice.dart';
-import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
+import 'package:social_app/features/blog/domain/read_models/blog_list_slice.dart';
 import 'package:social_app/features/blog/domain/repositories/blog_repository.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 /// Repository implementation that composes blog local and remote data sources
 /// into cache-first domain operations.
@@ -27,10 +25,10 @@ class BlogRepositoryImpl implements BlogRepository {
     required this.imageFileCache,
   });
 
-  /// Remote data source used for backend blog operations and feed events.
+  /// Remote data source used for backend blog operations.
   final BlogRemoteDataSource blogRemoteDataSource;
 
-  /// Local data source used for caching the first feed slice and individual
+  /// Local data source used for caching the first list slice and individual
   /// blog records.
   final BlogLocalDataSource blogLocalDataSource;
 
@@ -38,8 +36,6 @@ class BlogRepositoryImpl implements BlogRepository {
   final ImageFileCache imageFileCache;
 
   @override
-  /// Creates a blog remotely, updates the local cache, and returns the
-  /// resulting domain entity.
   Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
@@ -71,23 +67,21 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
-  /// Emits the cached first feed slice when available and then refreshes the
-  /// same slice from the remote source.
-  Stream<Either<Failure, BlogFeedSlice>> watchBlogFeedSlice({
+  Stream<Either<Failure, BlogListSlice>> observeInitialBlogListSlice({
     required int limit,
-    String? cursor,
   }) async* {
-    BlogFeedSliceModel? cachedSlice;
+    BlogListSliceModel? cachedSlice;
 
     try {
-      cachedSlice = await blogLocalDataSource.getFirstFeedSlice(
+      cachedSlice = await blogLocalDataSource.getFirstListSlice(
         limit: limit,
       );
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in BlogRepositoryImpl.watchFeedSlice local read',
+          'Unexpected error in '
+          'BlogRepositoryImpl.observeInitialBlogListSlice local read',
           error: error,
           stackTrace: stackTrace,
         );
@@ -96,26 +90,25 @@ class BlogRepositoryImpl implements BlogRepository {
 
     if (cachedSlice != null && cachedSlice.items.isNotEmpty) {
       yield right(
-        BlogFeedSlice(
+        BlogListSlice(
           blogs: cachedSlice.items.map((blog) => blog.toEntity()).toList(),
-          source: BlogFeedSource.cache,
+          source: BlogListSource.cache,
           nextCursor: cachedSlice.nextCursor,
         ),
       );
     }
 
     try {
-      final remoteSlice = await blogRemoteDataSource.getBlogFeedSlice(
+      final remoteSlice = await blogRemoteDataSource.getBlogListSlice(
         limit: limit,
-        cursor: cursor,
       );
 
       await blogLocalDataSource.upsertBlogs(remoteSlice.items);
 
       yield right(
-        BlogFeedSlice(
+        BlogListSlice(
           blogs: remoteSlice.items.map((blog) => blog.toEntity()).toList(),
-          source: BlogFeedSource.remote,
+          source: BlogListSource.remote,
           nextCursor: remoteSlice.nextCursor,
         ),
       );
@@ -124,7 +117,8 @@ class BlogRepositoryImpl implements BlogRepository {
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in BlogRepositoryImpl.watchFeedSlice remote fetch',
+          'Unexpected error in '
+          'BlogRepositoryImpl.observeInitialBlogListSlice remote fetch',
           error: error,
           stackTrace: stackTrace,
         );
@@ -134,9 +128,9 @@ class BlogRepositoryImpl implements BlogRepository {
         yield left(failure);
       } else {
         yield right(
-          BlogFeedSlice(
+          BlogListSlice(
             blogs: cachedSlice.items.map((blog) => blog.toEntity()).toList(),
-            source: BlogFeedSource.cache,
+            source: BlogListSource.cache,
             nextCursor: cachedSlice.nextCursor,
             refreshFailure: failure,
           ),
@@ -146,37 +140,42 @@ class BlogRepositoryImpl implements BlogRepository {
   }
 
   @override
-  /// Streams live backend blog feed events mapped into domain event objects.
-  Stream<Either<Failure, BlogFeedEvent>> watchBlogFeedEvents() async* {
+  Future<Either<Failure, BlogListSlice>> getBlogListSlice({
+    required int limit,
+    String? cursor,
+  }) async {
     try {
-      await for (final BlogFeedEventModel event
-          in blogRemoteDataSource.watchBlogFeedEvents()) {
-        yield right(
-          BlogFeedEvent(
-            type: BlogFeedEventType.fromValue(event.type),
-            blogId: event.blogId,
-          ),
-        );
-      }
+      final remoteSlice = await blogRemoteDataSource.getBlogListSlice(
+        limit: limit,
+        cursor: cursor,
+      );
+
+      await blogLocalDataSource.upsertBlogs(remoteSlice.items);
+
+      return right(
+        BlogListSlice(
+          blogs: remoteSlice.items.map((blog) => blog.toEntity()).toList(),
+          source: BlogListSource.remote,
+          nextCursor: remoteSlice.nextCursor,
+        ),
+      );
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in BlogRepositoryImpl.watchFeedEvents',
+          'Unexpected error in BlogRepositoryImpl.getBlogListSlice',
           error: error,
           stackTrace: stackTrace,
         );
       }
 
-      yield left(failure);
+      return left(failure);
     }
   }
 
   @override
-  /// Returns one blog by id, preferring a fresh remote value and falling back
-  /// to cache when needed.
-  Future<Either<Failure, Blog>> getBlogById(String blogId) async {
+  Stream<Either<Failure, Blog>> observeBlogById(String blogId) async* {
     BlogModel? cachedBlog;
 
     try {
@@ -186,39 +185,39 @@ class BlogRepositoryImpl implements BlogRepository {
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in BlogRepositoryImpl.getBlogById local read',
+          'Unexpected error in BlogRepositoryImpl.observeBlogById local read',
           error: error,
           stackTrace: stackTrace,
         );
       }
+    }
+
+    if (cachedBlog != null) {
+      yield right(cachedBlog.toEntity());
     }
 
     try {
       final remoteBlog = await blogRemoteDataSource.getBlogById(blogId);
       await blogLocalDataSource.upsertBlogs([remoteBlog]);
-      return right(remoteBlog.toEntity());
+      yield right(remoteBlog.toEntity());
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in BlogRepositoryImpl.getBlogById',
+          'Unexpected error in BlogRepositoryImpl.observeBlogById',
           error: error,
           stackTrace: stackTrace,
         );
       }
 
-      if (cachedBlog != null) {
-        return right(cachedBlog.toEntity());
+      if (cachedBlog == null) {
+        yield left(failure);
       }
-
-      return left(failure);
     }
   }
 
   @override
-  /// Returns the image file for [blog] from cache or downloads it when
-  /// needed.
   Future<Either<Failure, File?>> getBlogImage(Blog blog) async {
     try {
       final imageFile = await imageFileCache.getOrDownload(

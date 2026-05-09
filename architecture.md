@@ -213,15 +213,23 @@ Notes:
 6. results are mapped back to domain entities or failures
 7. the BLoC emits a new UI state
 
-### Reactive flow
+### Naming convention
 
-1. a repository exposes a passive stream of domain-level changes
+Use read names to signal where updates come from:
+
+- `subscribe` = server-pushed events
+- `observe` = local/cache/reactive streams
+- `get` = one-shot reads
+
+### Server-pushed flow
+
+1. a remote data source or repository exposes a backend-driven stream
 2. a use case exposes that stream to presentation
 3. a BLoC subscribes to the stream
 4. stream emissions are converted into BLoC events
 5. state changes still go through the BLoC event pipeline
 
-### Cache-first reactive flow
+### Local/cache-reactive flow
 
 When stale local data is still useful, the reactive flow becomes local-first:
 
@@ -231,6 +239,21 @@ When stale local data is still useful, the reactive flow becomes local-first:
 4. the repository emits fresh remote data or a refresh failure attached to the
    stale cached snapshot
 5. the BLoC updates UI state without duplicating cache and remote emissions
+
+### Deep-linkable page rule
+
+Pages that should support deep links, push notifications, or state restoration
+must receive primitive route parameters such as IDs, cursors, or slugs rather
+than rich domain objects.
+
+Rule:
+
+- route contracts stay stable and serializable
+- performance should come from cache-first `observe...` flows behind those
+  primitive identifiers, not from passing preloaded entities through navigation
+
+This keeps entry points consistent whether the user opens a page from in-app
+navigation, a deep link, a push notification, or a restored app session.
 
 ### App-wide coordination
 
@@ -252,12 +275,17 @@ Rule:
 
 Current notable patterns:
 
-- blog page and blog viewer flows can emit cached data before remote refresh
+- `observeInitialBlogListSlice` emits a cached initial blog slice before one
+  remote refresh
+- `observeBlogById(blogId)` keeps the blog viewer deep-link-safe while still
+  rendering quickly from local cache when possible
+- `getBlogListSlice`, `getChatListSlice`, `getChatCandidateListSlice`, and
+  `getChatMessageListSlice` are one-shot cursor reads
+- `subscribeToChatList` and `subscribeToChatMessageList` are server-pushed SSE
+  streams
 - image loading can use file-backed local cache before falling back to network
 - startup-only feedback such as the offline snackbar remains an app concern,
   not a feature concern
-
----
 
 ## 6. Error Handling
 

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/cubits/app_user_cubit.dart';
+import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidate_list/chat_candidate_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidates_bloc.dart';
 
 /// A new chat page widget.
 class NewChatPage extends StatefulWidget {
@@ -18,7 +19,7 @@ class NewChatPage extends StatefulWidget {
 }
 
 class _NewChatPageState extends State<NewChatPage> {
-  final List<User> _selectedUsers = [];
+  final List<ChatUserSummary> _selectedUsers = [];
   late final User _currentUser;
 
   @override
@@ -31,42 +32,42 @@ class _NewChatPageState extends State<NewChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New Chat')),
-      body: BlocBuilder<UsersBloc, ChatCandidatesState>(
+      body: BlocBuilder<ChatCandidateListBloc, ChatCandidateListState>(
         builder: _buildBody,
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  Widget _buildBody(BuildContext context, ChatCandidatesState state) {
-    if (state is UsersFailure) {
+  Widget _buildBody(BuildContext context, ChatCandidateListState state) {
+    if (state is ChatCandidateListFailure) {
       return Center(
         child: Text('Error loading users : ${state.error}'),
       );
     }
 
     // Show placeholders while the first page of users is loading.
-    if (state is UsersLoading && state.users.isEmpty) {
+    if (state is ChatCandidateListLoading && state.candidates.isEmpty) {
       return const Loader();
     }
 
     return _buildUsersList(context, state);
   }
 
-  Widget _buildUsersList(BuildContext context, ChatCandidatesState state) {
+  Widget _buildUsersList(BuildContext context, ChatCandidateListState state) {
     return ListView.builder(
-      controller: context.read<UsersBloc>().scrollController,
+      controller: context.read<ChatCandidateListBloc>().scrollController,
       itemCount: _userItemCount(state),
       itemBuilder: (context, index) => _buildUserListItem(state, index),
     );
   }
 
-  Widget _buildUserListItem(ChatCandidatesState state, int index) {
-    if (index == state.users.length) {
+  Widget _buildUserListItem(ChatCandidateListState state, int index) {
+    if (index == state.candidates.length) {
       return const Loader(size: 30);
     }
 
-    final user = state.users[index];
+    final user = state.candidates[index];
 
     if (_isCurrentUser(user)) {
       return const SizedBox.shrink();
@@ -75,11 +76,11 @@ class _NewChatPageState extends State<NewChatPage> {
     return _buildUserSelectionTile(user);
   }
 
-  bool _isCurrentUser(User user) {
+  bool _isCurrentUser(ChatUserSummary user) {
     return user.id == _currentUser.id;
   }
 
-  Widget _buildUserSelectionTile(User user) {
+  Widget _buildUserSelectionTile(ChatUserSummary user) {
     return CheckboxListTile(
       secondary: const CircleAvatar(child: Icon(Icons.person)),
       title: Text(user.name),
@@ -96,7 +97,7 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  void _toggleUserSelection(User user, bool? value) {
+  void _toggleUserSelection(ChatUserSummary user, bool? value) {
     setState(() {
       if (value == true) {
         _selectedUsers.add(user);
@@ -106,10 +107,13 @@ class _NewChatPageState extends State<NewChatPage> {
     });
   }
 
-  int _userItemCount(ChatCandidatesState state) {
-    return state.users.length == state.totalUsersInDatabase
-        ? state.users.length
-        : state.users.length + 1;
+  int _userItemCount(ChatCandidateListState state) {
+    final isLoadingMore =
+        state is ChatCandidateListLoading && state.candidates.isNotEmpty;
+
+    return isLoadingMore
+        ? state.candidates.length + 1
+        : state.candidates.length;
   }
 
   Widget? _buildFloatingActionButton() {
@@ -187,14 +191,11 @@ class _NewChatPageState extends State<NewChatPage> {
     }
 
     context.read<ChatEditorBloc>().add(
-      AddChat(chatMembers: _chatMembersForCreation()),
+      AddChat(chatMemberIds: _chatMemberIdsForCreation()),
     );
   }
 
-  List<User> _chatMembersForCreation() {
-    return [
-      ..._selectedUsers,
-      _currentUser,
-    ];
+  List<String> _chatMemberIdsForCreation() {
+    return _selectedUsers.map((user) => user.id).toList();
   }
 }

@@ -1,6 +1,6 @@
 # Social App
 
-A Flutter social application demo connected to Supabase.
+A Flutter social application demo backed by a custom NestJS API.
 
 This project is designed with a structured architecture focused on
 maintainability, scalability, and clear separation of responsibilities.
@@ -11,19 +11,19 @@ Social App is a client application built with Flutter. It currently covers
 three main capabilities:
 
 - email/password authentication
-- real-time blog publishing with image upload and offline-aware reading
-- real-time chat and messaging
+- blog publishing with image upload and cache-first reading
+- chat and messaging with server-pushed SSE updates
 
-The project is intended as a technical codebase
-organized around explicit architectural boundaries. It is suitable for learning
-and evolving a feature-based Flutter architecture with BLoC, dependency
-injection, and Supabase.
+The project is intended as a technical codebase organized around explicit
+architectural boundaries. It is suitable for learning and evolving a
+feature-based Flutter architecture with BLoC, dependency injection, local
+cache, and a custom HTTP backend.
 
 This project solves the need for a single codebase that combines:
 
 - session-aware navigation
 - feature isolation
-- real-time updates
+- server-pushed chat updates
 - local-first blog loading and disk-cached blog images
 - backend integration through clear infrastructure boundaries
 
@@ -50,11 +50,13 @@ The main goals of the project are:
 
 ### Data / Persistence
 
-- Database: Supabase Postgres
-- Query layer: `supabase_flutter` / Supabase client APIs and RPC calls
+- HTTP client: `dio`
+- Auth/session persistence: `flutter_secure_storage`
 - Local structured cache: Drift / SQLite for blog persistence
 - Local file cache: disk-backed cache for blog images
-- Read strategy: cache-first streams for blog pages and blog viewer flows
+- Read strategy: cache-first `observe...` flows for initial blog list and blog
+  viewer, one-shot `get...` pagination for additional slices
+- Server push: SSE for chat list and per-chat message streams
 
 ### Infrastructure
 
@@ -91,8 +93,9 @@ zones:
 
 At runtime, feature UI is coordinated with BLoC/Cubit, navigation is handled
 through `GoRouter`, dependencies are composed with `GetIt`, and repositories
-expose safe results through `Either<Failure, T>` or cache-first stream
-snapshots when stale local data can be shown before remote refresh completes.
+expose safe results through `Either<Failure, T>`, one-shot `get...` reads,
+cache-first `observe...` streams, or backend-driven `subscribe...` streams
+depending on the use case.
 
 For the full architectural rules, dependency direction, testing conventions,
 and runtime coordination patterns, see [architecture.md](./architecture.md).
@@ -126,7 +129,7 @@ Main folders:
 
 - Unit tests
 - Widget tests for targeted UI behavior
-- Current automated coverage baseline: is at least 70% line coverage across the project
+- No current automated coverage baseline for now
 
 ## Getting Started
 
@@ -149,32 +152,43 @@ flutter pub get
 
 The repository includes `assets/config/env.public` for zero-config onboarding.
 
-For local overrides, create a `.env` file at the root of the project:
+Runtime configuration is provided through Dart defines. The main required value
+is:
 
-```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
+```sh
+flutter run --dart-define=BACKEND_BASE_URL=http://localhost:3000
 ```
 
-Then run the app with:
+If omitted, the app defaults to `http://localhost:3000`.
 
-```bash
-flutter run --dart-define-from-file=.env
-```
+The client expects the backend to expose:
 
-Supabase is expected to provide:
+- authentication
+  - `POST /auth/sign-up`
+  - `POST /auth/sign-in`
+  - `POST /auth/refresh`
+  - `POST /auth/sign-out`
+- blogs
+  - `POST /blogs`
+  - `GET /blogs`
+  - `GET /blogs/:blogId`
+  - `GET /blogs/:blogId/image`
+- chats
+  - `POST /chats`
+  - `GET /chats`
+  - `GET /chats/candidates`
+  - `GET /chats/by-members`
+  - `GET /chats/:chatId/messages`
+  - `POST /chats/:chatId/messages`
+  - `SSE /chats/events`
+  - `SSE /chats/:chatId/messages/events`
 
-- email/password authentication
-- a public `blog_images` storage bucket
-- the tables used by the project (`profiles`, `blogs`, `chats`,
-  `chat_members`, `chat_messages`)
-- the RPC functions:
-  - `create_chat_with_members`
-  - `get_chat_by_members`
-- realtime enabled for:
-  - `blogs`
-  - `chats`
-  - `chat_messages`
+The blog feature uses local cache to make primitive-id navigation feel fast:
+
+- list page: cached initial slice can render before remote refresh
+- viewer page: `blogId` stays the route contract for deep links and push
+  notifications, while cache-first observation recreates the fast-first-render
+  behavior you would otherwise get by passing a full `Blog` object
 
 ### Run the Project
 
@@ -187,7 +201,7 @@ Examples:
 ```bash
 flutter run -d ios
 flutter run -d android
-flutter run --dart-define-from-file=.env
+flutter run --dart-define=BACKEND_BASE_URL=https://api.example.com
 ```
 
 ### Run Tests

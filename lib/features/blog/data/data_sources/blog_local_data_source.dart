@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:social_app/core/local_database/app_database.dart';
-import 'package:social_app/features/blog/data/models/blog_feed_slice_model.dart';
+import 'package:social_app/features/blog/data/models/blog_list_slice_model.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
@@ -11,10 +11,14 @@ abstract interface class BlogLocalDataSource {
   /// Upserts a list of blogs into the local data source.
   Future<void> upsertBlogs(List<BlogModel> blogs);
 
-  /// Gets the first slice of the blog feed from the local data source.
-  Future<BlogFeedSliceModel> getFirstFeedSlice({required int limit});
+  /// Gets the first slice of the blog list from the local data source.
+  Future<BlogListSliceModel> getFirstListSlice({required int limit});
 
   /// Gets a blog by its ID from the local data source.
+  ///
+  /// This cached lookup lets the viewer screen render almost immediately using
+  /// only a `blogId`, which mirrors the UX of passing a full blog object from
+  /// the list screen while still supporting deep links and push notifications.
   Future<BlogModel?> getBlogById(String blogId);
 
   /// Deletes a blog from the local data source by its ID.
@@ -59,7 +63,7 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
   }
 
   @override
-  Future<BlogFeedSliceModel> getFirstFeedSlice({
+  Future<BlogListSliceModel> getFirstListSlice({
     required int limit,
   }) async {
     final cachedBlogs =
@@ -79,7 +83,7 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
 
     final items = cachedBlogs.map(_toBlogModel).toList();
 
-    return BlogFeedSliceModel(
+    return BlogListSliceModel(
       items: items,
       nextCursor: null,
     );

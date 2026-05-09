@@ -16,7 +16,7 @@ import 'package:social_app/features/blog/presentation/blocs/blog_editor/'
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chats/'
     'chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidates_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidate_list/chat_candidate_list_bloc.dart';
 
 void main() async {
   // Local logger available immediately during app startup, before GetIt and the
@@ -44,7 +44,9 @@ void main() async {
                 BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
                 BlocProvider(create: (_) => serviceLocator<BlogEditorBloc>()),
                 BlocProvider(create: (_) => serviceLocator<ChatEditorBloc>()),
-                BlocProvider(create: (_) => serviceLocator<UsersBloc>()),
+                BlocProvider(
+                  create: (_) => serviceLocator<ChatCandidateListBloc>(),
+                ),
                 BlocProvider(create: (_) => serviceLocator<ChatsBloc>()),
               ],
               child: const SocialApp(),

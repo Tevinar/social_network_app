@@ -1,15 +1,12 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
-import 'package:social_app/core/network/sse/sse_client.dart';
-import 'package:social_app/features/blog/data/models/blog_feed_event_model.dart';
-import 'package:social_app/features/blog/data/models/blog_feed_slice_model.dart';
+import 'package:social_app/features/blog/data/models/blog_list_slice_model.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 
-/// Remote blog data source backed by the HTTP API and SSE feed endpoints.
+/// Remote blog data source backed by the HTTP API.
 abstract interface class BlogRemoteDataSource {
   /// Creates a new blog remotely and returns the persisted payload.
   Future<BlogModel> createBlog({
@@ -19,31 +16,24 @@ abstract interface class BlogRemoteDataSource {
     required List<String> topics,
   });
 
-  /// Fetches one cursor-based slice of the remote blog feed.
-  Future<BlogFeedSliceModel> getBlogFeedSlice({
+  /// Fetches one cursor-based slice of the remote blog list.
+  Future<BlogListSliceModel> getBlogListSlice({
     int limit = 20,
     String? cursor,
   });
 
   /// Fetches one blog by its stable identifier.
   Future<BlogModel> getBlogById(String blogId);
-
-  /// Opens the remote Server-Sent Events stream of blog feed events.
-  Stream<BlogFeedEventModel> watchBlogFeedEvents();
 }
 
-/// Default [BlogRemoteDataSource] implementation using Dio and a generic SSE
-/// client.
+/// Default [BlogRemoteDataSource] implementation using Dio.
 class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   /// Creates a [BlogRemoteDataSourceImpl].
   const BlogRemoteDataSourceImpl({
     required Dio dio,
-    required SseClient sseClient,
-  }) : _dio = dio,
-       _sseClient = sseClient;
+  }) : _dio = dio;
 
   final Dio _dio;
-  final SseClient _sseClient;
 
   @override
   Future<BlogModel> createBlog({
@@ -75,7 +65,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
   }
 
   @override
-  Future<BlogFeedSliceModel> getBlogFeedSlice({
+  Future<BlogListSliceModel> getBlogListSlice({
     int limit = 20,
     String? cursor,
   }) {
@@ -93,7 +83,7 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
         throw const ServerException(message: 'List blogs response is empty');
       }
 
-      return BlogFeedSliceModel.fromJson(body);
+      return BlogListSliceModel.fromJson(body);
     });
   }
 
@@ -109,12 +99,5 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       return BlogModel.fromJson(body);
     });
-  }
-
-  @override
-  Stream<BlogFeedEventModel> watchBlogFeedEvents() {
-    return _sseClient
-        .connect('/blogs/events')
-        .map(BlogFeedEventModel.fromSseEvent);
   }
 }

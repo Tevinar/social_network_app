@@ -1,19 +1,19 @@
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/blog/data/models/blog_model.dart';
 
-/// Data-layer representation of one cursor-based blog feed slice.
-class BlogFeedSliceModel {
-  /// Creates a [BlogFeedSliceModel].
-  BlogFeedSliceModel({
+/// Data-layer representation of one cursor-based blog list slice.
+class BlogListSliceModel {
+  /// Creates a [BlogListSliceModel].
+  BlogListSliceModel({
     required this.items,
     required this.nextCursor,
   });
 
-  /// Builds a blog feed slice model from a backend JSON payload.
-  factory BlogFeedSliceModel.fromJson(Map<String, dynamic> json) {
+  /// Builds a blog list slice model from a backend JSON payload.
+  factory BlogListSliceModel.fromJson(Map<String, dynamic> json) {
     final items = JsonReader.readList(json, 'items');
 
-    return BlogFeedSliceModel(
+    return BlogListSliceModel(
       items: items
           .map(
             (item) => BlogModel.fromJson(JsonReader.asObject(item, 'items[]')),
@@ -23,7 +23,7 @@ class BlogFeedSliceModel {
     );
   }
 
-  /// Blogs returned in the current feed slice.
+  /// Blogs returned in the current list slice.
   final List<BlogModel> items;
 
   /// Opaque cursor to request the next slice, when available.

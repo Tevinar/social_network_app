@@ -1,3 +1,6 @@
+// ignore_for_file: one_member_abstracts because these are just shared contracts
+// that don't require more than one method.
+
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 

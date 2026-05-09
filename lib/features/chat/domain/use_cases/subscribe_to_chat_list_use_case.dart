@@ -5,10 +5,10 @@ import 'package:social_app/features/chat/domain/events/chat_change.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Subscribes to live chat-list events emitted by the backend.
-class SubscribeToChatList
+class SubscribeToChatListUseCase
     implements NoParamsStreamUseCase<Either<Failure, ChatListChange>> {
-  /// Creates a [SubscribeToChatList].
-  SubscribeToChatList({required ChatRepository chatRepository})
+  /// Creates a [SubscribeToChatListUseCase].
+  SubscribeToChatListUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to observe chat-list events.

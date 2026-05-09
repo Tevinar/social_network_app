@@ -2,9 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
-import 'package:social_app/features/chat/domain/usecases/create_chat.dart';
-import 'package:social_app/features/chat/domain/usecases/'
-    'get_chat_by_members.dart';
+import 'package:social_app/features/chat/domain/use_cases/create_chat_use_case.dart';
+import 'package:social_app/features/chat/domain/use_cases/get_chat_by_members_use_case.dart';
 
 part 'chat_session_event.dart';
 part 'chat_session_state.dart';
@@ -13,8 +12,8 @@ part 'chat_session_state.dart';
 class ChatEditorBloc extends Bloc<ChatSessionEvent, ChatSessionState> {
   /// Creates a [ChatEditorBloc].
   ChatEditorBloc({
-    required CreateChat createChat,
-    required GetChatByMembers getChatByMembers,
+    required CreateChatUseCase createChat,
+    required GetChatByMembersUseCase getChatByMembers,
   }) : _createChat = createChat,
        _getChatByMembers = getChatByMembers,
        super(const ChatSessionDrafted(chatMembers: [])) {
@@ -22,8 +21,8 @@ class ChatEditorBloc extends Bloc<ChatSessionEvent, ChatSessionState> {
     on<AddChatFirstMessage>(_onAddChatFirstMessage);
     on<SelectChat>(_onSelectChat);
   }
-  final CreateChat _createChat;
-  final GetChatByMembers _getChatByMembers;
+  final CreateChatUseCase _createChat;
+  final GetChatByMembersUseCase _getChatByMembers;
 
   /// When no chat exists yet, wait for the first backend message.
   /// If one already exists, navigate directly to the chat page.

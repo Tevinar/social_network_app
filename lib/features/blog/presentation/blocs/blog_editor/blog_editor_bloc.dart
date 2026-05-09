@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 part 'blog_editor_event.dart';
 part 'blog_editor_state.dart';
@@ -14,8 +14,8 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   /// Creates a [BlogEditorBloc].
   BlogEditorBloc({required CreateBlogUseCase uploadBlog})
     : _uploadBlog = uploadBlog,
-      super(BlogInitial()) {
-    on<BlogEditorEvent>((event, emit) => emit(BlogLoading()));
+      super(const BlogInitial()) {
+    on<BlogEditorEvent>((event, emit) => emit(const BlogLoading()));
     on<AddBlog>(_onAddBlog);
   }
   final CreateBlogUseCase _uploadBlog;

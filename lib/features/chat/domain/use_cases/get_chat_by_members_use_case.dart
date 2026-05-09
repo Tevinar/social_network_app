@@ -5,9 +5,10 @@ import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Looks up one existing chat by its exact member set.
-class GetChatByMembers implements UseCase<Chat?, GetChatByMembersParams> {
-  /// Creates a [GetChatByMembers].
-  GetChatByMembers({required ChatRepository chatRepository})
+class GetChatByMembersUseCase
+    implements UseCase<Chat?, GetChatByMembersParams> {
+  /// Creates a [GetChatByMembersUseCase].
+  GetChatByMembersUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to search chats by members.

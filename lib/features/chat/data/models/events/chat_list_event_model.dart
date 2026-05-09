@@ -1,4 +1,4 @@
-import 'package:social_app/core/network/sse/sse_client.dart';
+import 'package:social_app/core/network/sse/sse_event.dart';
 import 'package:social_app/core/serialization/json_reader.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
 import 'package:social_app/features/chat/domain/events/chat_change.dart';

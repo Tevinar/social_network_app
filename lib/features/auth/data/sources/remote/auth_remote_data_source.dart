@@ -3,8 +3,8 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/core/local_database/app_settings_store.dart';
 import 'package:social_app/core/local_database/schema/app_settings.dart';
-import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:uuid/uuid.dart';
 
 /// Remote boundary for backend authentication requests.

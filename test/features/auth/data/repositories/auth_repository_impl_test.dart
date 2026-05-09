@@ -7,14 +7,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
 import 'package:social_app/features/auth/data/models/auth_session_model.dart';
+import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
-import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/repositories/'
     'auth_repository_impl.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
+import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
@@ -344,8 +344,8 @@ void main() {
     );
 
     test(
-      'Given current user store emits null when listening to auth changes, then '
-      'Right(null) is emitted',
+      'Given current user store emits null when listening to auth changes, then'
+      ' Right(null) is emitted',
       () async {
         // Arrange
         when(
@@ -361,8 +361,8 @@ void main() {
     );
 
     test(
-      'Given current user store stream throws when listening to auth changes, then '
-      'Left<Failure> is emitted',
+      'Given current user store stream throws when listening to auth changes, '
+      'then Left<Failure> is emitted',
       () async {
         // Arrange
         when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(

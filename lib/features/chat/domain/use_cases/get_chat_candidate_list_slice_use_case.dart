@@ -5,11 +5,11 @@ import 'package:social_app/features/chat/domain/pagination/chat_candidate_list_s
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Loads one cursor-based slice of chat candidates.
-class GetChatCandidateListSlice
+class GetChatCandidateListSliceUseCase
     implements
         UseCase<ChatCandidateListSlice, GetChatCandidateListSliceParams> {
-  /// Creates a [GetChatCandidateListSlice].
-  GetChatCandidateListSlice({required ChatRepository chatRepository})
+  /// Creates a [GetChatCandidateListSliceUseCase].
+  GetChatCandidateListSliceUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to load chat candidates.

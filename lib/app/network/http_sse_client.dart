@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:social_app/core/errors/exceptions.dart';
-import 'package:social_app/core/network/sse/sse_client.dart';
+import 'package:social_app/core/network/sse/sse_event.dart';
 import 'package:social_app/features/auth/data/session/auth_token_manager.dart';
 
-/// HTTP-based [SseClient] that opens authenticated Server-Sent Events
+/// HTTP-based Server-Sent Events client that opens authenticated
 /// subscriptions against the backend API.
-class HttpSseClient implements SseClient {
+class HttpSseClient {
   /// Creates an [HttpSseClient].
   const HttpSseClient({
     required String baseUrl,
@@ -19,7 +19,7 @@ class HttpSseClient implements SseClient {
   final String _baseUrl;
   final AuthTokenManager _authTokenManager;
 
-  @override
+  /// Opens the authenticated SSE stream exposed by the backend [path].
   Stream<SseEvent> connect(String path) {
     late final StreamController<SseEvent> controller;
     HttpClient? httpClient;

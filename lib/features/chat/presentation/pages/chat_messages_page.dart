@@ -6,8 +6,9 @@ import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_message_list/chat_message_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
 
 /// A chat messages page widget.
@@ -77,7 +78,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     }
 
     return Expanded(
-      child: BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
+      child: BlocBuilder<ChatMessagesBloc, ChatMessageListState>(
         builder: (context, chatMessagesState) {
           return _buildChatMessagesList(
             context,
@@ -92,7 +93,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   Widget _buildChatMessagesList(
     BuildContext context,
     ChatSessionLoaded chatEditorState,
-    ChatMessagesState chatMessagesState,
+    ChatMessageListState chatMessagesState,
   ) {
     return ListView.builder(
       reverse: true,
@@ -100,7 +101,6 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       itemCount: _messageItemCount(chatMessagesState),
       itemBuilder: (context, index) {
         return _buildChatMessageListItem(
-          chatEditorState,
           chatMessagesState,
           index,
         );
@@ -109,8 +109,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   Widget _buildChatMessageListItem(
-    ChatSessionLoaded chatEditorState,
-    ChatMessagesState chatMessagesState,
+    ChatMessageListState chatMessagesState,
     int index,
   ) {
     if (index == chatMessagesState.chatMessages.length) {
@@ -125,8 +124,8 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
           _buildDateSeparator(currentChatMessage.createdAt),
         ChatMessageCard(
           chatMessage: currentChatMessage,
-          authorName: _authorName(chatEditorState, currentChatMessage.authorId),
-          isMe: currentChatMessage.authorId == _currentUser.id,
+          authorName: _authorName(currentChatMessage),
+          isMe: currentChatMessage.author?.id == _currentUser.id,
         ),
       ],
     );
@@ -145,21 +144,18 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  int _messageItemCount(ChatMessagesState chatMessagesState) {
-    return chatMessagesState.chatMessages.length ==
-            chatMessagesState.totalChatMessagesInDatabase
+  int _messageItemCount(ChatMessageListState chatMessagesState) {
+    return chatMessagesState.nextCursor == null
         ? chatMessagesState.chatMessages.length
         : chatMessagesState.chatMessages.length + 1;
   }
 
-  String _authorName(ChatSessionLoaded chatEditorState, String authorId) {
-    return chatEditorState.chatMembers
-        .firstWhere((member) => member.id == authorId)
-        .name;
+  String _authorName(ChatMessage chatMessage) {
+    return chatMessage.author?.name ?? 'Unknown user';
   }
 
   bool _shouldShowDateSeparator(
-    ChatMessagesState chatMessagesState,
+    ChatMessageListState chatMessagesState,
     int index,
   ) {
     if (index == chatMessagesState.chatMessages.length - 1) {
@@ -232,8 +228,9 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       return serviceLocator<ChatMessagesBloc>();
     }
 
-    return serviceLocator<ChatMessagesBloc>()
-      ..add(LoadInitialChatMessagesPage(chatEditorState.chatId));
+    return serviceLocator<ChatMessagesBloc>()..add(
+      LoadInitialChatMessageListSlice(chatEditorState.chatId),
+    );
   }
 
   void _loadInitialChatMessagesPage(
@@ -242,7 +239,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   ) {
     if (state is ChatSessionLoaded) {
       context.read<ChatMessagesBloc>().add(
-        LoadInitialChatMessagesPage(state.chatId),
+        LoadInitialChatMessageListSlice(state.chatId),
       );
     }
   }

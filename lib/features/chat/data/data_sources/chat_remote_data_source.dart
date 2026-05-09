@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:social_app/app/network/http_sse_client.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
-import 'package:social_app/core/network/sse/sse_client.dart';
 import 'package:social_app/features/chat/data/models/common/chat_model.dart';
 import 'package:social_app/features/chat/data/models/events/chat_list_event_model.dart';
 import 'package:social_app/features/chat/data/models/events/chat_message_list_event_model.dart';
@@ -67,12 +67,12 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   /// Creates a [ChatRemoteDataSourceImpl].
   const ChatRemoteDataSourceImpl({
     required Dio dio,
-    required SseClient sseClient,
+    required HttpSseClient sseClient,
   }) : _dio = dio,
        _sseClient = sseClient;
 
   final Dio _dio;
-  final SseClient _sseClient;
+  final HttpSseClient _sseClient;
 
   @override
   Future<ChatCandidateListSliceModel> getChatCandidateListSlice({

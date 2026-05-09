@@ -2,9 +2,9 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
 import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 

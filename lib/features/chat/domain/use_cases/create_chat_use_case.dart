@@ -5,9 +5,9 @@ import 'package:social_app/features/chat/domain/repositories/chat_repository.dar
 import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
 /// Validates chat creation input and delegates the write to the repository.
-class CreateChat implements UseCase<ChatWriteResult, CreateChatParams> {
-  /// Creates a [CreateChat].
-  CreateChat({required ChatRepository chatRepository})
+class CreateChatUseCase implements UseCase<ChatWriteResult, CreateChatParams> {
+  /// Creates a [CreateChatUseCase].
+  CreateChatUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to create chats.

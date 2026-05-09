@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
@@ -31,7 +32,7 @@ class BlogListBloc extends Bloc<BlogListEvent, BlogListState> {
        ) {
     _addListenerToScrollController();
     on<LoadInitialList>(_onLoadInitialList);
-    on<LoadMoreList>(_onLoadMoreList);
+    on<LoadMoreList>(_onLoadMoreList, transformer: droppable());
     on<RefreshList>(_onRefreshList);
     on<PrependCreatedBlog>(_onPrependCreatedBlog);
     on<_InitialListSliceReceived>(_onInitialListSliceReceived);
@@ -144,10 +145,6 @@ class BlogListBloc extends Bloc<BlogListEvent, BlogListState> {
     LoadMoreList event,
     Emitter<BlogListState> emit,
   ) async {
-    if (state is BlogListLoading) {
-      return;
-    }
-
     final cursor = state.nextCursor;
     if (cursor == null) {
       return;

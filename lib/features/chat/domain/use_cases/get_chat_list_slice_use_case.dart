@@ -5,10 +5,10 @@ import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart'
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Loads one cursor-based slice of the chat list.
-class GetChatListSlice
+class GetChatListSliceUseCase
     implements UseCase<ChatListSlice, GetChatListSliceParams> {
-  /// Creates a [GetChatListSlice].
-  GetChatListSlice({required ChatRepository chatRepository})
+  /// Creates a [GetChatListSliceUseCase].
+  GetChatListSliceUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to load chat-list data.

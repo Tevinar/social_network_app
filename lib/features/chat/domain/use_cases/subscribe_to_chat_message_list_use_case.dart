@@ -5,14 +5,14 @@ import 'package:social_app/features/chat/domain/events/chat_message_change.dart'
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 
 /// Subscribes to live chat-message events for one chat.
-class SubscribeToChatMessageList
+class SubscribeToChatMessageListUseCase
     implements
         StreamUseCase<
           Either<Failure, ChatMessageListChange>,
           SubscribeToChatMessageListParams
         > {
-  /// Creates a [SubscribeToChatMessageList].
-  SubscribeToChatMessageList({required ChatRepository chatRepository})
+  /// Creates a [SubscribeToChatMessageListUseCase].
+  SubscribeToChatMessageListUseCase({required ChatRepository chatRepository})
     : _chatRepository = chatRepository;
 
   /// Repository used to observe chat-message events.

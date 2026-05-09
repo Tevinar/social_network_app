@@ -149,12 +149,6 @@ void _initBlog() {
     ..registerLazySingleton<BlogLocalDataSource>(
       () => BlogLocalDataSourceDriftImpl(database: serviceLocator()),
     )
-    ..registerLazySingleton<SseClient>(
-      () => HttpSseClient(
-        baseUrl: Env.backendBaseUrl,
-        authTokenManager: serviceLocator(),
-      ),
-    )
     ..registerLazySingleton<BlogRemoteDataSource>(
       () => BlogRemoteDataSourceImpl(
         dio: serviceLocator(instanceName: 'authedDio'),
@@ -205,6 +199,12 @@ void _initBlog() {
 void _initChat() {
   serviceLocator
     // Datasources
+    ..registerLazySingleton(
+      () => HttpSseClient(
+        baseUrl: Env.backendBaseUrl,
+        authTokenManager: serviceLocator(),
+      ),
+    )
     ..registerLazySingleton<ChatRemoteDataSource>(
       () => ChatRemoteDataSourceImpl(
         dio: serviceLocator(instanceName: 'authedDio'),
@@ -216,39 +216,29 @@ void _initChat() {
       () => ChatRepositoryImpl(chatRemoteDataSource: serviceLocator()),
     )
     // Usecases
-    ..registerLazySingleton(() => CreateChat(chatRepository: serviceLocator()))
     ..registerLazySingleton(
-      () => GetUsersPage(chatRepository: serviceLocator()),
+      () => CreateChatUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetUsersCount(chatRepository: serviceLocator()),
+      () => GetChatListSliceUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatsCount(chatRepository: serviceLocator()),
+      () => GetChatMessageListSliceUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatsPage(chatRepository: serviceLocator()),
+      () => CreateChatMessageUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatMessagesPage(chatRepository: serviceLocator()),
+      () => GetChatByMembersUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatMessagesCount(chatRepository: serviceLocator()),
+      () => GetChatCandidateListSliceUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => CreateChatMessage(chatRepository: serviceLocator()),
+      () => SubscribeToChatListUseCase(chatRepository: serviceLocator()),
     )
     ..registerLazySingleton(
-      () => GetChatByMembers(chatRepository: serviceLocator()),
-    )
-    ..registerLazySingleton(
-      () => GetChatCandidateListSlice(chatRepository: serviceLocator()),
-    )
-    ..registerLazySingleton(
-      () => SubscribeToChatList(chatRepository: serviceLocator()),
-    )
-    ..registerLazySingleton(
-      () => SubscribeToChatMessageList(chatRepository: serviceLocator()),
+      () => SubscribeToChatMessageListUseCase(chatRepository: serviceLocator()),
     )
     // BLoC
     ..registerLazySingleton(
@@ -263,16 +253,14 @@ void _initChat() {
       ),
     )
     ..registerLazySingleton(
-      () => ChatsBloc(
-        getChatsPage: serviceLocator(),
-        getChatsCount: serviceLocator(),
+      () => ChatListBloc(
+        getChatListSlice: serviceLocator(),
         subscribeToChatList: serviceLocator(),
       ),
     )
     ..registerFactory(
       () => ChatMessagesBloc(
-        getChatMessagesPage: serviceLocator(),
-        getChatMessagesCount: serviceLocator(),
+        getChatMessageListSlice: serviceLocator(),
         subscribeToChatMessageList: serviceLocator(),
         createChatMessage: serviceLocator(),
       ),

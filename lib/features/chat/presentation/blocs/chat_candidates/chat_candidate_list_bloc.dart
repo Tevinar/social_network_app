@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
 import 'package:social_app/features/chat/domain/pagination/chat_candidate_list_slice.dart';
-import 'package:social_app/features/chat/domain/usecases/get_chat_candidate_list_slice.dart';
+import 'package:social_app/features/chat/domain/use_cases/get_chat_candidate_list_slice_use_case.dart';
 
 part 'chat_candidate_list_event.dart';
 part 'chat_candidate_list_state.dart';
@@ -14,7 +15,7 @@ class ChatCandidateListBloc
     extends Bloc<ChatCandidateListEvent, ChatCandidateListState> {
   /// Creates a [ChatCandidateListBloc].
   ChatCandidateListBloc({
-    required GetChatCandidateListSlice getChatCandidateListSlice,
+    required GetChatCandidateListSliceUseCase getChatCandidateListSlice,
   }) : _getChatCandidateListSlice = getChatCandidateListSlice,
        super(
          const ChatCandidateListLoading(
@@ -23,14 +24,17 @@ class ChatCandidateListBloc
          ),
        ) {
     _addListenerToScrollController();
-    on<LoadChatCandidateListNextSlice>(_onLoadChatCandidateListNextSlice);
-    add(LoadChatCandidateListNextSlice());
+    on<LoadChatCandidateListNextSlice>(
+      _onLoadChatCandidateListNextSlice,
+      transformer: droppable(),
+    );
+    add(const LoadChatCandidateListNextSlice());
   }
 
   static const int _pageSize = 20;
 
   final ScrollController _scrollController = ScrollController();
-  final GetChatCandidateListSlice _getChatCandidateListSlice;
+  final GetChatCandidateListSliceUseCase _getChatCandidateListSlice;
 
   @override
   Future<void> close() async {
@@ -46,7 +50,7 @@ class ChatCandidateListBloc
       if (_scrollController.offset >=
               _scrollController.position.maxScrollExtent - 200 &&
           !_scrollController.position.outOfRange) {
-        add(LoadChatCandidateListNextSlice());
+        add(const LoadChatCandidateListNextSlice());
       }
     });
   }
@@ -55,12 +59,6 @@ class ChatCandidateListBloc
     LoadChatCandidateListNextSlice event,
     Emitter<ChatCandidateListState> emit,
   ) async {
-    // Allow the initial empty loading state to fetch its first slice, but
-    // ignore duplicate triggers while a non-empty pagination request is active.
-    if (state is ChatCandidateListLoading && state.candidates.isNotEmpty) {
-      return;
-    }
-
     // Stop pagination once the backend has no next cursor for additional data.
     if (state.candidates.isNotEmpty && state.nextCursor == null) {
       return;

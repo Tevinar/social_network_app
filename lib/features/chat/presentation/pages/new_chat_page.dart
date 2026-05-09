@@ -6,7 +6,7 @@ import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_candidate_list/chat_candidate_list_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidate_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
 /// A new chat page widget.
@@ -54,7 +54,10 @@ class _NewChatPageState extends State<NewChatPage> {
     return _buildUsersList(context, state);
   }
 
-  Widget _buildUsersList(BuildContext context, ChatCandidateListState state) {
+  Widget _buildUsersList(
+    BuildContext context,
+    ChatCandidateListState state,
+  ) {
     return ListView.builder(
       controller: context.read<ChatCandidateListBloc>().scrollController,
       itemCount: _userItemCount(state),

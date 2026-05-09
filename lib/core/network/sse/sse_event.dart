@@ -1,12 +1,4 @@
-import 'dart:async';
-
-/// Client abstraction for opening Server-Sent Events streams.
-abstract interface class SseClient {
-  /// Connects to the SSE endpoint identified by [path].
-  Stream<SseEvent> connect(String path);
-}
-
-/// One parsed event frame emitted by an [SseClient].
+/// One parsed Server-Sent Events frame.
 class SseEvent {
   /// Creates an [SseEvent].
   const SseEvent({

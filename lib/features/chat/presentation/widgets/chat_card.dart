@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/app/cubits/app_user_cubit.dart';
+import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
@@ -33,6 +33,10 @@ class ChatCard extends StatelessWidget {
   @override
   /// The build.
   Widget build(BuildContext context) {
+    final lastMessage = chat.lastMessage;
+    final lastMessageTimestamp = lastMessage?.createdAt;
+    final lastMessagePreview = lastMessage?.content ?? 'No messages yet';
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
@@ -61,15 +65,17 @@ class ChatCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        isSameDay(chat.lastMessage.updatedAt, DateTime.now())
-                            ? formatToHour(chat.lastMessage.updatedAt)
-                            : formatToDay(chat.lastMessage.updatedAt),
+                        lastMessageTimestamp == null
+                            ? ''
+                            : isSameDay(lastMessageTimestamp, DateTime.now())
+                            ? formatToHour(lastMessageTimestamp)
+                            : formatToDay(lastMessageTimestamp),
                       ),
                     ],
                   ),
 
                   Text(
-                    chat.lastMessage.content,
+                    lastMessagePreview,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppPallete.greyColor,
                       overflow: TextOverflow.ellipsis,

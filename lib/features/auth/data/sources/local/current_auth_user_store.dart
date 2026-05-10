@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:social_app/core/local_database/app_database.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 
@@ -44,6 +45,7 @@ class DriftCurrentAuthUserStore implements CurrentAuthUserStore {
         .into(_database.currentAuthUsers)
         .insertOnConflictUpdate(
           CurrentAuthUsersCompanion.insert(
+            singletonKey: const Value(0),
             id: user.id,
             email: user.email,
             name: user.name,

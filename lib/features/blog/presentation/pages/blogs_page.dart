@@ -124,10 +124,22 @@ class BlogsPage extends StatelessWidget {
   }
 
   Widget _buildBlogsList(BuildContext context, BlogListState state) {
+    if (state.blogs.isEmpty) {
+      return _buildEmptyState(context);
+    }
     return ListView.builder(
       controller: context.read<BlogListBloc>().scrollController,
       itemCount: _itemCount(state),
       itemBuilder: (context, index) => _buildBlogListItem(state, index),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Text(
+        'There are no blogs to display. Start a new one!',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
     );
   }
 

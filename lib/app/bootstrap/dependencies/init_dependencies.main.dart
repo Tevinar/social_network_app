@@ -5,36 +5,7 @@ final GetIt serviceLocator = GetIt.instance;
 
 /// The init dependencies.
 Future<void> initDependencies() async {
-  serviceLocator
-    ..registerLazySingleton<Dio>(
-      () => Dio(
-        BaseOptions(
-          baseUrl: Env.backendBaseUrl,
-          headers: {'content-type': 'application/json'},
-        ),
-      ),
-      instanceName: 'publicDio',
-    )
-    ..registerLazySingleton<Dio>(
-      () {
-        final dio = Dio(
-          BaseOptions(
-            baseUrl: Env.backendBaseUrl,
-            headers: {'content-type': 'application/json'},
-          ),
-        );
-
-        dio.interceptors.add(
-          AuthDioInterceptor(
-            dio: dio,
-            authTokenManager: serviceLocator(),
-          ),
-        );
-
-        return dio;
-      },
-      instanceName: 'authedDio',
-    );
+  _initDio();
 
   // app
   _initApp();
@@ -46,6 +17,66 @@ Future<void> initDependencies() async {
   _initAuth();
   _initBlog();
   _initChat();
+}
+
+/// Registers the application's HTTP clients.
+///
+/// We keep two separate `Dio` instances:
+/// - `publicDio` for requests that must not require an access token
+/// - `authedDio` for requests that automatically attach and refresh auth
+///   credentials
+///
+/// The authenticated client also accepts the local self-signed certificate in
+/// debug mode so simulator traffic can follow backend redirects to the local
+/// HTTPS asset host during development.
+void _initDio() {
+  serviceLocator
+    // Public client used for unauthenticated endpoints such as sign-in,
+    // sign-up, and token refresh.
+    ..registerLazySingleton<Dio>(
+      () => Dio(
+        BaseOptions(
+          baseUrl: Env.backendBaseUrl,
+          headers: {'content-type': 'application/json'},
+        ),
+      ),
+      instanceName: 'publicDio',
+    )
+    // Authenticated client used by protected feature APIs.
+    ..registerLazySingleton<Dio>(
+      () {
+        final dio = Dio(
+          BaseOptions(
+            baseUrl: Env.backendBaseUrl,
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+
+        // Attach bearer tokens to outgoing requests and retry once after an
+        // auth refresh when the backend reports an expired session.
+        dio.interceptors.add(
+          AuthDioInterceptor(
+            dio: dio,
+            authTokenManager: serviceLocator(),
+          ),
+        );
+
+        // The blog image endpoint redirects to a local HTTPS asset host in
+        // development. iOS simulator requests will fail that redirect unless
+        // the local self-signed certificate is explicitly accepted.
+        (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+          final client = HttpClient()
+            ..badCertificateCallback = (cert, host, port) {
+              // Restrict this exception to local development hosts only.
+              return kDebugMode && (host == '127.0.0.1' || host == 'localhost');
+            };
+          return client;
+        };
+
+        return dio;
+      },
+      instanceName: 'authedDio',
+    );
 }
 
 void _initApp() {
@@ -68,11 +99,14 @@ void _initCore() {
   // Connection checker
   serviceLocator
     ..registerLazySingleton(AppDatabase.new)
-    ..registerLazySingleton(InternetConnection.new)
-    ..registerLazySingleton<ConnectionChecker>(
-      () => ConnectionCheckerImpl(internetConnection: serviceLocator()),
+    ..registerLazySingleton(
+      () => DioHttpDownloader(serviceLocator(instanceName: 'authedDio')),
     )
-    ..registerLazySingleton<ImageFileCache>(ImageFileCacheImpl.new);
+    ..registerLazySingleton<ImageFileCache>(
+      () => ImageFileCacheImpl(
+        dioHttpDownloader: serviceLocator(),
+      ),
+    );
 }
 
 void _initAuth() {

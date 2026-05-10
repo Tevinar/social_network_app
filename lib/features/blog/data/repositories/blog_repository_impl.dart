@@ -47,7 +47,7 @@ class BlogRepositoryImpl implements BlogRepository {
         title: title,
         content: content,
         image: image,
-        topics: topics.map((topic) => topic.value).toList(),
+        topics: topics.map((topic) => topic.name).toList(),
       );
 
       await blogLocalDataSource.upsertBlogs([blog]);

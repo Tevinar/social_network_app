@@ -19,11 +19,11 @@ enum BlogTopic {
   final String value;
 
   /// Creates a [BlogTopic] from a string value.
-  static BlogTopic fromValue(String value) {
+  static BlogTopic fromValue(String name) {
     return BlogTopic.values.firstWhere(
-      (topic) => topic.value == value,
+      (topic) => topic.name == name,
       orElse: () => throw FormatException(
-        'Unknown blog topic: $value',
+        'Unknown blog topic: $name',
       ),
     );
   }

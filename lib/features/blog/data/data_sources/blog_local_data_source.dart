@@ -50,7 +50,7 @@ class BlogLocalDataSourceDriftImpl implements BlogLocalDataSource {
                 content: blog.content,
                 imageUrl: blog.imageUrl,
                 topicsJson: jsonEncode(
-                  blog.topics.map((topic) => topic.value).toList(),
+                  blog.topics.map((topic) => topic.name).toList(),
                 ),
                 createdAt: blog.createdAt,
                 updatedAt: blog.updatedAt,

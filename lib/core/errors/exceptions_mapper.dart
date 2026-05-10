@@ -23,13 +23,6 @@ Future<T> guardRemoteDataSourceCall<T>(Future<T> Function() call) async {
         ? data['code'] as String? ?? statusCode?.toString()
         : statusCode?.toString();
 
-    if (statusCode == 401 || statusCode == 403) {
-      throw UnauthorizedException(
-        message: message,
-        code: code,
-      );
-    }
-
     throw ServerException(
       message: message,
       code: code,

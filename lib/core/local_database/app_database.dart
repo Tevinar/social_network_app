@@ -14,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase()
     : super(
         driftDatabase(
-          name: 'social_app.sqlite',
+          name: 'social_app',
           native: const DriftNativeOptions(),
         ),
       );

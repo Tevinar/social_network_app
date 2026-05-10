@@ -92,5 +92,79 @@ void main() {
         );
       },
     );
+
+    test(
+      'given invalid email when UserSignUp is called then returns '
+      'ValidationFailure and does not call repository',
+      () async {
+        // Arrange
+        final params = UserSignUpParams(
+          name: 'Test User',
+          email: 'invalid-email',
+          password: 'password',
+        );
+
+        // Act
+        final result = await userSignUp(params);
+
+        // Assert
+        expect(result, isA<Left<Failure, User>>());
+        result.fold(
+          (failure) => expect(
+            failure,
+            isA<ValidationFailure>().having(
+              (failure) => failure.message,
+              'message',
+              'Please enter a valid email address.',
+            ),
+          ),
+          (_) => fail('Expected a failure'),
+        );
+        verifyNever(
+          () => authRepository.signUpWithEmailPassword(
+            name: any(named: 'name'),
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'given short password when UserSignUp is called then returns '
+      'ValidationFailure and does not call repository',
+      () async {
+        // Arrange
+        final params = UserSignUpParams(
+          name: 'Test User',
+          email: 'test@test.com',
+          password: '12345',
+        );
+
+        // Act
+        final result = await userSignUp(params);
+
+        // Assert
+        expect(result, isA<Left<Failure, User>>());
+        result.fold(
+          (failure) => expect(
+            failure,
+            isA<ValidationFailure>().having(
+              (failure) => failure.message,
+              'message',
+              'Password must be at least 6 characters long.',
+            ),
+          ),
+          (_) => fail('Expected a failure'),
+        );
+        verifyNever(
+          () => authRepository.signUpWithEmailPassword(
+            name: any(named: 'name'),
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
   });
 }

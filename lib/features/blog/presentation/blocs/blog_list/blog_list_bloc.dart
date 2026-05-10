@@ -64,6 +64,8 @@ class BlogListBloc extends Bloc<BlogListEvent, BlogListState> {
 
   /// Smoothly scrolls the list back to the top.
   Future<void> scrollToTop() async {
+    if (!_scrollController.hasClients) return;
+
     await _scrollController.animateTo(
       0,
       duration: const Duration(milliseconds: 300),

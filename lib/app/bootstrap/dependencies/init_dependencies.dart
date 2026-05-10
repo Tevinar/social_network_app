@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/app/logging/app_talker_logger.dart';
 import 'package:social_app/app/logging/talker_config.dart';
@@ -11,7 +14,7 @@ import 'package:social_app/core/local_database/app_database.dart';
 import 'package:social_app/core/local_database/app_settings_store.dart';
 import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/core/network/connection_checker.dart';
+import 'package:social_app/core/network/dio_http_downloader.dart';
 import 'package:social_app/features/auth/data/network/auth_dio_interceptor.dart';
 import 'package:social_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:social_app/features/auth/data/session/auth_session_refresher.dart';

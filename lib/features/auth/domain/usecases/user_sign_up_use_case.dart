@@ -3,6 +3,7 @@ import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:social_app/features/auth/domain/usecases/auth_input_validation.dart';
 
 /// An user sign up.
 class UserSignUpUseCase implements UseCase<User, UserSignUpParams> {
@@ -14,9 +15,18 @@ class UserSignUpUseCase implements UseCase<User, UserSignUpParams> {
 
   @override
   Future<Either<Failure, User>> call(UserSignUpParams params) {
+    final email = params.email.trim();
+    final validationFailure = validateAuthEmailAndPassword(
+      email: email,
+      password: params.password,
+    );
+    if (validationFailure != null) {
+      return Future.value(left(validationFailure));
+    }
+
     return authRepository.signUpWithEmailPassword(
       name: params.name,
-      email: params.email,
+      email: email,
       password: params.password,
     );
   }

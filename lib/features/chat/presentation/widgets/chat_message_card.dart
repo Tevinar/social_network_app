@@ -5,7 +5,8 @@ import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A chat message card widget.
+/// A chat message card widget that displays a chat message in the chat messages
+/// page.
 class ChatMessageCard extends StatelessWidget {
   /// Creates a [ChatMessageCard].
   const ChatMessageCard({

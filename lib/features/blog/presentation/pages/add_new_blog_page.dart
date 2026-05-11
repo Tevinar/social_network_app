@@ -14,7 +14,7 @@ import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/blog_editor_bloc.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_editor.dart';
 
-/// A add new blog page widget.
+/// Page that allows the user to add a new blog.
 class AddNewBlogPage extends StatefulWidget {
   /// Creates a [AddNewBlogPage].
   const AddNewBlogPage({super.key});

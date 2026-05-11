@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
 
-/// A blog card placeholder.
+/// A placeholder widget for the blog card while the blog data is loading.
 class BlogCardPlaceholder extends StatelessWidget {
   /// Creates a [BlogCardPlaceholder].
   const BlogCardPlaceholder({super.key, this.color = AppPallete.greyColor});

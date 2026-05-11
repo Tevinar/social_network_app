@@ -7,7 +7,8 @@ import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A chat card widget.
+/// A chat card widget that displays a summary of a chat session in the chats
+/// page.
 class ChatCard extends StatelessWidget {
   /// Creates a [ChatCard].
   const ChatCard({required this.chat, super.key});

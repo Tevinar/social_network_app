@@ -9,7 +9,8 @@ import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart'
 import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidate_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A new chat page widget.
+/// Page that allows the user to select other users to start a new chat session
+/// with.
 class NewChatPage extends StatefulWidget {
   /// Creates a [NewChatPage].
   const NewChatPage({super.key});

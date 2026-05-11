@@ -6,7 +6,7 @@ import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/chat/presentation/blocs/chat_list/chat_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
 
-/// A chats page widget.
+/// Page that displays a list of the user's chats.
 class ChatsPage extends StatelessWidget {
   /// Creates a [ChatsPage].
   const ChatsPage({super.key});

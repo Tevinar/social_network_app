@@ -3,7 +3,7 @@ import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/ui/text/calculate_reading_time.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
 
-/// A blog card widget.
+/// A blog card widget that displays a summary of a blog in the blogs page.
 class BlogCard extends StatelessWidget {
   /// Creates a [BlogCard].
   const BlogCard({required this.blog, required this.color, super.key});

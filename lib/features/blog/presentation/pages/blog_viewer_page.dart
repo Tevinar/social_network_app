@@ -9,7 +9,7 @@ import 'package:social_app/core/ui/text/calculate_reading_time.dart';
 import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_viewer/blog_viewer_bloc.dart';
 
-/// A blog viewer page widget.
+/// Page that displays the content of a blog.
 class BlogViewerPage extends StatelessWidget {
   /// Creates a [BlogViewerPage].
   const BlogViewerPage({

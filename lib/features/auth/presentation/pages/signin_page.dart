@@ -7,7 +7,7 @@ import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:social_app/features/auth/presentation/widgets/auth_gradient_button.dart';
 
-/// A sign in page widget.
+/// Page that allows the user to sign in to their account.
 class SignInPage extends StatefulWidget {
   /// Creates a [SignInPage].
   const SignInPage({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// A auth field widget.
+/// A auth field widget that displays a text field for the user to enter their
+/// email or password in the sign in and sign up pages.
 class AuthField extends StatelessWidget {
   /// Creates a [AuthField].
   const AuthField({

@@ -11,7 +11,8 @@ import 'package:social_app/features/chat/presentation/blocs/chat_message_list/ch
 import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
 
-/// A chat messages page widget.
+/// Page that displays the messages of a chat session and allows sending new
+/// messages.
 class ChatMessagesPage extends StatefulWidget {
   /// Creates a [ChatMessagesPage].
   const ChatMessagesPage({super.key});

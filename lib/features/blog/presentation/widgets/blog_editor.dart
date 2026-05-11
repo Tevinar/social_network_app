@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A blog editor.
+/// A blog editor widget that allows the user to edit the content of a blog.
 class BlogEditor extends StatelessWidget {
   /// Creates a [BlogEditor].
   const BlogEditor({

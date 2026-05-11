@@ -15,12 +15,6 @@ The architecture is designed to provide:
 - predictable data flow
 - scalability without widespread rewrites
 
-The core organizing question for any file is:
-
-- is it a passive shared building block?
-- is it app-wide coordination?
-- is it part of a business capability?
-
 ---
 
 ## 2. Project Structure
@@ -50,9 +44,6 @@ features/
       └── presentation/
 ```
 
-This is a practical structure for clarity and growth, not an academic layering
-exercise.
-
 ---
 
 ## 3. Responsibilities by Module
@@ -67,7 +58,7 @@ Typical contents:
 
 - shared errors and low-level abstractions
 - configuration access
-- shared constants and schema names
+- shared constants
 - local database and local file storage infrastructure
 - reusable utilities
 - use case conventions
@@ -98,7 +89,6 @@ Typical contents:
 - routing and route guards
 - app shell
 - global session state
-- startup-only UX such as one-shot offline notifications
 - app-wide logging integration
 - concrete shared service implementations when they are truly global
 
@@ -141,7 +131,7 @@ Typical contents:
 
 - repository implementations
 - data sources
-- DTOs and models
+- read and persistence models
 - external persistence and API integration
 
 Must not contain:
@@ -243,14 +233,8 @@ When stale local data is still useful, the reactive flow becomes local-first:
 ### Deep-linkable page rule
 
 Pages that should support deep links, push notifications, or state restoration
-must receive primitive route parameters such as IDs, cursors, or slugs rather
-than rich domain objects.
-
-Rule:
-
-- route contracts stay stable and serializable
-- performance should come from cache-first `observe...` flows behind those
-  primitive identifiers, not from passing preloaded entities through navigation
+must receive primitive route parameters (string, integer, boolean...), rather
+than rich domain objects. That rule allows to route contracts to stay serializable.
 
 This keeps entry points consistent whether the user opens a page from in-app
 navigation, a deep link, a push notification, or a restored app session.
@@ -267,11 +251,6 @@ they are centered on:
 - `GoRouter` for navigation
 - BLoC/Cubit for state management
 - `StreamUseCase` for cache-first and other reactive feature reads
-
-Rule:
-
-- feature behavior stays inside features
-- global lifecycle, routing, and session concerns live in `app/`
 
 Current notable patterns:
 
@@ -292,7 +271,7 @@ Current notable patterns:
 Errors are handled according to their level:
 
 - infrastructure code may throw technical exceptions
-- repositories map those exceptions into safe `Failure` objects
+- repositories map those exceptions into safe `Failure` objects. Only unexpected failures are logged in production code.
 - use cases and presentation consume `Either<Failure, T>`
 - UI receives intentional, user-safe messages
 - logs may keep richer technical details than UI state
@@ -308,31 +287,7 @@ Practical rules:
 
 ---
 
-## 7. Shared Code and Cross-Cutting Concerns
-
-Shared concerns in this project include:
-
-- logging
-- configuration and environment access
-- connectivity checking
-- local persistence and disk caching
-- image picking abstraction
-- formatting and technical utilities
-- theme and small UI primitives
-
-Placement rules:
-
-- passive, feature-agnostic technical code belongs in `core/`
-- app-wide coordination belongs in `app/`
-- feature logic must stay in features, even if duplication exists
-- `core/` must not become a dumping ground
-
-An external dependency belongs in `core/` only when it supports an
-architectural convention rather than app-specific behavior.
-
----
-
-## 8. Testing Strategy
+## 7. Testing Strategy
 
 Testing should prioritize behavior over surface area.
 
@@ -352,17 +307,15 @@ Practical rules:
   priority as behavior-owning code
 
 The goal is not mechanical coverage. The goal is to test code that owns
-decisions and behavior. The current project baseline is high, but the lasting
-expectation is to preserve disciplined behavior-focused coverage and maintain at
-least a 70% overall baseline over time.
+decisions and behavior.
 
 ---
 
-## 9. Practical Conventions
+## 8. Practical Conventions
 
 Default placement rules:
 
-- DTOs and transport models live in `data/models`
+- transport and persistence models live in `data/models`
 - external system access lives in `data/data_sources`
 - repository implementations live in `data/repositories`
 - use cases live in `domain/usecases`
@@ -380,28 +333,5 @@ Additional conventions:
 
 Sharing rules:
 
-- domain entities may be shared only with clear ownership
-- feature UI, feature BLoCs, and DTOs should not be shared arbitrarily
-
----
-
-## 10. Trade-offs
-
-This architecture is intentionally pragmatic.
-
-Guiding rules:
-
-- `core/` stays passive
-- `app/` orchestrates globally
-- `features/` own business behavior
-
-Practical trade-offs:
-
-- not every operation needs its own abstraction
-- use cases are kept when they improve clarity, consistency, or ownership
-- `app/` must not become a hidden business layer
-- some cross-feature sharing is acceptable when the concept is genuinely shared
-  and ownership is explicit
-- clarity is preferred over unnecessary indirection
-
-Consistency matters, but pragmatism is allowed when justified.
+- domain layer may be shared only with clear ownership
+- presentation and data layers should not be shared arbitrarely

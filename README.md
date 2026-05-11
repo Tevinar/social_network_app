@@ -2,9 +2,6 @@
 
 A Flutter social application demo backed by a custom NestJS API.
 
-This project is designed with a structured architecture focused on
-maintainability, scalability, and clear separation of responsibilities.
-
 ## Overview
 
 Social App is a client application built with Flutter. It currently covers
@@ -18,14 +15,6 @@ The project is intended as a technical codebase organized around explicit
 architectural boundaries. It is suitable for learning and evolving a
 feature-based Flutter architecture with BLoC, dependency injection, local
 cache, and a custom HTTP backend.
-
-This project solves the need for a single codebase that combines:
-
-- session-aware navigation
-- feature isolation
-- server-pushed chat updates
-- local-first blog loading and disk-cached blog images
-- backend integration through clear infrastructure boundaries
 
 It is a mobile-first Flutter application, but the repository also includes the standard multi-platform Flutter targets.
 
@@ -71,9 +60,6 @@ The main goals of the project are:
   - test build validation
   - release build validation
   - SonarQube Analysis
-- CD: not configured yet in the repository
-- Monitoring / Observability: local logging through Talker; no remote
-  monitoring sink configured yet
 
 ### Testing Tooling
 
@@ -129,7 +115,6 @@ Main folders:
 
 - Unit tests
 - Widget tests for targeted UI behavior
-- No current automated coverage baseline for now
 
 ## Getting Started
 
@@ -264,6 +249,8 @@ Possible future improvements include:
 
 - CD automation
 - remote error monitoring / crash reporting
+- integration tests
+- automated coverage baseline
 
 ## Additional Documentation
 

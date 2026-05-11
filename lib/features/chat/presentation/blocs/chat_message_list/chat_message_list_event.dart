@@ -42,9 +42,11 @@ final class ChatMessageListChangeReceived extends ChatMessagesEvent {
   final Either<Failure, ChatMessageListChange> chatMessageChange;
 }
 
+/// Adds the first chat message locally before server-pushed sync arrives.
 class AddManuallyChatFirstMessage extends ChatMessagesEvent {
   /// Creates an [AddManuallyChatFirstMessage].
   const AddManuallyChatFirstMessage(this.chatMessage);
 
+  /// The first chat message to insert into the current message list.
   final ChatMessage chatMessage;
 }

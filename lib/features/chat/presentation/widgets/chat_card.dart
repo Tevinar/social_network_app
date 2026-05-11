@@ -66,11 +66,18 @@ class ChatCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        lastMessageTimestamp == null
-                            ? ''
-                            : isSameDay(lastMessageTimestamp, DateTime.now())
-                            ? formatToHour(lastMessageTimestamp)
-                            : formatToDay(lastMessageTimestamp),
+                        () {
+                          if (lastMessageTimestamp == null) {
+                            return '';
+                          } else {
+                            return isSameDay(
+                                  lastMessageTimestamp,
+                                  DateTime.now(),
+                                )
+                                ? formatToHour(lastMessageTimestamp)
+                                : formatToDay(lastMessageTimestamp);
+                          }
+                        }(),
                       ),
                     ],
                   ),

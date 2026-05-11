@@ -10,7 +10,7 @@ import 'package:social_app/features/auth/data/session/auth_token_manager.dart';
 /// subscriptions against the backend API.
 class HttpSseClient {
   /// Creates an [HttpSseClient].
-  const HttpSseClient({
+  HttpSseClient({
     required String baseUrl,
     required AuthTokenManager authTokenManager,
   }) : _baseUrl = baseUrl,
@@ -18,6 +18,10 @@ class HttpSseClient {
 
   final String _baseUrl;
   final AuthTokenManager _authTokenManager;
+
+  String? _eventType;
+  String? _eventId;
+  StringBuffer _dataBuffer = StringBuffer();
 
   /// Opens the authenticated SSE stream exposed by the backend [path].
   Stream<SseEvent> connect(String path) {
@@ -69,10 +73,6 @@ class HttpSseClient {
             );
           }
 
-          String? eventType;
-          String? eventId;
-          var dataBuffer = StringBuffer();
-
           // Start listening to the SSE stream, which is a stream of
           // UTF-8 encoded text lines.
           linesSubscription = response
@@ -82,62 +82,10 @@ class HttpSseClient {
               .transform(const LineSplitter())
               .listen(
                 (line) {
-                  // In SSE, a line that starts with : is a special protocol
-                  // line, not a real app event field.
-                  // These lines can be ignored. They are often used as
-                  // keep-alive events by the backend.
-                  if (line.startsWith(':')) {
-                    return;
-                  }
-
-                  // A blank line marks the end of one SSE event frame. At that
-                  // point the buffered `data:` lines can be decoded and
-                  // emitted.
-                  if (line.isEmpty) {
-                    if (dataBuffer.isEmpty) {
-                      eventType = null;
-                      eventId = null;
-                      return;
-                    }
-
-                    final decoded =
-                        jsonDecode(dataBuffer.toString())
-                            as Map<String, dynamic>;
-
-                    controller.add(
-                      SseEvent(
-                        type: eventType,
-                        id: eventId,
-                        data: decoded,
-                      ),
-                    );
-
-                    eventType = null;
-                    eventId = null;
-                    dataBuffer = StringBuffer();
-                    return;
-                  }
-
-                  // `event:` provides the event name used by the backend.
-                  if (line.startsWith('event:')) {
-                    eventType = line.substring('event:'.length).trim();
-                    return;
-                  }
-
-                  // `id:` carries the optional SSE event identifier.
-                  if (line.startsWith('id:')) {
-                    eventId = line.substring('id:'.length).trim();
-                    return;
-                  }
-
-                  // `data:` carries the JSON payload. Multiple `data:` lines
-                  // belong to the same event and must be concatenated.
-                  if (line.startsWith('data:')) {
-                    if (dataBuffer.isNotEmpty) {
-                      dataBuffer.write('\n');
-                    }
-                    dataBuffer.write(line.substring('data:'.length).trim());
-                  }
+                  _processSseLine(
+                    line,
+                    controller,
+                  );
                 },
                 onError: controller.addError,
                 onDone: controller.close,
@@ -156,5 +104,66 @@ class HttpSseClient {
     );
 
     return controller.stream;
+  }
+
+  void _processSseLine(
+    String line,
+    StreamController<SseEvent> controller,
+  ) {
+    // In SSE, a line that starts with : is a special protocol
+    // line, not a real app event field.
+    // These lines can be ignored. They are often used as
+    // keep-alive events by the backend.
+    if (line.startsWith(':')) {
+      return;
+    }
+
+    // A blank line marks the end of one SSE event frame. At that
+    // point the buffered `data:` lines can be decoded and
+    // emitted.
+    if (line.isEmpty) {
+      if (_dataBuffer.isEmpty) {
+        _eventType = null;
+        _eventId = null;
+        return;
+      }
+
+      final decoded =
+          jsonDecode(_dataBuffer.toString()) as Map<String, dynamic>;
+
+      controller.add(
+        SseEvent(
+          type: _eventType,
+          id: _eventId,
+          data: decoded,
+        ),
+      );
+
+      _eventType = null;
+      _eventId = null;
+      _dataBuffer = StringBuffer();
+      return;
+    }
+
+    // `event:` provides the event name used by the backend.
+    if (line.startsWith('event:')) {
+      _eventType = line.substring('event:'.length).trim();
+      return;
+    }
+
+    // `id:` carries the optional SSE event identifier.
+    if (line.startsWith('id:')) {
+      _eventId = line.substring('id:'.length).trim();
+      return;
+    }
+
+    // `data:` carries the JSON payload. Multiple `data:` lines
+    // belong to the same event and must be concatenated.
+    if (line.startsWith('data:')) {
+      if (_dataBuffer.isNotEmpty) {
+        _dataBuffer.write('\n');
+      }
+      _dataBuffer.write(line.substring('data:'.length).trim());
+    }
   }
 }

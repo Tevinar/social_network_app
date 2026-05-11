@@ -14,6 +14,8 @@
     "**/lib/core/usecases/**",
     "**/lib/core/utils/stream_to_listenable.dart",
     "**/lib/core/widgets/**",
+    "**/lib/features/blog/**",
+    "**/lib/features/chat/**",
   ],
   "sonarlint.connectedMode.project": {
     "connectionId": "tevinar-sonarqube-cloud",

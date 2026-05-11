@@ -161,6 +161,14 @@ flutter run --dart-define=BACKEND_BASE_URL=http://localhost:3000
 
 If omitted, the app defaults to `http://localhost:3000`.
 
+When running the app on the Android emulator against a backend on your
+development machine, you can keep `http://localhost:3000` by forwarding the
+port with:
+
+```sh
+adb reverse tcp:3000 tcp:3000
+```
+
 The client expects the backend to expose:
 
 - authentication

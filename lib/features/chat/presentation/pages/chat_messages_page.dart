@@ -143,9 +143,11 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   int _messageItemCount(ChatMessageListState chatMessagesState) {
-    return chatMessagesState.nextCursor == null
-        ? chatMessagesState.chatMessages.length
-        : chatMessagesState.chatMessages.length + 1;
+    final isLoadingMore =
+        chatMessagesState is ChatMessageListLoading &&
+        chatMessagesState.chatMessages.isNotEmpty;
+
+    return chatMessagesState.chatMessages.length + (isLoadingMore ? 1 : 0);
   }
 
   String _authorName(ChatMessage chatMessage) {

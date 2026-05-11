@@ -69,9 +69,9 @@ class ChatsPage extends StatelessWidget {
   }
 
   int _chatItemCount(ChatListState state) {
-    return state.nextCursor == null
-        ? state.chats.length
-        : state.chats.length + 1;
+    final isLoadingMore = state is ChatListLoading && state.chats.isNotEmpty;
+
+    return state.chats.length + (isLoadingMore ? 1 : 0);
   }
 
   Widget _buildNewChatButton(BuildContext context) {

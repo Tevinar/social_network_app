@@ -42,8 +42,16 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: _createChatMessagesBloc,
-      child: BlocConsumer<ChatEditorBloc, ChatSessionState>(
-        listener: _loadInitialChatMessagesPage,
+      child: BlocConsumer<ChatSessionBloc, ChatSessionState>(
+        listener: (context, state) {
+          // This listener is needed to add the first message to the chat
+          // message list after creating the chat session
+          if (state is ChatSessionNewlyCreated) {
+            context.read<ChatMessagesBloc>().add(
+              AddManuallyChatFirstMessage(state.chatFirstMessage),
+            );
+          }
+        },
         builder: _buildPage,
       ),
     );
@@ -57,7 +65,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       body: Column(
         children: [
           _buildMessagesSection(chatEditorState),
-          BlocBuilder<ChatEditorBloc, ChatSessionState>(
+          BlocBuilder<ChatSessionBloc, ChatSessionState>(
             builder: _buildComposer,
           ),
         ],
@@ -73,38 +81,27 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   Widget _buildMessagesSection(ChatSessionState chatEditorState) {
-    if (chatEditorState is! ChatSessionLoaded) {
+    if (chatEditorState is! ChatSessionLoaded &&
+        chatEditorState is! ChatSessionNewlyCreated) {
       return const Expanded(child: SizedBox());
     }
 
     return Expanded(
       child: BlocBuilder<ChatMessagesBloc, ChatMessageListState>(
         builder: (context, chatMessagesState) {
-          return _buildChatMessagesList(
-            context,
-            chatEditorState,
-            chatMessagesState,
+          return ListView.builder(
+            reverse: true,
+            controller: context.read<ChatMessagesBloc>().scrollController,
+            itemCount: _messageItemCount(chatMessagesState),
+            itemBuilder: (context, index) {
+              return _buildChatMessageListItem(
+                chatMessagesState,
+                index,
+              );
+            },
           );
         },
       ),
-    );
-  }
-
-  Widget _buildChatMessagesList(
-    BuildContext context,
-    ChatSessionLoaded chatEditorState,
-    ChatMessageListState chatMessagesState,
-  ) {
-    return ListView.builder(
-      reverse: true,
-      controller: context.read<ChatMessagesBloc>().scrollController,
-      itemCount: _messageItemCount(chatMessagesState),
-      itemBuilder: (context, index) {
-        return _buildChatMessageListItem(
-          chatMessagesState,
-          index,
-        );
-      },
     );
   }
 
@@ -222,26 +219,20 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   ChatMessagesBloc _createChatMessagesBloc(BuildContext context) {
-    final chatEditorState = context.read<ChatEditorBloc>().state;
+    final chatSessionState = context.read<ChatSessionBloc>().state;
 
-    if (chatEditorState is! ChatSessionLoaded) {
+    // This case is relevant when coming from the chat creation flow, where the
+    // chat session is created in parallel with the first message, so the chat
+    // session is not yet loaded when opening the chat
+    if (chatSessionState is! ChatSessionLoaded) {
       return serviceLocator<ChatMessagesBloc>();
     }
 
+    // This case is relevant when coming from the chats list, where the chat
+    // session is already loaded when opening the chat
     return serviceLocator<ChatMessagesBloc>()..add(
-      LoadInitialChatMessageListSlice(chatEditorState.chatId),
+      LoadInitialChatMessageListSlice(chatSessionState.chatId),
     );
-  }
-
-  void _loadInitialChatMessagesPage(
-    BuildContext context,
-    ChatSessionState state,
-  ) {
-    if (state is ChatSessionLoaded) {
-      context.read<ChatMessagesBloc>().add(
-        LoadInitialChatMessageListSlice(state.chatId),
-      );
-    }
   }
 
   void _sendMessage(BuildContext context, ChatSessionState state) {
@@ -275,7 +266,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   void _sendFirstChatMessage(BuildContext context, String messageText) {
-    context.read<ChatEditorBloc>().add(
+    context.read<ChatSessionBloc>().add(
       AddChatFirstMessage(firstMessageContent: messageText),
     );
     _messageController.clear();

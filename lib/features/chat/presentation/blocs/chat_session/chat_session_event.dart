@@ -7,10 +7,10 @@ sealed class ChatSessionEvent {}
 /// Requests resolving an existing chat or starting a new one.
 class AddChat extends ChatSessionEvent {
   /// Creates an [AddChat].
-  AddChat({required this.chatMemberIds});
+  AddChat({required this.chatMembers});
 
-  /// Ids from the users that should participate in the session.
-  final List<String> chatMemberIds;
+  /// Members to include in the new chat
+  final List<ChatUserSummary> chatMembers;
 }
 
 /// Requests creation of the first message for a new chat session.

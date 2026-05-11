@@ -57,7 +57,7 @@ class ChatMessageCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!isMe &&
-                      context.read<ChatEditorBloc>().state.chatMembers.length >
+                      context.read<ChatSessionBloc>().state.chatMembers.length >
                           2)
                     Text(
                       authorName,

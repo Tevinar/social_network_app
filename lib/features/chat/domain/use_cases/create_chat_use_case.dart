@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
+import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
@@ -17,6 +18,9 @@ class CreateChatUseCase implements UseCase<ChatWriteResult, CreateChatParams> {
   /// Validates the first message and selected members, then creates the chat.
   Future<Either<Failure, ChatWriteResult>> call(CreateChatParams params) {
     if (params.memberIds.isEmpty) {
+      appLogger.debug(
+        'Validation failed in CreateChatUseCase: no members selected',
+      );
       return Future.value(
         left(
           const ValidationFailure('At least one chat member must be selected'),
@@ -24,6 +28,10 @@ class CreateChatUseCase implements UseCase<ChatWriteResult, CreateChatParams> {
       );
     }
     if (params.firstMessageContent.trim().isEmpty) {
+      appLogger.debug(
+        'Validation failed in CreateChatUseCase: first message content is '
+        'empty',
+      );
       return Future.value(
         left(const ValidationFailure('First message content cannot be empty')),
       );

@@ -41,3 +41,10 @@ final class ChatMessageListChangeReceived extends ChatMessagesEvent {
   /// The chat-message change payload.
   final Either<Failure, ChatMessageListChange> chatMessageChange;
 }
+
+class AddManuallyChatFirstMessage extends ChatMessagesEvent {
+  /// Creates an [AddManuallyChatFirstMessage].
+  const AddManuallyChatFirstMessage(this.chatMessage);
+
+  final ChatMessage chatMessage;
+}

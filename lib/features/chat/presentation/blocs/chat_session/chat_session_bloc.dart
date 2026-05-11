@@ -8,10 +8,10 @@ import 'package:social_app/features/chat/domain/use_cases/get_chat_by_members_us
 part 'chat_session_event.dart';
 part 'chat_session_state.dart';
 
-/// A chat editor bloc.
-class ChatEditorBloc extends Bloc<ChatSessionEvent, ChatSessionState> {
-  /// Creates a [ChatEditorBloc].
-  ChatEditorBloc({
+/// Bloc handling the chat session flow (selection, creation)
+class ChatSessionBloc extends Bloc<ChatSessionEvent, ChatSessionState> {
+  /// Creates a [ChatSessionBloc].
+  ChatSessionBloc({
     required CreateChatUseCase createChat,
     required GetChatByMembersUseCase getChatByMembers,
   }) : _createChat = createChat,
@@ -27,9 +27,11 @@ class ChatEditorBloc extends Bloc<ChatSessionEvent, ChatSessionState> {
   /// When no chat exists yet, wait for the first backend message.
   /// If one already exists, navigate directly to the chat page.
   Future<void> _onAddChat(AddChat event, Emitter<ChatSessionState> emit) async {
-    emit(ChatSessionLoading(chatMembers: state.chatMembers));
+    emit(ChatSessionLoading(chatMembers: event.chatMembers));
     final res = await _getChatByMembers.call(
-      GetChatByMembersParams(memberIds: event.chatMemberIds),
+      GetChatByMembersParams(
+        memberIds: event.chatMembers.map((m) => m.id).toList(),
+      ),
     );
 
     res.fold(

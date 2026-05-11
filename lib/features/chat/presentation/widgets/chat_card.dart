@@ -40,7 +40,7 @@ class ChatCard extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
-        context.read<ChatEditorBloc>().add(
+        context.read<ChatSessionBloc>().add(
           SelectChat(chatId: chat.id, chatMembers: chat.members),
         );
         await const ChatMessagesPageRoute().push<void>(context);

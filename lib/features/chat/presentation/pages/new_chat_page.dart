@@ -126,7 +126,7 @@ class _NewChatPageState extends State<NewChatPage> {
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: BlocConsumer<ChatEditorBloc, ChatSessionState>(
+      child: BlocConsumer<ChatSessionBloc, ChatSessionState>(
         listener: _onChatEditorStateChanged,
         builder: _buildCreateChatButton,
       ),
@@ -193,12 +193,8 @@ class _NewChatPageState extends State<NewChatPage> {
       return;
     }
 
-    context.read<ChatEditorBloc>().add(
-      AddChat(chatMemberIds: _chatMemberIdsForCreation()),
+    context.read<ChatSessionBloc>().add(
+      AddChat(chatMembers: _selectedUsers),
     );
-  }
-
-  List<String> _chatMemberIdsForCreation() {
-    return _selectedUsers.map((user) => user.id).toList();
   }
 }

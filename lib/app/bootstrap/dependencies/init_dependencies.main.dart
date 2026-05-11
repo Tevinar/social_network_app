@@ -276,7 +276,7 @@ void _initChat() {
     )
     // BLoC
     ..registerLazySingleton(
-      () => ChatEditorBloc(
+      () => ChatSessionBloc(
         createChat: serviceLocator(),
         getChatByMembers: serviceLocator(),
       ),

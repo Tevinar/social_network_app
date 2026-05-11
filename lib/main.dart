@@ -42,7 +42,7 @@ void main() async {
                 BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
                 BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
                 BlocProvider(create: (_) => serviceLocator<BlogEditorBloc>()),
-                BlocProvider(create: (_) => serviceLocator<ChatEditorBloc>()),
+                BlocProvider(create: (_) => serviceLocator<ChatSessionBloc>()),
                 BlocProvider(
                   create: (_) => serviceLocator<ChatCandidateListBloc>(),
                 ),

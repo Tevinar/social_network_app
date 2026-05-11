@@ -39,6 +39,7 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessageListState> {
     on<ChatMessageListChangeReceived>(_onChatMessageChangeReceived);
     on<LoadInitialChatMessageListSlice>(_onLoadInitialChatMessagesPage);
     on<AddChatMessage>(_onAddChatMessage);
+    on<AddManuallyChatFirstMessage>(_onAddManuallyChatFirstMessage);
 
     _addListenerToScrollController();
   }
@@ -254,5 +255,18 @@ class ChatMessagesBloc extends Bloc<ChatMessagesEvent, ChatMessageListState> {
       chatMessage,
       ...state.chatMessages,
     ];
+  }
+
+  void _onAddManuallyChatFirstMessage(
+    AddManuallyChatFirstMessage event,
+    Emitter<ChatMessageListState> emit,
+  ) {
+    emit(
+      ChatMessageListSuccess(
+        chatId: event.chatMessage.chatId,
+        chatMessages: [event.chatMessage],
+        nextCursor: null,
+      ),
+    );
   }
 }

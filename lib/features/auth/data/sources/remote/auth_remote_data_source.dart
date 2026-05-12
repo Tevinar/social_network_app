@@ -70,7 +70,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final body = response.data;
 
       if (body == null) {
-        throw const ServerException(message: 'Sign in response body is empty');
+        throw const InvalidResponseException(
+          message: 'Sign in response body is empty',
+        );
       }
 
       return AuthenticatedUserModel.fromJson(body);
@@ -102,7 +104,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final body = response.data;
 
       if (body == null) {
-        throw const ServerException(message: 'Sign up response body is empty');
+        throw const InvalidResponseException(
+          message: 'Sign up response body is empty',
+        );
       }
 
       return AuthenticatedUserModel.fromJson(body);

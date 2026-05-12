@@ -113,7 +113,7 @@ void main() {
       isA<AppUserFailure>().having(
         (state) => state.error,
         'error',
-        'No internet connection.',
+        const NetworkFailure().message,
       ),
     ],
   );

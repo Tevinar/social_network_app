@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/exceptions_mapper.dart';
 import 'package:social_app/core/network/sse/sse_event.dart';
 import 'package:social_app/features/auth/data/session/auth_token_manager.dart';
 
@@ -67,10 +68,8 @@ class HttpSseClient {
           final response = await request.close();
 
           if (response.statusCode != HttpStatus.ok) {
-            throw ServerException(
-              message:
-                  'SSE connection failed with status ${response.statusCode}',
-            );
+            final responseBody = await utf8.decoder.bind(response).join();
+            throw parseServerExceptionPayload(responseBody);
           }
 
           // Start listening to the SSE stream, which is a stream of

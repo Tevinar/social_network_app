@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
@@ -20,7 +21,7 @@ class GetChatByMembersUseCase
     if (params.memberIds.isEmpty) {
       return Future.value(
         left(
-          const ValidationFailure('At least one chat member must be selected'),
+          const ValidationFailure(ChatFailureMessages.memberSelectionRequired),
         ),
       );
     }

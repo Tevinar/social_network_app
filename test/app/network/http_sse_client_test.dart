@@ -125,6 +125,11 @@ void main() {
         // Arrange
         server.listen((request) async {
           request.response.statusCode = HttpStatus.forbidden;
+          request.response.headers.contentType = ContentType.json;
+          request.response.write(
+            '{"statusCode":403,"code":"forbidden","message":"Forbidden",'
+            '"path":"/events","timestamp":"2026-05-12T10:00:00.000Z"}',
+          );
           await request.response.close();
         });
 
@@ -140,11 +145,11 @@ void main() {
         await expectLater(
           client.connect('/events'),
           emitsError(
-            isA<ServerException>().having(
-              (value) => value.message,
-              'message',
-              'SSE connection failed with status 403',
-            ),
+            isA<ServerException>()
+                .having((value) => value.message, 'message', 'Forbidden')
+                .having((value) => value.code, 'code', 'forbidden')
+                .having((value) => value.statusCode, 'statusCode', 403)
+                .having((value) => value.path, 'path', '/events'),
           ),
         );
       },

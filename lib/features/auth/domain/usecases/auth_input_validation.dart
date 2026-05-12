@@ -1,3 +1,4 @@
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 
 /// Minimum allowed password length for email/password authentication.
@@ -16,13 +17,11 @@ ValidationFailure? validateAuthEmailAndPassword({
   required String password,
 }) {
   if (!_emailRegExp.hasMatch(email)) {
-    return const ValidationFailure('Please enter a valid email address.');
+    return const ValidationFailure(AuthFailureMessages.invalidEmail);
   }
 
   if (password.length < _minimumPasswordLength) {
-    return const ValidationFailure(
-      'Password must be at least 6 characters long.',
-    );
+    return const ValidationFailure(AuthFailureMessages.invalidPassword);
   }
 
   return null;

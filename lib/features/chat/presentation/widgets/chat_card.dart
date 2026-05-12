@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/app/router/routes/routes.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A chat card widget.
+/// A chat card widget that displays a summary of a chat session in the chats
+/// page.
 class ChatCard extends StatelessWidget {
   /// Creates a [ChatCard].
   const ChatCard({required this.chat, super.key});
@@ -33,10 +34,14 @@ class ChatCard extends StatelessWidget {
   @override
   /// The build.
   Widget build(BuildContext context) {
+    final lastMessage = chat.lastMessage;
+    final lastMessageTimestamp = lastMessage?.createdAt;
+    final lastMessagePreview = lastMessage?.content ?? 'No messages yet';
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
-        context.read<ChatEditorBloc>().add(
+        context.read<ChatSessionBloc>().add(
           SelectChat(chatId: chat.id, chatMembers: chat.members),
         );
         await const ChatMessagesPageRoute().push<void>(context);
@@ -61,15 +66,24 @@ class ChatCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        isSameDay(chat.lastMessage.updatedAt, DateTime.now())
-                            ? formatToHour(chat.lastMessage.updatedAt)
-                            : formatToDay(chat.lastMessage.updatedAt),
+                        () {
+                          if (lastMessageTimestamp == null) {
+                            return '';
+                          } else {
+                            return isSameDay(
+                                  lastMessageTimestamp,
+                                  DateTime.now(),
+                                )
+                                ? formatToHour(lastMessageTimestamp)
+                                : formatToDay(lastMessageTimestamp);
+                          }
+                        }(),
                       ),
                     ],
                   ),
 
                   Text(
-                    chat.lastMessage.content,
+                    lastMessagePreview,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppPallete.greyColor,
                       overflow: TextOverflow.ellipsis,

@@ -1,17 +1,43 @@
-import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
 
-/// A chat.
+/// Domain entity representing one chat conversation.
 class Chat {
   /// Creates a [Chat].
-  Chat({required this.id, required this.lastMessage, required this.members});
+  const Chat({
+    required this.id,
+    required this.members,
+    required this.lastMessage,
+  });
 
-  /// The id.
+  /// Stable chat identifier.
   final String id;
 
-  /// The last message.
-  final ChatMessage lastMessage;
+  /// Public chat members visible in the UI.
+  final List<ChatUserSummary> members;
 
-  /// The members.
-  final List<User> members;
+  /// Latest message preview associated with the chat.
+  final ChatLastMessage? lastMessage;
+}
+
+/// Domain entity representing the latest message preview shown for one chat.
+class ChatLastMessage {
+  /// Creates a [ChatLastMessage].
+  const ChatLastMessage({
+    required this.id,
+    required this.author,
+    required this.content,
+    required this.createdAt,
+  });
+
+  /// Stable message identifier.
+  final String id;
+
+  /// Message author when still available.
+  final ChatUserSummary? author;
+
+  /// Preview content shown in chat lists.
+  final String content;
+
+  /// Message creation timestamp.
+  final DateTime createdAt;
 }

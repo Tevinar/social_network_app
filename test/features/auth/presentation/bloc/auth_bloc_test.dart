@@ -5,16 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
-import 'package:social_app/core/usecases/usecase.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_up.dart';
-import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_up_use_case.dart';
+import 'package:social_app/features/auth/domain/usecases/watch_auth_state_changes_use_case.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 
-class MockUserSignIn extends Mock implements UserSignIn {}
+class MockUserSignIn extends Mock implements UserSignInUseCase {}
 
-class MockUserSignUp extends Mock implements UserSignUp {}
+class MockUserSignUp extends Mock implements UserSignUpUseCase {}
 
 class MockWatchAuthStateChanges extends Mock implements WatchAuthStateChanges {}
 
@@ -23,7 +22,11 @@ void main() {
   late MockUserSignUp userSignUp;
   late MockWatchAuthStateChanges watchAuthStateChanges;
 
-  const testUser = User(id: '123', name: 'Test User', email: 'test@test.com');
+  const testUser = User(
+    id: '123',
+    name: 'Test User',
+    email: 'test@test.com',
+  );
 
   setUp(() {
     userSignIn = MockUserSignIn();
@@ -31,13 +34,9 @@ void main() {
     watchAuthStateChanges = MockWatchAuthStateChanges();
 
     // Default: auth stream emits nothing
-    when(
-      () => watchAuthStateChanges(any()),
-    ).thenAnswer((_) => const Stream.empty());
-  });
-
-  setUpAll(() {
-    registerFallbackValue(const NoParams());
+    when(() => watchAuthStateChanges()).thenAnswer(
+      (_) => const Stream.empty(),
+    );
     registerFallbackValue(UserSignInParams(email: '', password: ''));
     registerFallbackValue(UserSignUpParams(name: '', email: '', password: ''));
   });
@@ -52,9 +51,9 @@ void main() {
         ).thenAnswer((_) async => const Right(testUser));
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       act: (bloc) =>
@@ -82,9 +81,9 @@ void main() {
         ).thenAnswer((_) async => left(const NetworkFailure()));
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       act: (bloc) =>
@@ -106,9 +105,9 @@ void main() {
         ).thenAnswer((_) async => const Right(testUser));
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       act: (bloc) => bloc.add(
@@ -144,9 +143,9 @@ void main() {
         );
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       act: (bloc) => bloc.add(
@@ -165,14 +164,14 @@ void main() {
       'Given authStateChanges emits null when listening to the auth stream, '
       'then SignedOut is emitted',
       build: () {
-        when(
-          () => watchAuthStateChanges(any()),
-        ).thenAnswer((_) => Stream.value(const Right(null)));
+        when(() => watchAuthStateChanges()).thenAnswer(
+          (_) => Stream.value(const Right(null)),
+        );
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       expect: () => [AuthSignedOut()],
@@ -182,14 +181,14 @@ void main() {
       'Given authStateChanges emits a user when listening to the auth '
       'stream, then SignedIn is emitted',
       build: () {
-        when(
-          () => watchAuthStateChanges(any()),
-        ).thenAnswer((_) => Stream.value(const Right(testUser)));
+        when(() => watchAuthStateChanges()).thenAnswer(
+          (_) => Stream.value(const Right(testUser)),
+        );
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       expect: () => [const AuthSignedIn(testUser)],
@@ -199,14 +198,14 @@ void main() {
       'Given authStateChanges emits a failure when listening to the auth '
       'stream, then Failure is emitted',
       build: () {
-        when(
-          () => watchAuthStateChanges(any()),
-        ).thenAnswer((_) => Stream.value(left(const NetworkFailure())));
+        when(() => watchAuthStateChanges()).thenAnswer(
+          (_) => Stream.value(left(const NetworkFailure())),
+        );
 
         return AuthBloc(
-          userSignIn: userSignIn,
-          userSignUp: userSignUp,
-          watchAuthStateChanges: watchAuthStateChanges,
+          userSignInUseCase: userSignIn,
+          userSignUpUseCase: userSignUp,
+          watchAuthStateChangesUseCase: watchAuthStateChanges,
         );
       },
       expect: () => [const AuthFailure('No internet connection.')],

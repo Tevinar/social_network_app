@@ -36,25 +36,6 @@ void main() {
     );
   });
 
-  group('UserModel.fromProfileJson', () {
-    test(
-      'given a profile json when fromProfileJson is called then returns a '
-      'UserModel with an empty email',
-      () {
-        // Arrange
-        final map = <String, dynamic>{'id': '123', 'name': 'Test User'};
-
-        // Act
-        final result = UserModel.fromProfileJson(map);
-
-        // Assert
-        expect(result.id, '123');
-        expect(result.name, 'Test User');
-        expect(result.email, '');
-      },
-    );
-  });
-
   group('UserModel.fromEntity', () {
     test(
       'given a User entity when fromEntity is called then returns a '
@@ -74,65 +55,24 @@ void main() {
     );
   });
 
-  group('UserModel.fromAuthJson', () {
+  group('UserModel.fromJson', () {
     test(
-      'given an auth json with user metadata when fromAuthJson is called '
+      'given a user json when fromJson is called '
       'then returns a matching UserModel',
       () {
         // Arrange
         final map = <String, dynamic>{
           'id': '123',
           'email': 'test@test.com',
-          'user_metadata': <String, dynamic>{'name': 'Test User'},
+          'name': 'Test User',
         };
 
         // Act
-        final result = UserModel.fromAuthJson(map);
+        final result = UserModel.fromJson(map);
 
         // Assert
         expect(result.id, '123');
         expect(result.name, 'Test User');
-        expect(result.email, 'test@test.com');
-      },
-    );
-
-    test(
-      'given an auth json without user metadata when fromAuthJson is called '
-      'then returns a UserModel with an empty name',
-      () {
-        // Arrange
-        final map = <String, dynamic>{
-          'id': '123',
-          'email': 'test@test.com',
-        };
-
-        // Act
-        final result = UserModel.fromAuthJson(map);
-
-        // Assert
-        expect(result.id, '123');
-        expect(result.name, '');
-        expect(result.email, 'test@test.com');
-      },
-    );
-
-    test(
-      'given an auth json with user metadata without a name when '
-      'fromAuthJson is called then returns a UserModel with an empty name',
-      () {
-        // Arrange
-        final map = <String, dynamic>{
-          'id': '123',
-          'email': 'test@test.com',
-          'user_metadata': <String, dynamic>{'name': null},
-        };
-
-        // Act
-        final result = UserModel.fromAuthJson(map);
-
-        // Assert
-        expect(result.id, '123');
-        expect(result.name, '');
         expect(result.email, 'test@test.com');
       },
     );

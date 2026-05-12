@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/app/router/routes/routes.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/show_snackbar.dart';
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/features/blog/presentation/blocs/blogs/'
-    'blogs_bloc.dart';
+import 'package:social_app/core/ui/feedback/show_snackbar.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/presentation/blocs/blog_list/blog_list_bloc.dart';
 import 'package:social_app/features/blog/presentation/widgets/blog_card.dart';
-import 'package:social_app/features/blog/presentation/widgets/'
-    'blog_card_place_holder.dart';
+import 'package:social_app/features/blog/presentation/widgets/blog_card_place_holder.dart';
 
-/// A blogs page widget.
+/// Page that displays the scrollable blog list.
 class BlogsPage extends StatelessWidget {
   /// Creates a [BlogsPage].
   const BlogsPage({super.key});
@@ -20,7 +19,7 @@ class BlogsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => serviceLocator<BlogsBloc>(),
+      create: (_) => serviceLocator<BlogListBloc>(),
       child: Builder(
         builder: (innerContext) {
           return Scaffold(
@@ -38,7 +37,15 @@ class BlogsPage extends StatelessWidget {
                 ),
               ],
             ),
-            body: BlocBuilder<BlogsBloc, BlogsState>(
+            body: BlocConsumer<BlogListBloc, BlogListState>(
+              listenWhen: (previous, current) =>
+                  previous.refreshError != current.refreshError &&
+                  current.refreshError != null,
+              listener: (context, state) {
+                if (state.refreshError != null) {
+                  showSnackBar(context, state.refreshError!);
+                }
+              },
               builder: (_, state) => _buildBody(innerContext, state),
             ),
           );
@@ -69,33 +76,38 @@ class BlogsPage extends StatelessWidget {
   }
 
   Future<void> _openAddBlogPage(BuildContext context) async {
-    final blogsBloc = context.read<BlogsBloc>();
+    final blogListBloc = context.read<BlogListBloc>();
+    final createdBlog = await const AddNewBlogPageRoute().push<Blog>(context);
 
-    final created = await const AddNewBlogPageRoute().push<bool>(context);
-
-    if (created != true) {
+    if (createdBlog == null) {
       return;
     }
 
-    await blogsBloc.scrollToTop();
-    // Refreshes the list size after a newly created blog is added.
-    blogsBloc.add(
-      RefreshBlogsView(),
-    );
+    blogListBloc.add(PrependCreatedBlog(createdBlog));
+    await blogListBloc.scrollToTop();
   }
 
-  Widget _buildBody(BuildContext context, BlogsState state) {
-    if (state is BlogsLoading && state.blogs.isEmpty) {
+  Widget _buildBody(BuildContext context, BlogListState state) {
+    if (state is BlogListLoading && state.blogs.isEmpty) {
       return _buildLoadingPlaceholders();
     }
 
-    if (state is BlogsFailure && state.blogs.isEmpty) {
-      return Center(
-        child: Text(state.error),
-      );
+    if (state is BlogListFailure && state.blogs.isEmpty) {
+      return Center(child: Text(state.error));
     }
 
-    return _buildBlogsList(context, state);
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              context.read<BlogListBloc>().add(const RefreshList());
+            },
+            child: _buildBlogsList(context, state),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildLoadingPlaceholders() {
@@ -111,15 +123,27 @@ class BlogsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBlogsList(BuildContext context, BlogsState state) {
+  Widget _buildBlogsList(BuildContext context, BlogListState state) {
+    if (state.blogs.isEmpty) {
+      return _buildEmptyState(context);
+    }
     return ListView.builder(
-      controller: context.read<BlogsBloc>().scrollController,
+      controller: context.read<BlogListBloc>().scrollController,
       itemCount: _itemCount(state),
       itemBuilder: (context, index) => _buildBlogListItem(state, index),
     );
   }
 
-  Widget _buildBlogListItem(BlogsState state, int index) {
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Text(
+        'There are no blogs to display. Start a new one!',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+    );
+  }
+
+  Widget _buildBlogListItem(BlogListState state, int index) {
     if (index == state.blogs.length) {
       return const Padding(
         padding: EdgeInsets.all(16),
@@ -133,10 +157,10 @@ class BlogsPage extends StatelessWidget {
     );
   }
 
-  int _itemCount(BlogsState state) {
-    return state.blogs.length == state.totalBlogsInDatabase
-        ? state.blogs.length
-        : state.blogs.length + 1;
+  int _itemCount(BlogListState state) {
+    final isLoadingMore = state is BlogListLoading && state.blogs.isNotEmpty;
+
+    return state.blogs.length + (isLoadingMore ? 1 : 0);
   }
 
   Color _blogCardColor(int index) {

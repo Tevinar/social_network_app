@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:social_app/core/local_storage/app_directory_provider.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/core/network/http_downloader.dart';
+import 'package:social_app/core/network/dio_http_downloader.dart';
 
 /// A disk cache for remote image files.
+// ignore one_member_abstracts warning because this interface is expected to
+// be mocked in tests and more methods may be added in the future.
 // ignore: one_member_abstracts
 abstract interface class ImageFileCache {
   /// Returns a cached file when available or downloads and persists it.
@@ -20,17 +22,13 @@ abstract interface class ImageFileCache {
 class ImageFileCacheImpl implements ImageFileCache {
   /// Creates an [ImageFileCacheImpl].
   ImageFileCacheImpl({
-    AppDirectoryProvider? directoryProvider,
-    HttpDownloader? httpDownloader,
-  }) : _directoryProvider =
-           directoryProvider ?? PathProviderAppDirectoryProvider(),
-       _httpDownloader = httpDownloader ?? DartHttpDownloader();
+    required DioHttpDownloader dioHttpDownloader,
+  }) : _dioHttpDownloader = dioHttpDownloader;
 
-  final AppDirectoryProvider _directoryProvider;
-  final HttpDownloader _httpDownloader;
+  final DioHttpDownloader _dioHttpDownloader;
 
   Future<Directory> get _cacheDir async {
-    final baseDir = await _directoryProvider.getApplicationDocumentsDirectory();
+    final baseDir = await path_provider.getApplicationDocumentsDirectory();
     final dir = Directory('${baseDir.path}/image_cache');
     if (!dir.existsSync()) {
       await dir.create(recursive: true);
@@ -77,6 +75,6 @@ class ImageFileCacheImpl implements ImageFileCache {
   }
 
   Future<Uint8List> _downloadImage(Uri uri) {
-    return _httpDownloader.downloadBytes(uri);
+    return _dioHttpDownloader.downloadBytes(uri);
   }
 }

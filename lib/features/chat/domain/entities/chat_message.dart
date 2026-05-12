@@ -1,24 +1,30 @@
-/// Domain entity representing a message sent inside a chat.
+import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
+
+/// Domain entity representing one chat message.
 class ChatMessage {
   /// Creates a [ChatMessage].
   const ChatMessage({
     required this.id,
-    required this.authorId,
+    required this.chatId,
+    required this.author,
     required this.content,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  /// Unique message identifier.
+  /// Stable message identifier.
   final String id;
 
-  /// Identifier of the user who authored the message.
-  final String authorId;
+  /// Identifier of the chat that owns this message.
+  final String chatId;
 
-  /// Message text displayed in the conversation.
+  /// Message author when still available.
+  final ChatUserSummary? author;
+
+  /// Text content sent in the message.
   final String content;
 
-  /// Timestamp of the initial message creation.
+  /// Timestamp at which the message was created.
   final DateTime createdAt;
 
   /// Timestamp of the latest message update.

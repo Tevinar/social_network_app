@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/format_date.dart';
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/core/ui/formatting/format_date.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_messages/chat_messages_bloc.dart';
+import 'package:social_app/features/chat/domain/entities/chat_message.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_message_list/chat_message_list_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_message_card.dart';
 
-/// A chat messages page widget.
+/// Page that displays the messages of a chat session and allows sending new
+/// messages.
 class ChatMessagesPage extends StatefulWidget {
   /// Creates a [ChatMessagesPage].
   const ChatMessagesPage({super.key});
@@ -41,14 +43,22 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: _createChatMessagesBloc,
-      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
-        listener: _loadInitialChatMessagesPage,
+      child: BlocConsumer<ChatSessionBloc, ChatSessionState>(
+        listener: (context, state) {
+          // This listener is needed to add the first message to the chat
+          // message list after creating the chat session
+          if (state is ChatSessionNewlyCreated) {
+            context.read<ChatMessagesBloc>().add(
+              AddManuallyChatFirstMessage(state.chatFirstMessage),
+            );
+          }
+        },
         builder: _buildPage,
       ),
     );
   }
 
-  Widget _buildPage(BuildContext context, ChatEditorState chatEditorState) {
+  Widget _buildPage(BuildContext context, ChatSessionState chatEditorState) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_chatTitle(chatEditorState)),
@@ -56,7 +66,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
       body: Column(
         children: [
           _buildMessagesSection(chatEditorState),
-          BlocBuilder<ChatEditorBloc, ChatEditorState>(
+          BlocBuilder<ChatSessionBloc, ChatSessionState>(
             builder: _buildComposer,
           ),
         ],
@@ -64,53 +74,40 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  String _chatTitle(ChatEditorState chatEditorState) {
+  String _chatTitle(ChatSessionState chatEditorState) {
     return chatEditorState.chatMembers
         .where((member) => member.id != _currentUser.id)
         .map((member) => member.name)
         .join(', ');
   }
 
-  Widget _buildMessagesSection(ChatEditorState chatEditorState) {
-    if (chatEditorState is! ChatEditorLoaded) {
+  Widget _buildMessagesSection(ChatSessionState chatEditorState) {
+    if (chatEditorState is! ChatSessionLoaded &&
+        chatEditorState is! ChatSessionNewlyCreated) {
       return const Expanded(child: SizedBox());
     }
 
     return Expanded(
-      child: BlocBuilder<ChatMessagesBloc, ChatMessagesState>(
+      child: BlocBuilder<ChatMessagesBloc, ChatMessageListState>(
         builder: (context, chatMessagesState) {
-          return _buildChatMessagesList(
-            context,
-            chatEditorState,
-            chatMessagesState,
+          return ListView.builder(
+            reverse: true,
+            controller: context.read<ChatMessagesBloc>().scrollController,
+            itemCount: _messageItemCount(chatMessagesState),
+            itemBuilder: (context, index) {
+              return _buildChatMessageListItem(
+                chatMessagesState,
+                index,
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildChatMessagesList(
-    BuildContext context,
-    ChatEditorLoaded chatEditorState,
-    ChatMessagesState chatMessagesState,
-  ) {
-    return ListView.builder(
-      reverse: true,
-      controller: context.read<ChatMessagesBloc>().scrollController,
-      itemCount: _messageItemCount(chatMessagesState),
-      itemBuilder: (context, index) {
-        return _buildChatMessageListItem(
-          chatEditorState,
-          chatMessagesState,
-          index,
-        );
-      },
-    );
-  }
-
   Widget _buildChatMessageListItem(
-    ChatEditorLoaded chatEditorState,
-    ChatMessagesState chatMessagesState,
+    ChatMessageListState chatMessagesState,
     int index,
   ) {
     if (index == chatMessagesState.chatMessages.length) {
@@ -125,8 +122,8 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
           _buildDateSeparator(currentChatMessage.createdAt),
         ChatMessageCard(
           chatMessage: currentChatMessage,
-          authorName: _authorName(chatEditorState, currentChatMessage.authorId),
-          isMe: currentChatMessage.authorId == _currentUser.id,
+          authorName: _authorName(currentChatMessage),
+          isMe: currentChatMessage.author?.id == _currentUser.id,
         ),
       ],
     );
@@ -145,21 +142,20 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  int _messageItemCount(ChatMessagesState chatMessagesState) {
-    return chatMessagesState.chatMessages.length ==
-            chatMessagesState.totalChatMessagesInDatabase
-        ? chatMessagesState.chatMessages.length
-        : chatMessagesState.chatMessages.length + 1;
+  int _messageItemCount(ChatMessageListState chatMessagesState) {
+    final isLoadingMore =
+        chatMessagesState is ChatMessageListLoading &&
+        chatMessagesState.chatMessages.isNotEmpty;
+
+    return chatMessagesState.chatMessages.length + (isLoadingMore ? 1 : 0);
   }
 
-  String _authorName(ChatEditorLoaded chatEditorState, String authorId) {
-    return chatEditorState.chatMembers
-        .firstWhere((member) => member.id == authorId)
-        .name;
+  String _authorName(ChatMessage chatMessage) {
+    return chatMessage.author?.name ?? 'Unknown user';
   }
 
   bool _shouldShowDateSeparator(
-    ChatMessagesState chatMessagesState,
+    ChatMessageListState chatMessagesState,
     int index,
   ) {
     if (index == chatMessagesState.chatMessages.length - 1) {
@@ -176,7 +172,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  Widget _buildComposer(BuildContext context, ChatEditorState state) {
+  Widget _buildComposer(BuildContext context, ChatSessionState state) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -208,7 +204,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     );
   }
 
-  Widget _buildSendButton(BuildContext context, ChatEditorState state) {
+  Widget _buildSendButton(BuildContext context, ChatSessionState state) {
     return IconButton.filled(
       style: const ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(
@@ -216,7 +212,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
         ),
       ),
       onPressed: () => _sendMessage(context, state),
-      icon: state is ChatEditorLoading
+      icon: state is ChatSessionLoading
           ? const Loader()
           : const Icon(
               Icons.send,
@@ -226,28 +222,23 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   ChatMessagesBloc _createChatMessagesBloc(BuildContext context) {
-    final chatEditorState = context.read<ChatEditorBloc>().state;
+    final chatSessionState = context.read<ChatSessionBloc>().state;
 
-    if (chatEditorState is! ChatEditorLoaded) {
+    // This case is relevant when coming from the chat creation flow, where the
+    // chat session is created in parallel with the first message, so the chat
+    // session is not yet loaded when opening the chat
+    if (chatSessionState is! ChatSessionLoaded) {
       return serviceLocator<ChatMessagesBloc>();
     }
 
-    return serviceLocator<ChatMessagesBloc>()
-      ..add(LoadInitialChatMessagesPage(chatEditorState.chatId));
+    // This case is relevant when coming from the chats list, where the chat
+    // session is already loaded when opening the chat
+    return serviceLocator<ChatMessagesBloc>()..add(
+      LoadInitialChatMessageListSlice(chatSessionState.chatId),
+    );
   }
 
-  void _loadInitialChatMessagesPage(
-    BuildContext context,
-    ChatEditorState state,
-  ) {
-    if (state is ChatEditorLoaded) {
-      context.read<ChatMessagesBloc>().add(
-        LoadInitialChatMessagesPage(state.chatId),
-      );
-    }
-  }
-
-  void _sendMessage(BuildContext context, ChatEditorState state) {
+  void _sendMessage(BuildContext context, ChatSessionState state) {
     final messageText = _messageController.text.trim();
 
     if (messageText.isEmpty) {
@@ -255,10 +246,10 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
     }
 
     switch (state) {
-      case ChatEditorLoaded():
+      case ChatSessionLoaded():
         _sendLoadedChatMessage(context, state.chatId, messageText);
 
-      case ChatEditorWaitingForFirstMessage():
+      case ChatSessionWaitingForFirstMessage():
         _sendFirstChatMessage(context, messageText);
 
       default:
@@ -278,7 +269,7 @@ class _ChatMessagesPageState extends State<ChatMessagesPage> {
   }
 
   void _sendFirstChatMessage(BuildContext context, String messageText) {
-    context.read<ChatEditorBloc>().add(
+    context.read<ChatSessionBloc>().add(
       AddChatFirstMessage(firstMessageContent: messageText),
     );
     _messageController.clear();

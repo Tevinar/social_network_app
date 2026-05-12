@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/router/routes/routes.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/widgets/loader.dart';
-import 'package:social_app/features/chat/presentation/blocs/chats/'
-    'chats_bloc.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_list/chat_list_bloc.dart';
 import 'package:social_app/features/chat/presentation/widgets/chat_card.dart';
 
-/// A chats page widget.
+/// Page that displays a list of the user's chats.
 class ChatsPage extends StatelessWidget {
   /// Creates a [ChatsPage].
   const ChatsPage({super.key});
@@ -17,7 +16,7 @@ class ChatsPage extends StatelessWidget {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: BlocBuilder<ChatsBloc, ChatsState>(
+        child: BlocBuilder<ChatListBloc, ChatListState>(
           builder: _buildBody,
         ),
       ),
@@ -25,15 +24,15 @@ class ChatsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, ChatsState state) {
-    if (state is ChatsFailure) {
+  Widget _buildBody(BuildContext context, ChatListState state) {
+    if (state is ChatListFailure) {
       return Center(
         child: Text('Error loading chats : ${state.error}'),
       );
     }
 
     // Show placeholders while the first page of chats is loading.
-    if (state is ChatsLoading && state.chats.isEmpty) {
+    if (state is ChatListLoading && state.chats.isEmpty) {
       return const Center(child: Loader());
     }
 
@@ -53,15 +52,15 @@ class ChatsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildChatsList(BuildContext context, ChatsState state) {
+  Widget _buildChatsList(BuildContext context, ChatListState state) {
     return ListView.builder(
-      controller: context.read<ChatsBloc>().scrollController,
+      controller: context.read<ChatListBloc>().scrollController,
       itemCount: _chatItemCount(state),
       itemBuilder: (context, index) => _buildChatListItem(state, index),
     );
   }
 
-  Widget _buildChatListItem(ChatsState state, int index) {
+  Widget _buildChatListItem(ChatListState state, int index) {
     if (index == state.chats.length) {
       return const Loader(size: 30);
     }
@@ -69,10 +68,10 @@ class ChatsPage extends StatelessWidget {
     return ChatCard(chat: state.chats[index]);
   }
 
-  int _chatItemCount(ChatsState state) {
-    return state.chats.length == state.totalChatsInDatabase
-        ? state.chats.length
-        : state.chats.length + 1;
+  int _chatItemCount(ChatListState state) {
+    final isLoadingMore = state is ChatListLoading && state.chats.isNotEmpty;
+
+    return state.chats.length + (isLoadingMore ? 1 : 0);
   }
 
   Widget _buildNewChatButton(BuildContext context) {

@@ -4,21 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/app/bootstrap/configure_global_error_handling.dart';
 import 'package:social_app/app/bootstrap/dependencies/init_dependencies.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/app/logging/app_bloc_observer.dart';
 import 'package:social_app/app/logging/app_talker_logger.dart';
 import 'package:social_app/app/logging/talker_config.dart';
 import 'package:social_app/app/router/app.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:social_app/features/blog/presentation/blocs/blog_editor/'
     'blog_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
-    'chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/chats/'
-    'chats_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/'
-    'users_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidate_list_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_list/chat_list_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
 void main() async {
   // Local logger available immediately during app startup, before GetIt and the
@@ -45,9 +42,11 @@ void main() async {
                 BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
                 BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
                 BlocProvider(create: (_) => serviceLocator<BlogEditorBloc>()),
-                BlocProvider(create: (_) => serviceLocator<ChatEditorBloc>()),
-                BlocProvider(create: (_) => serviceLocator<UsersBloc>()),
-                BlocProvider(create: (_) => serviceLocator<ChatsBloc>()),
+                BlocProvider(create: (_) => serviceLocator<ChatSessionBloc>()),
+                BlocProvider(
+                  create: (_) => serviceLocator<ChatCandidateListBloc>(),
+                ),
+                BlocProvider(create: (_) => serviceLocator<ChatListBloc>()),
               ],
               child: const SocialApp(),
             ),

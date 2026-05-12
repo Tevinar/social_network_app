@@ -3,40 +3,42 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
-import 'package:social_app/features/blog/domain/entities/blog_change.dart';
-import 'package:social_app/features/blog/domain/entities/blog_snapshot.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
-import 'package:social_app/features/blog/domain/entities/blogs_page_snapshot.dart';
+import 'package:social_app/features/blog/domain/read_models/blog_list_slice.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
-/// A blog repository.
+/// Domain repository contract for blog creation, reading, and list slices.
 abstract interface class BlogRepository {
-  /// Create blog.
+  /// Creates a new blog and returns the persisted domain entity.
   Future<Either<Failure, Blog>> createBlog({
     required File image,
     required String title,
     required String content,
-    required String posterId,
-    required String posterName,
     required List<BlogTopic> topics,
   });
 
-  /// Watches a page of blogs, emitting cached data immediately
-  /// and remote updates.
-  Stream<Either<Failure, BlogsPageSnapshot>> watchBlogsPage(
-    int pageNumber,
-  );
+  /// Observes a cache-first snapshot of the initial blog list slice and then
+  /// refreshes that same slice once from the remote source.
+  Stream<Either<Failure, BlogListSlice>> observeInitialBlogListSlice({
+    required int limit,
+  });
 
-  /// Gets the blogs count.
-  Future<Either<Failure, int>> getBlogsCount();
+  /// Loads one cursor-based blog list slice from the remote source.
+  Future<Either<Failure, BlogListSlice>> getBlogListSlice({
+    required int limit,
+    String? cursor,
+  });
 
-  /// Emits domain-level blog change events (insert/update/delete).
+  /// Observes a cache-first snapshot of the blog and then refreshes that same
+  /// blog once from the remote source.
   ///
-  /// This is a passive, reactive data stream (not a user-triggered action).
-  Stream<Either<Failure, BlogChange>> watchBlogChanges();
+  /// The viewer route stays keyed by [blogId] instead of receiving a full
+  /// [Blog] object so it can also be opened from deep links and push
+  /// notifications, where only the identifier is reliably available. This
+  /// cache-first observation restores the same fast-first-render behavior that
+  /// passing a full blog object would provide without weakening the route
+  /// contract.
+  Stream<Either<Failure, Blog>> observeBlogById(String blogId);
 
-  /// Watches a single blog, emitting cached data first and remote updates.
-  Stream<Either<Failure, BlogSnapshot>> watchBlogById(String blogId);
-
-  /// Gets a blog by its ID.
-  Future<Either<Failure, Blog>> getBlogById(String blogId);
+  /// Retrieves the locally cached or downloaded image file for [blog].
+  Future<Either<Failure, File?>> getBlogImage(Blog blog);
 }

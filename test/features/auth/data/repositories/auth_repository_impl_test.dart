@@ -7,19 +7,28 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/data_sources/'
-    'auth_remote_data_source.dart';
+import 'package:social_app/features/auth/data/models/auth_session_model.dart';
+import 'package:social_app/features/auth/data/models/authenticated_user_model.dart';
 import 'package:social_app/features/auth/data/models/user_model.dart';
 import 'package:social_app/features/auth/data/repositories/'
     'auth_repository_impl.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
+import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 
 class MockAuthRemoteDataSource extends Mock implements AuthRemoteDataSource {}
+
+class MockAuthSessionStore extends Mock implements AuthSessionStore {}
+
+class MockCurrentAuthUserStore extends Mock implements CurrentAuthUserStore {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
   late MockAuthRemoteDataSource remote;
+  late MockAuthSessionStore sessionStore;
+  late MockCurrentAuthUserStore currentAuthUserStore;
   late MockAppLogger logger;
   late AuthRepositoryImpl repository;
 
@@ -28,15 +37,46 @@ void main() {
     email: 'test@test.com',
     name: 'Test',
   );
+  final sessionModel = AuthSessionModel(
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+    accessTokenExpiresAt: DateTime.utc(2026),
+    refreshTokenExpiresAt: DateTime.utc(2026, 2),
+  );
+  late AuthenticatedUserModel authenticatedUserModel;
+
+  setUpAll(() {
+    registerFallbackValue(userModel);
+    registerFallbackValue(sessionModel);
+  });
 
   setUp(() async {
     await GetIt.I.reset();
     remote = MockAuthRemoteDataSource();
+    sessionStore = MockAuthSessionStore();
+    currentAuthUserStore = MockCurrentAuthUserStore();
     logger = MockAppLogger();
+    authenticatedUserModel = AuthenticatedUserModel(
+      session: sessionModel,
+      user: userModel,
+    );
 
     GetIt.I.registerSingleton<AppLogger>(logger);
 
-    repository = AuthRepositoryImpl(authRemoteDataSource: remote);
+    when(() => currentAuthUserStore.saveCurrentUser(any())).thenAnswer(
+      (_) async {},
+    );
+    when(
+      () => currentAuthUserStore.clearCurrentUser(),
+    ).thenAnswer((_) async {});
+    when(() => sessionStore.saveSession(any())).thenAnswer((_) async {});
+    when(() => sessionStore.clearSession()).thenAnswer((_) async {});
+
+    repository = AuthRepositoryImpl(
+      authRemoteDataSource: remote,
+      authSessionStore: sessionStore,
+      currentAuthUserStore: currentAuthUserStore,
+    );
   });
 
   tearDown(() async {
@@ -54,7 +94,7 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => userModel);
+        ).thenAnswer((_) async => authenticatedUserModel);
 
         // Act
         final result = await repository.signInWithEmailPassword(
@@ -70,6 +110,8 @@ void main() {
               .having((r) => r.value.email, 'email', 'test@test.com')
               .having((r) => r.value.name, 'name', 'Test'),
         );
+        verify(() => currentAuthUserStore.saveCurrentUser(userModel)).called(1);
+        verify(() => sessionStore.saveSession(sessionModel)).called(1);
       },
     );
 
@@ -149,7 +191,7 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenAnswer((_) async => userModel);
+        ).thenAnswer((_) async => authenticatedUserModel);
 
         // Act
         final result = await repository.signUpWithEmailPassword(
@@ -160,6 +202,8 @@ void main() {
 
         // Assert
         expect(result, isA<Right<Failure, User>>());
+        verify(() => currentAuthUserStore.saveCurrentUser(userModel)).called(1);
+        verify(() => sessionStore.saveSession(sessionModel)).called(1);
       },
     );
 
@@ -215,6 +259,8 @@ void main() {
         // Assert
         expect(result, isA<Right<Failure, void>>());
         verify(() => remote.signOut()).called(1);
+        verify(() => sessionStore.clearSession()).called(1);
+        verify(() => currentAuthUserStore.clearCurrentUser()).called(1);
       },
     );
 
@@ -272,12 +318,12 @@ void main() {
 
   group('authStateChanges', () {
     test(
-      'Given remote emits UserModel when listening to auth changes, then '
-      'Right<User> is emitted',
+      'Given current user store emits a user when listening to auth changes, '
+      'then Right<User> is emitted',
       () async {
         // Arrange
         when(
-          () => remote.authStateChanges(),
+          () => currentAuthUserStore.watchCurrentUser(),
         ).thenAnswer((_) => Stream.value(userModel));
 
         // Act
@@ -298,12 +344,12 @@ void main() {
     );
 
     test(
-      'Given remote emits null when listening to auth changes, then '
-      'Right(null) is emitted',
+      'Given current user store emits null when listening to auth changes, then'
+      ' Right(null) is emitted',
       () async {
         // Arrange
         when(
-          () => remote.authStateChanges(),
+          () => currentAuthUserStore.watchCurrentUser(),
         ).thenAnswer((_) => Stream.value(null));
 
         // Act & Assert
@@ -315,11 +361,11 @@ void main() {
     );
 
     test(
-      'Given remote stream throws when listening to auth changes, then '
-      'Left<Failure> is emitted',
+      'Given current user store stream throws when listening to auth changes, '
+      'then Left<Failure> is emitted',
       () async {
         // Arrange
-        when(() => remote.authStateChanges()).thenAnswer(
+        when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(
           (_) => Stream.error(const NetworkException(message: 'boom')),
         );
 
@@ -332,11 +378,12 @@ void main() {
     );
 
     test(
-      'Given remote stream throws an unexpected exception when listening to '
-      'auth changes, then Left<Failure> is emitted and the error is logged',
+      'Given current user store stream throws an unexpected exception when '
+      'listening to auth changes, then Left<Failure> is emitted and the error '
+      'is logged',
       () async {
         // Arrange
-        when(() => remote.authStateChanges()).thenAnswer(
+        when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(
           (_) => Stream.error(const ServerException(message: 'stream error')),
         );
 

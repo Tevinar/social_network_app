@@ -27,3 +27,18 @@ class NetworkException implements Exception {
   @override
   String toString() => 'NetworkException: $message (code: $code)';
 }
+
+/// Represents an authentication / authorization exception.
+class UnauthorizedException implements Exception {
+  /// Creates an [UnauthorizedException].
+  const UnauthorizedException({required this.message, this.code});
+
+  /// The message.
+  final String message;
+
+  /// The code.
+  final String? code;
+
+  @override
+  String toString() => 'UnauthorizedException: $message (code: $code)';
+}

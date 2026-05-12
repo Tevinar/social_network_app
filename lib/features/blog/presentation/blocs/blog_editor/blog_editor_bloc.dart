@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/features/blog/domain/entities/blog_topic.dart';
-import 'package:social_app/features/blog/domain/usecases/create_blog.dart';
+import 'package:social_app/features/blog/domain/entities/blog.dart';
+import 'package:social_app/features/blog/domain/usecases/create_blog_use_case.dart';
+import 'package:social_app/features/blog/domain/value_objects/blog_topic.dart';
 
 part 'blog_editor_event.dart';
 part 'blog_editor_state.dart';
@@ -11,19 +12,17 @@ part 'blog_editor_state.dart';
 /// A blog editor bloc.
 class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
   /// Creates a [BlogEditorBloc].
-  BlogEditorBloc({required CreateBlog uploadBlog})
+  BlogEditorBloc({required CreateBlogUseCase uploadBlog})
     : _uploadBlog = uploadBlog,
-      super(BlogInitial()) {
-    on<BlogEditorEvent>((event, emit) => emit(BlogLoading()));
+      super(const BlogInitial()) {
+    on<BlogEditorEvent>((event, emit) => emit(const BlogLoading()));
     on<AddBlog>(_onAddBlog);
   }
-  final CreateBlog _uploadBlog;
+  final CreateBlogUseCase _uploadBlog;
 
   Future<void> _onAddBlog(AddBlog event, Emitter<BlogEditorState> emit) async {
     final res = await _uploadBlog.call(
       CreateBlogParams(
-        posterId: event.posterId,
-        posterName: event.posterName,
         title: event.title,
         content: event.content,
         image: event.image,
@@ -32,7 +31,7 @@ class BlogEditorBloc extends Bloc<BlogEditorEvent, BlogEditorState> {
     );
     res.fold(
       (l) => emit(BlogFailure(l.message)),
-      (r) => emit(BlogUploadSuccess()),
+      (r) => emit(BlogUploadSuccess(r)),
     );
   }
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/utils/format_date.dart';
+import 'package:social_app/core/ui/formatting/format_date.dart';
 import 'package:social_app/features/chat/domain/entities/chat_message.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/chat_editor_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A chat message card widget.
+/// A chat message card widget that displays a chat message in the chat messages
+/// page.
 class ChatMessageCard extends StatelessWidget {
   /// Creates a [ChatMessageCard].
   const ChatMessageCard({
@@ -57,7 +58,7 @@ class ChatMessageCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!isMe &&
-                      context.read<ChatEditorBloc>().state.chatMembers.length >
+                      context.read<ChatSessionBloc>().state.chatMembers.length >
                           2)
                     Text(
                       authorName,

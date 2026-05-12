@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app/cubits/app_user_cubit.dart';
 import 'package:social_app/app/router/routes/routes.dart';
-import 'package:social_app/app/session/app_user_cubit.dart';
 import 'package:social_app/core/theme/app_pallete.dart';
-import 'package:social_app/core/widgets/loader.dart';
+import 'package:social_app/core/ui/widgets/loader.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
-import 'package:social_app/features/chat/presentation/blocs/chat_editor/'
-    'chat_editor_bloc.dart';
-import 'package:social_app/features/chat/presentation/blocs/user/'
-    'users_bloc.dart';
+import 'package:social_app/features/chat/domain/entities/chat_user_summary.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_candidates/chat_candidate_list_bloc.dart';
+import 'package:social_app/features/chat/presentation/blocs/chat_session/chat_session_bloc.dart';
 
-/// A new chat page widget.
+/// Page that allows the user to select other users to start a new chat session
+/// with.
 class NewChatPage extends StatefulWidget {
   /// Creates a [NewChatPage].
   const NewChatPage({super.key});
@@ -20,7 +20,7 @@ class NewChatPage extends StatefulWidget {
 }
 
 class _NewChatPageState extends State<NewChatPage> {
-  final List<User> _selectedUsers = [];
+  final List<ChatUserSummary> _selectedUsers = [];
   late final User _currentUser;
 
   @override
@@ -33,42 +33,45 @@ class _NewChatPageState extends State<NewChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New Chat')),
-      body: BlocBuilder<UsersBloc, UsersState>(
+      body: BlocBuilder<ChatCandidateListBloc, ChatCandidateListState>(
         builder: _buildBody,
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  Widget _buildBody(BuildContext context, UsersState state) {
-    if (state is UsersFailure) {
+  Widget _buildBody(BuildContext context, ChatCandidateListState state) {
+    if (state is ChatCandidateListFailure) {
       return Center(
         child: Text('Error loading users : ${state.error}'),
       );
     }
 
     // Show placeholders while the first page of users is loading.
-    if (state is UsersLoading && state.users.isEmpty) {
+    if (state is ChatCandidateListLoading && state.candidates.isEmpty) {
       return const Loader();
     }
 
     return _buildUsersList(context, state);
   }
 
-  Widget _buildUsersList(BuildContext context, UsersState state) {
+  Widget _buildUsersList(
+    BuildContext context,
+    ChatCandidateListState state,
+  ) {
     return ListView.builder(
-      controller: context.read<UsersBloc>().scrollController,
+      controller: context.read<ChatCandidateListBloc>().scrollController,
       itemCount: _userItemCount(state),
       itemBuilder: (context, index) => _buildUserListItem(state, index),
     );
   }
 
-  Widget _buildUserListItem(UsersState state, int index) {
-    if (index == state.users.length) {
+  Widget _buildUserListItem(ChatCandidateListState state, int index) {
+    if (index == state.candidates.length) {
       return const Loader(size: 30);
     }
 
-    final user = state.users[index];
+    final user = state.candidates[index];
 
     if (_isCurrentUser(user)) {
       return const SizedBox.shrink();
@@ -77,11 +80,11 @@ class _NewChatPageState extends State<NewChatPage> {
     return _buildUserSelectionTile(user);
   }
 
-  bool _isCurrentUser(User user) {
+  bool _isCurrentUser(ChatUserSummary user) {
     return user.id == _currentUser.id;
   }
 
-  Widget _buildUserSelectionTile(User user) {
+  Widget _buildUserSelectionTile(ChatUserSummary user) {
     return CheckboxListTile(
       secondary: const CircleAvatar(child: Icon(Icons.person)),
       title: Text(user.name),
@@ -98,7 +101,7 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  void _toggleUserSelection(User user, bool? value) {
+  void _toggleUserSelection(ChatUserSummary user, bool? value) {
     setState(() {
       if (value == true) {
         _selectedUsers.add(user);
@@ -108,10 +111,13 @@ class _NewChatPageState extends State<NewChatPage> {
     });
   }
 
-  int _userItemCount(UsersState state) {
-    return state.users.length == state.totalUsersInDatabase
-        ? state.users.length
-        : state.users.length + 1;
+  int _userItemCount(ChatCandidateListState state) {
+    final isLoadingMore =
+        state is ChatCandidateListLoading && state.candidates.isNotEmpty;
+
+    return isLoadingMore
+        ? state.candidates.length + 1
+        : state.candidates.length;
   }
 
   Widget? _buildFloatingActionButton() {
@@ -121,7 +127,7 @@ class _NewChatPageState extends State<NewChatPage> {
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: BlocConsumer<ChatEditorBloc, ChatEditorState>(
+      child: BlocConsumer<ChatSessionBloc, ChatSessionState>(
         listener: _onChatEditorStateChanged,
         builder: _buildCreateChatButton,
       ),
@@ -130,15 +136,15 @@ class _NewChatPageState extends State<NewChatPage> {
 
   void _onChatEditorStateChanged(
     BuildContext context,
-    ChatEditorState state,
+    ChatSessionState state,
   ) {
-    if (state is ChatEditorWaitingForFirstMessage ||
-        state is ChatEditorLoaded) {
+    if (state is ChatSessionWaitingForFirstMessage ||
+        state is ChatSessionLoaded) {
       const ChatMessagesPageRoute().pushReplacement(context);
     }
   }
 
-  Widget _buildCreateChatButton(BuildContext context, ChatEditorState state) {
+  Widget _buildCreateChatButton(BuildContext context, ChatSessionState state) {
     return TextButton.icon(
       onPressed: () => _startChat(context, state),
       label: _buildCreateChatButtonLabel(context, state),
@@ -149,9 +155,9 @@ class _NewChatPageState extends State<NewChatPage> {
 
   Widget _buildCreateChatButtonLabel(
     BuildContext context,
-    ChatEditorState state,
+    ChatSessionState state,
   ) {
-    if (state is ChatEditorLoading) {
+    if (state is ChatSessionLoading) {
       return const Loader(size: 25);
     }
 
@@ -161,8 +167,8 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  Widget? _buildCreateChatButtonIcon(ChatEditorState state) {
-    if (state is ChatEditorLoading) {
+  Widget? _buildCreateChatButtonIcon(ChatSessionState state) {
+    if (state is ChatSessionLoading) {
       return null;
     }
 
@@ -183,20 +189,13 @@ class _NewChatPageState extends State<NewChatPage> {
     );
   }
 
-  void _startChat(BuildContext context, ChatEditorState state) {
-    if (state is ChatEditorLoading) {
+  void _startChat(BuildContext context, ChatSessionState state) {
+    if (state is ChatSessionLoading) {
       return;
     }
 
-    context.read<ChatEditorBloc>().add(
-      AddChat(chatMembers: _chatMembersForCreation()),
+    context.read<ChatSessionBloc>().add(
+      AddChat(chatMembers: _selectedUsers),
     );
-  }
-
-  List<User> _chatMembersForCreation() {
-    return [
-      ..._selectedUsers,
-      _currentUser,
-    ];
   }
 }

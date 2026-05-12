@@ -2,17 +2,26 @@ import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
+import 'package:social_app/features/auth/data/sources/local/auth_session_store.dart';
+import 'package:social_app/features/auth/data/sources/local/current_auth_user_store.dart';
+import 'package:social_app/features/auth/data/sources/remote/auth_remote_data_source.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
 
 /// An auth repository impl.
 class AuthRepositoryImpl implements AuthRepository {
   /// Creates a [AuthRepositoryImpl].
-  const AuthRepositoryImpl({required AuthRemoteDataSource authRemoteDataSource})
-    : _authRemoteDataSource = authRemoteDataSource;
+  const AuthRepositoryImpl({
+    required AuthRemoteDataSource authRemoteDataSource,
+    required AuthSessionStore authSessionStore,
+    required CurrentAuthUserStore currentAuthUserStore,
+  }) : _authRemoteDataSource = authRemoteDataSource,
+       _authSessionStore = authSessionStore,
+       _currentAuthUserStore = currentAuthUserStore;
+
   final AuthRemoteDataSource _authRemoteDataSource;
+  final AuthSessionStore _authSessionStore;
+  final CurrentAuthUserStore _currentAuthUserStore;
 
   @override
   Future<Either<Failure, User>> signInWithEmailPassword({
@@ -20,11 +29,21 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final user = await _authRemoteDataSource.signInWithEmailPassword(
-        email: email,
-        password: password,
-      );
-      return right(user.toEntity());
+      final authenticatedUser = await _authRemoteDataSource
+          .signInWithEmailPassword(
+            email: email,
+            password: password,
+          );
+      await _currentAuthUserStore.saveCurrentUser(authenticatedUser.user);
+
+      try {
+        await _authSessionStore.saveSession(authenticatedUser.session);
+      } on Exception {
+        await _currentAuthUserStore.clearCurrentUser();
+        rethrow;
+      }
+
+      return right(authenticatedUser.user.toEntity());
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
@@ -47,12 +66,22 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final user = await _authRemoteDataSource.signUpWithEmailPassword(
-        name: name,
-        email: email,
-        password: password,
-      );
-      return right(user.toEntity());
+      final authenticatedUser = await _authRemoteDataSource
+          .signUpWithEmailPassword(
+            name: name,
+            email: email,
+            password: password,
+          );
+      await _currentAuthUserStore.saveCurrentUser(authenticatedUser.user);
+
+      try {
+        await _authSessionStore.saveSession(authenticatedUser.session);
+      } on Exception {
+        await _currentAuthUserStore.clearCurrentUser();
+        rethrow;
+      }
+
+      return right(authenticatedUser.user.toEntity());
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
 
@@ -72,6 +101,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> signOut() async {
     try {
       await _authRemoteDataSource.signOut();
+      await _authSessionStore.clearSession();
+      await _currentAuthUserStore.clearCurrentUser();
       return right(null);
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
@@ -91,13 +122,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<Either<Failure, User?>> authStateChanges() async* {
     try {
-      await for (final UserModel? userModel
-          in _authRemoteDataSource.authStateChanges()) {
-        // userModel == null → signed out (valid state)
-        if (userModel == null) {
+      await for (final user in _currentAuthUserStore.watchCurrentUser()) {
+        if (user == null) {
           yield right(null);
         } else {
-          yield right(userModel.toEntity());
+          yield right(user.toEntity());
         }
       }
     } on Exception catch (error, stackTrace) {
@@ -110,7 +139,7 @@ class AuthRepositoryImpl implements AuthRepository {
           stackTrace: stackTrace,
         );
       }
-      // Any unexpected stream error is translated into a Failure
+
       yield left(failure);
     }
   }

@@ -76,7 +76,7 @@ void main() {
 
     test(
       'given a ServerException with 23505 when mapExceptionToFailure is '
-      'called then returns ValidationFailure for duplicate values',
+      'called then returns UnexpectedFailure',
       () {
         // Arrange
         const error = ServerException(
@@ -88,8 +88,8 @@ void main() {
         final failure = mapExceptionToFailure(error);
 
         // Assert
-        expect(failure, isA<ValidationFailure>());
-        expect(failure.message, 'This value already exists.');
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, 'Something went wrong. Please try again.');
         expect(
           failure.debugMessage,
           'duplicate key value violates unique constraint',
@@ -99,7 +99,7 @@ void main() {
 
     test(
       'given a ServerException with 23502 when mapExceptionToFailure is '
-      'called then returns ValidationFailure for missing field',
+      'called then returns UnexpectedFailure',
       () {
         // Arrange
         const error = ServerException(
@@ -111,8 +111,8 @@ void main() {
         final failure = mapExceptionToFailure(error);
 
         // Assert
-        expect(failure, isA<ValidationFailure>());
-        expect(failure.message, 'Some required information is missing.');
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, 'Something went wrong. Please try again.');
         expect(failure.debugMessage, 'null value in column');
       },
     );

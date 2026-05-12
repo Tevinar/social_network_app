@@ -27,6 +27,12 @@ class UnauthorizedFailure extends Failure {
       );
 }
 
+/// Represents authentication failure.
+class AuthenticationFailure extends Failure {
+  /// Creates an [AuthenticationFailure].
+  const AuthenticationFailure(super.message, {super.debugMessage});
+}
+
 /// Represents validation failure.
 class ValidationFailure extends Failure {
   /// Creates a [ValidationFailure].

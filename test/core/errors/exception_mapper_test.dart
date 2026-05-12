@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   group('NetworkException', () {
@@ -45,13 +45,21 @@ void main() {
     );
 
     test(
-      'given a PostgrestException when guardRemoteDataSourceCall is invoked '
+      'given a DioException with a server payload when '
+      'guardRemoteDataSourceCall is invoked '
       'then throws ServerException with code',
       () async {
         // Arrange
-        const exception = PostgrestException(
-          message: 'Database error',
-          code: '23505',
+        final exception = DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          response: Response<Map<String, dynamic>>(
+            requestOptions: RequestOptions(path: '/test'),
+            statusCode: 409,
+            data: {
+              'message': 'Database error',
+              'code': '23505',
+            },
+          ),
         );
 
         // Act
@@ -74,11 +82,16 @@ void main() {
     );
 
     test(
-      'given a SocketException when guardRemoteDataSourceCall is invoked '
+      'given a network DioException when guardRemoteDataSourceCall is invoked '
       'then throws NetworkException',
       () async {
         // Arrange
-        const exception = SocketException('No internet');
+        final exception = DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          type: DioExceptionType.connectionError,
+          error: const SocketException('No internet'),
+          message: 'No internet',
+        );
 
         // Act
         Future<void> act() async {

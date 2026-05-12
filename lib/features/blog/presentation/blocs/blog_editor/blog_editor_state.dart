@@ -1,23 +1,38 @@
 part of 'blog_editor_bloc.dart';
 
+/// Base state emitted by [BlogEditorBloc].
 @immutable
-/// Represents blog editor state.
-sealed class BlogEditorState {}
+sealed class BlogEditorState {
+  /// Creates a [BlogEditorState].
+  const BlogEditorState();
+}
 
-/// A blog initial.
-final class BlogInitial extends BlogEditorState {}
+/// Initial idle state before any upload attempt starts.
+final class BlogInitial extends BlogEditorState {
+  /// Creates a [BlogInitial].
+  const BlogInitial();
+}
 
-/// A blog loading.
-final class BlogLoading extends BlogEditorState {}
+/// State emitted while a blog upload request is in progress.
+final class BlogLoading extends BlogEditorState {
+  /// Creates a [BlogLoading].
+  const BlogLoading();
+}
 
-/// A blog upload success.
-final class BlogUploadSuccess extends BlogEditorState {}
+/// State emitted after a blog is uploaded successfully.
+final class BlogUploadSuccess extends BlogEditorState {
+  /// Creates a [BlogUploadSuccess].
+  const BlogUploadSuccess(this.blog);
 
-/// Represents blog failure.
+  /// Uploaded blog returned by the backend.
+  final Blog blog;
+}
+
+/// State emitted when the upload request fails.
 final class BlogFailure extends BlogEditorState {
   /// Creates a [BlogFailure].
-  BlogFailure(this.error);
+  const BlogFailure(this.error);
 
-  /// The error.
+  /// Human-readable error message.
   final String error;
 }

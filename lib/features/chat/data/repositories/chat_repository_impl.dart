@@ -1,16 +1,20 @@
+import 'dart:async';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/features/auth/data/models/user_model.dart';
-import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:social_app/features/chat/domain/entities/chat.dart';
-import 'package:social_app/features/chat/domain/entities/chat_change.dart';
+import 'package:social_app/features/chat/domain/events/chat_change.dart';
+import 'package:social_app/features/chat/domain/events/chat_message_change.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_candidate_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart';
+import 'package:social_app/features/chat/domain/pagination/chat_message_list_slice.dart';
 import 'package:social_app/features/chat/domain/repositories/chat_repository.dart';
+import 'package:social_app/features/chat/domain/results/chat_write_result.dart';
 
-/// Repository implementation that maps chat data source results
-/// to domain types.
+/// Repository implementation that maps remote chat payloads to domain entities.
 class ChatRepositoryImpl implements ChatRepository {
   /// Creates a [ChatRepositoryImpl].
   ChatRepositoryImpl({required this.chatRemoteDataSource});
@@ -19,118 +23,186 @@ class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource chatRemoteDataSource;
 
   @override
-  /// Creates a chat from domain members and returns the created domain chat.
-  Future<Either<Failure, Chat>> createChat(
-    List<User> members,
-    String firstMessageContent,
-  ) async {
+  Future<Either<Failure, ChatCandidateListSlice>> getChatCandidateListSlice({
+    required int limit,
+    String? cursor,
+  }) async {
     try {
-      final chat = await chatRemoteDataSource.createChat(
-        members.map(UserModel.fromEntity).toList(),
-        firstMessageContent,
+      final sliceModel = await chatRemoteDataSource.getChatCandidateListSlice(
+        limit: limit,
+        cursor: cursor,
       );
-      return right(chat.toEntity());
+      return right(sliceModel.toSlice());
     } on Exception catch (error, stackTrace) {
-      final failure = mapExceptionToFailure(error);
-
-      if (failure is UnexpectedFailure) {
-        appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.createChat',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
-      return left(failure);
-    }
-  }
-
-  @override
-  /// Fetches a page of chats and maps the models to domain entities.
-  Future<Either<Failure, List<Chat>>> getChatsPage(int pageNumber) async {
-    try {
-      final chatModels = await chatRemoteDataSource.getChatsPage(
-        pageNumber,
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.getChatCandidateListSlice',
       );
-      final chats = chatModels
-          .map((chatModel) => chatModel.toEntity())
-          .toList();
-      return right(chats);
-    } on Exception catch (error, stackTrace) {
-      final failure = mapExceptionToFailure(error);
-
-      if (failure is UnexpectedFailure) {
-        appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.getChatsPage',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
-      return left(failure);
     }
   }
 
   @override
-  /// Fetches the total number of chats available in the backend.
-  Future<Either<Failure, int>> getChatsCount() async {
+  Future<Either<Failure, ChatWriteResult>> createChat({
+    required List<String> memberIds,
+    required String firstMessageContent,
+  }) async {
     try {
-      final chatsCount = await chatRemoteDataSource.getChatsCount();
-      return right(chatsCount);
+      final resultModel = await chatRemoteDataSource.createChat(
+        memberIds: memberIds,
+        firstMessageContent: firstMessageContent,
+      );
+      return right(
+        resultModel.toResult(),
+      );
     } on Exception catch (error, stackTrace) {
-      final failure = mapExceptionToFailure(error);
-
-      if (failure is UnexpectedFailure) {
-        appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.getChatsCount',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
-      return left(failure);
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.createChat',
+      );
     }
   }
 
   @override
-  /// Streams realtime chat changes mapped to domain-level change objects.
-  Stream<Either<Failure, ChatChange>> watchChatChanges() async* {
+  Future<Either<Failure, ChatListSlice>> getChatListSlice({
+    required int limit,
+    String? cursor,
+  }) async {
     try {
-      await for (final ChatChange chatChange
-          in chatRemoteDataSource.watchChatChanges()) {
-        yield right(chatChange);
+      final sliceModel = await chatRemoteDataSource.getChatListSlice(
+        limit: limit,
+        cursor: cursor,
+      );
+      return right(sliceModel.toSlice());
+    } on Exception catch (error, stackTrace) {
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.getChatListSlice',
+      );
+    }
+  }
+
+  @override
+  Stream<Either<Failure, ChatListChange>> subscribeToChatList() async* {
+    try {
+      await for (final eventModel
+          in chatRemoteDataSource.subscribeToChatList()) {
+        yield right(eventModel.toEvent());
       }
     } on Exception catch (error, stackTrace) {
       final failure = mapExceptionToFailure(error);
-
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.watchChatChanges',
+          'Unexpected error in ChatRepositoryImpl.subscribeToChatList',
           error: error,
           stackTrace: stackTrace,
         );
       }
-      // Any unexpected stream error is translated into a Failure
       yield left(failure);
     }
   }
 
   @override
-  /// Looks up an existing chat for the provided member set.
-  Future<Either<Failure, Chat?>> getChatByMembers(List<User> members) async {
+  Future<Either<Failure, Chat?>> getChatByMembers({
+    required List<String> memberIds,
+  }) async {
     try {
       final chatModel = await chatRemoteDataSource.getChatByMembers(
-        members.map(UserModel.fromEntity).toList(),
+        memberIds: memberIds,
       );
       return right(chatModel?.toEntity());
     } on Exception catch (error, stackTrace) {
-      final failure = mapExceptionToFailure(error);
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.getChatByMembers',
+      );
+    }
+  }
 
+  @override
+  Future<Either<Failure, ChatMessageListSlice>> getChatMessageListSlice({
+    required String chatId,
+    required int limit,
+    String? cursor,
+  }) async {
+    try {
+      final sliceModel = await chatRemoteDataSource.getChatMessageListSlice(
+        chatId: chatId,
+        limit: limit,
+        cursor: cursor,
+      );
+      return right(sliceModel.toSlice());
+    } on Exception catch (error, stackTrace) {
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.getChatMessageListSlice',
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChatWriteResult>> createChatMessage({
+    required String chatId,
+    required String content,
+  }) async {
+    try {
+      final resultModel = await chatRemoteDataSource.createChatMessage(
+        chatId: chatId,
+        content: content,
+      );
+      return right(
+        resultModel.toResult(),
+      );
+    } on Exception catch (error, stackTrace) {
+      return _mapFailure(
+        error,
+        stackTrace,
+        'Unexpected error in ChatRepositoryImpl.createChatMessage',
+      );
+    }
+  }
+
+  @override
+  Stream<Either<Failure, ChatMessageListChange>> subscribeToChatMessageList({
+    required String chatId,
+  }) async* {
+    try {
+      await for (final eventModel
+          in chatRemoteDataSource.subscribeToChatMessageList(chatId: chatId)) {
+        yield right(eventModel.toEvent());
+      }
+    } on Exception catch (error, stackTrace) {
+      final failure = mapExceptionToFailure(error);
       if (failure is UnexpectedFailure) {
         appLogger.error(
-          'Unexpected error in ChatRepositoryImpl.getChatByMembers',
+          'Unexpected error in ChatRepositoryImpl.subscribeToChatMessageList',
           error: error,
           stackTrace: stackTrace,
         );
       }
-      return left(failure);
+      yield left(failure);
     }
+  }
+
+  Either<Failure, T> _mapFailure<T>(
+    Exception error,
+    StackTrace stackTrace,
+    String message,
+  ) {
+    final failure = mapExceptionToFailure(error);
+
+    if (failure is UnexpectedFailure) {
+      appLogger.error(
+        message,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return left(failure);
   }
 }

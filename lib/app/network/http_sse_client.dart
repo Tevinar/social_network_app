@@ -1,0 +1,169 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/network/sse/sse_event.dart';
+import 'package:social_app/features/auth/data/session/auth_token_manager.dart';
+
+/// HTTP-based Server-Sent Events client that opens authenticated
+/// subscriptions against the backend API.
+class HttpSseClient {
+  /// Creates an [HttpSseClient].
+  HttpSseClient({
+    required String baseUrl,
+    required AuthTokenManager authTokenManager,
+  }) : _baseUrl = baseUrl,
+       _authTokenManager = authTokenManager;
+
+  final String _baseUrl;
+  final AuthTokenManager _authTokenManager;
+
+  String? _eventType;
+  String? _eventId;
+  StringBuffer _dataBuffer = StringBuffer();
+
+  /// Opens the authenticated SSE stream exposed by the backend [path].
+  Stream<SseEvent> connect(String path) {
+    late final StreamController<SseEvent> controller;
+    HttpClient? httpClient;
+    StreamSubscription<String>? linesSubscription;
+
+    controller = StreamController<SseEvent>(
+      // Define how the SSE connection is established when
+      // the stream gets its first listener.
+      onListen: () async {
+        try {
+          final accessToken = await _authTokenManager.getValidAccessToken();
+          if (accessToken == null) {
+            throw const UnauthorizedException(
+              message: 'Missing auth session for SSE connection',
+            );
+          }
+
+          httpClient = HttpClient();
+
+          // Build the GET request that subscribes to the backend SSE endpoint
+          // (for example `/blogs/events`).
+          final request = await httpClient!.getUrl(
+            Uri.parse('$_baseUrl$path'),
+          );
+
+          // SSE is still plain HTTP, so authentication and content negotiation
+          // are configured through regular request headers before the request
+          // is sent.
+          request.headers.set(
+            HttpHeaders.authorizationHeader,
+            'Bearer $accessToken',
+          );
+          // Tell the backend this request expects a Server-Sent Events stream.
+          request.headers.set(HttpHeaders.acceptHeader, 'text/event-stream');
+          // Ask the server and any intermediaries on the request path to treat
+          // this as a fresh live stream request rather than a cacheable
+          // response.
+          request.headers.set(HttpHeaders.cacheControlHeader, 'no-cache');
+
+          // Sending the request opens the long-lived backend stream.
+          final response = await request.close();
+
+          if (response.statusCode != HttpStatus.ok) {
+            throw ServerException(
+              message:
+                  'SSE connection failed with status ${response.statusCode}',
+            );
+          }
+
+          // Start listening to the SSE stream, which is a stream of
+          // UTF-8 encoded text lines.
+          linesSubscription = response
+              // decode the byte stream into UTF-8 text
+              .transform(utf8.decoder)
+              //splits the text stream into one line at a time.
+              .transform(const LineSplitter())
+              .listen(
+                (line) {
+                  _processSseLine(
+                    line,
+                    controller,
+                  );
+                },
+                onError: controller.addError,
+                onDone: controller.close,
+                cancelOnError: true,
+              );
+        } on Exception catch (error, stackTrace) {
+          controller.addError(error, stackTrace);
+          await controller.close();
+        }
+      },
+      onCancel: () async {
+        // Closing the Dart stream should also tear down the HTTP subscription.
+        await linesSubscription?.cancel();
+        httpClient?.close(force: true);
+      },
+    );
+
+    return controller.stream;
+  }
+
+  void _processSseLine(
+    String line,
+    StreamController<SseEvent> controller,
+  ) {
+    // In SSE, a line that starts with : is a special protocol
+    // line, not a real app event field.
+    // These lines can be ignored. They are often used as
+    // keep-alive events by the backend.
+    if (line.startsWith(':')) {
+      return;
+    }
+
+    // A blank line marks the end of one SSE event frame. At that
+    // point the buffered `data:` lines can be decoded and
+    // emitted.
+    if (line.isEmpty) {
+      if (_dataBuffer.isEmpty) {
+        _eventType = null;
+        _eventId = null;
+        return;
+      }
+
+      final decoded =
+          jsonDecode(_dataBuffer.toString()) as Map<String, dynamic>;
+
+      controller.add(
+        SseEvent(
+          type: _eventType,
+          id: _eventId,
+          data: decoded,
+        ),
+      );
+
+      _eventType = null;
+      _eventId = null;
+      _dataBuffer = StringBuffer();
+      return;
+    }
+
+    // `event:` provides the event name used by the backend.
+    if (line.startsWith('event:')) {
+      _eventType = line.substring('event:'.length).trim();
+      return;
+    }
+
+    // `id:` carries the optional SSE event identifier.
+    if (line.startsWith('id:')) {
+      _eventId = line.substring('id:'.length).trim();
+      return;
+    }
+
+    // `data:` carries the JSON payload. Multiple `data:` lines
+    // belong to the same event and must be concatenated.
+    if (line.startsWith('data:')) {
+      if (_dataBuffer.isNotEmpty) {
+        _dataBuffer.write('\n');
+      }
+      _dataBuffer.write(line.substring('data:'.length).trim());
+    }
+  }
+}

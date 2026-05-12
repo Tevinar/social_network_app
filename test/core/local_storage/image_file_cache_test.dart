@@ -4,125 +4,150 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:social_app/core/local_storage/app_directory_provider.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:social_app/core/local_storage/image_file_cache.dart';
 import 'package:social_app/core/logging/app_logger.dart';
-import 'package:social_app/core/network/http_downloader.dart';
+import 'package:social_app/core/network/dio_http_downloader.dart';
 
-class MockAppDirectoryProvider extends Mock implements AppDirectoryProvider {}
-
-class MockHttpDownloader extends Mock implements HttpDownloader {}
+class MockDioHttpDownloader extends Mock implements DioHttpDownloader {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
+class FakePathProviderPlatform extends PathProviderPlatform {
+  FakePathProviderPlatform(this.applicationDocumentsPath);
+
+  final String applicationDocumentsPath;
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    return applicationDocumentsPath;
+  }
+}
+
 void main() {
-  late MockAppDirectoryProvider directoryProvider;
-  late MockHttpDownloader httpDownloader;
+  late MockDioHttpDownloader dioHttpDownloader;
   late MockAppLogger logger;
   late ImageFileCacheImpl imageFileCache;
-  late Directory tempDirectory;
+  late Directory tempDir;
+  late PathProviderPlatform originalPathProviderPlatform;
+
+  setUpAll(() {
+    registerFallbackValue(Uri());
+  });
 
   setUp(() async {
-    directoryProvider = MockAppDirectoryProvider();
-    httpDownloader = MockHttpDownloader();
-    logger = MockAppLogger();
-    tempDirectory = Directory.systemTemp.createTempSync('image-cache-test');
+    tempDir = await Directory.systemTemp.createTemp('image-file-cache-test-');
+    originalPathProviderPlatform = PathProviderPlatform.instance;
+    PathProviderPlatform.instance = FakePathProviderPlatform(tempDir.path);
 
-    if (GetIt.I.isRegistered<AppLogger>()) {
-      await GetIt.I.unregister<AppLogger>();
-    }
+    dioHttpDownloader = MockDioHttpDownloader();
+    logger = MockAppLogger();
+    imageFileCache = ImageFileCacheImpl(dioHttpDownloader: dioHttpDownloader);
+
+    await GetIt.I.reset();
     GetIt.I.registerSingleton<AppLogger>(logger);
 
     when(
-      () => directoryProvider.getApplicationDocumentsDirectory(),
-    ).thenAnswer((_) async => tempDirectory);
-
-    imageFileCache = ImageFileCacheImpl(
-      directoryProvider: directoryProvider,
-      httpDownloader: httpDownloader,
-    );
+      () => logger.error(
+        any(),
+        error: any(named: 'error'),
+        stackTrace: any(named: 'stackTrace'),
+      ),
+    ).thenReturn(null);
   });
 
   tearDown(() async {
+    PathProviderPlatform.instance = originalPathProviderPlatform;
     await GetIt.I.reset();
-    if (tempDirectory.existsSync()) {
-      await tempDirectory.delete(recursive: true);
+    if (tempDir.existsSync()) {
+      await tempDir.delete(recursive: true);
     }
   });
 
-  test(
-    'given a cached file already exists when getOrDownload is called then '
-    'it returns the cached file without downloading',
-    () async {
-      final cacheDirectory = Directory('${tempDirectory.path}/image_cache')
-        ..createSync(recursive: true);
-      final cachedFile = File('${cacheDirectory.path}/blog-1.img')
-        ..writeAsBytesSync([1, 2, 3]);
+  group('getOrDownload', () {
+    test(
+      'given a cached file when requested then returns it without downloading',
+      () async {
+        // Arrange
+        final cacheDir = Directory('${tempDir.path}/image_cache');
+        await cacheDir.create(recursive: true);
+        final cachedFile = File('${cacheDir.path}/avatar.img');
+        await cachedFile.writeAsBytes(const [1, 2, 3], flush: true);
 
-      final result = await imageFileCache.getOrDownload(
-        cacheKey: 'blog-1',
-        imageUrl: 'https://example.com/blog-1.png',
-      );
+        // Act
+        final result = await imageFileCache.getOrDownload(
+          cacheKey: 'avatar',
+          imageUrl: 'https://example.com/avatar.png',
+        );
 
-      expect(result, isNotNull);
-      expect(result!.path, cachedFile.path);
-      expect(result.readAsBytesSync(), [1, 2, 3]);
-      verifyNever(
-        () => httpDownloader.downloadBytes(
-          Uri.parse('https://example.com/blog-1.png'),
-        ),
-      );
-    },
-  );
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.path, cachedFile.path);
+        expect(
+          await result.readAsBytes(),
+          Uint8List.fromList(const [1, 2, 3]),
+        );
+        verifyNever(() => dioHttpDownloader.downloadBytes(any()));
+      },
+    );
 
-  test(
-    'given no cached file when getOrDownload succeeds then it downloads and '
-    'stores the image on disk',
-    () async {
-      when(
-        () => httpDownloader.downloadBytes(
-          Uri.parse('https://example.com/blog-2.png'),
-        ),
-      ).thenAnswer((_) async => Uint8List.fromList([4, 5, 6]));
+    test(
+      'given no cached file when requested then downloads and stores it',
+      () async {
+        // Arrange
+        when(() => dioHttpDownloader.downloadBytes(any())).thenAnswer(
+          (_) async => Uint8List.fromList(const [9, 8, 7]),
+        );
 
-      final result = await imageFileCache.getOrDownload(
-        cacheKey: 'blog-2',
-        imageUrl: 'https://example.com/blog-2.png',
-      );
+        // Act
+        final result = await imageFileCache.getOrDownload(
+          cacheKey: 'avatar',
+          imageUrl: 'https://example.com/avatar.png',
+        );
 
-      expect(result, isNotNull);
-      expect(result!.existsSync(), isTrue);
-      expect(result.readAsBytesSync(), [4, 5, 6]);
-      verify(
-        () => httpDownloader.downloadBytes(
-          Uri.parse('https://example.com/blog-2.png'),
-        ),
-      ).called(1);
-    },
-  );
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.existsSync(), isTrue);
+        expect(
+          await result.readAsBytes(),
+          Uint8List.fromList(const [9, 8, 7]),
+        );
+        verify(
+          () => dioHttpDownloader.downloadBytes(
+            any(
+              that: predicate<Uri>(
+                (value) => value.toString() == 'https://example.com/avatar.png',
+              ),
+            ),
+          ),
+        ).called(1);
+      },
+    );
 
-  test(
-    'given no cached file when download fails then getOrDownload returns null',
-    () async {
-      when(
-        () => httpDownloader.downloadBytes(
-          Uri.parse('https://example.com/blog-3.png'),
-        ),
-      ).thenThrow(const HttpException('download failed'));
+    test(
+      'given the download fails when requested then returns null and logs '
+      'the error',
+      () async {
+        // Arrange
+        final error = Exception('download failed');
+        when(() => dioHttpDownloader.downloadBytes(any())).thenThrow(error);
 
-      final result = await imageFileCache.getOrDownload(
-        cacheKey: 'blog-3',
-        imageUrl: 'https://example.com/blog-3.png',
-      );
+        // Act
+        final result = await imageFileCache.getOrDownload(
+          cacheKey: 'avatar',
+          imageUrl: 'https://example.com/avatar.png',
+        );
 
-      expect(result, isNull);
-      final expectedFile = File('${tempDirectory.path}/image_cache/blog-3.img');
-      expect(expectedFile.existsSync(), isFalse);
-      verify(
-        () => httpDownloader.downloadBytes(
-          Uri.parse('https://example.com/blog-3.png'),
-        ),
-      ).called(1);
-    },
-  );
+        // Assert
+        expect(result, isNull);
+        verify(
+          () => logger.error(
+            'Failed to download or cache image for avatar from https://example.com/avatar.png',
+            error: error,
+            stackTrace: any(named: 'stackTrace'),
+          ),
+        ).called(1);
+      },
+    );
+  });
 }

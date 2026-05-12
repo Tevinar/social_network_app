@@ -15,12 +15,6 @@ The architecture is designed to provide:
 - predictable data flow
 - scalability without widespread rewrites
 
-The core organizing question for any file is:
-
-- is it a passive shared building block?
-- is it app-wide coordination?
-- is it part of a business capability?
-
 ---
 
 ## 2. Project Structure
@@ -50,9 +44,6 @@ features/
       └── presentation/
 ```
 
-This is a practical structure for clarity and growth, not an academic layering
-exercise.
-
 ---
 
 ## 3. Responsibilities by Module
@@ -67,7 +58,7 @@ Typical contents:
 
 - shared errors and low-level abstractions
 - configuration access
-- shared constants and schema names
+- shared constants
 - local database and local file storage infrastructure
 - reusable utilities
 - use case conventions
@@ -98,7 +89,6 @@ Typical contents:
 - routing and route guards
 - app shell
 - global session state
-- startup-only UX such as one-shot offline notifications
 - app-wide logging integration
 - concrete shared service implementations when they are truly global
 
@@ -141,7 +131,7 @@ Typical contents:
 
 - repository implementations
 - data sources
-- DTOs and models
+- read and persistence models
 - external persistence and API integration
 
 Must not contain:
@@ -213,15 +203,23 @@ Notes:
 6. results are mapped back to domain entities or failures
 7. the BLoC emits a new UI state
 
-### Reactive flow
+### Naming convention
 
-1. a repository exposes a passive stream of domain-level changes
+Use read names to signal where updates come from:
+
+- `subscribe` = server-pushed events
+- `observe` = local/cache/reactive streams
+- `get` = one-shot reads
+
+### Server-pushed flow
+
+1. a remote data source or repository exposes a backend-driven stream
 2. a use case exposes that stream to presentation
 3. a BLoC subscribes to the stream
 4. stream emissions are converted into BLoC events
 5. state changes still go through the BLoC event pipeline
 
-### Cache-first reactive flow
+### Local/cache-reactive flow
 
 When stale local data is still useful, the reactive flow becomes local-first:
 
@@ -231,6 +229,15 @@ When stale local data is still useful, the reactive flow becomes local-first:
 4. the repository emits fresh remote data or a refresh failure attached to the
    stale cached snapshot
 5. the BLoC updates UI state without duplicating cache and remote emissions
+
+### Deep-linkable page rule
+
+Pages that should support deep links, push notifications, or state restoration
+must receive primitive route parameters (string, integer, boolean...), rather
+than rich domain objects. That rule allows to route contracts to stay serializable.
+
+This keeps entry points consistent whether the user opens a page from in-app
+navigation, a deep link, a push notification, or a restored app session.
 
 ### App-wide coordination
 
@@ -245,26 +252,26 @@ they are centered on:
 - BLoC/Cubit for state management
 - `StreamUseCase` for cache-first and other reactive feature reads
 
-Rule:
-
-- feature behavior stays inside features
-- global lifecycle, routing, and session concerns live in `app/`
-
 Current notable patterns:
 
-- blog page and blog viewer flows can emit cached data before remote refresh
+- `observeInitialBlogListSlice` emits a cached initial blog slice before one
+  remote refresh
+- `observeBlogById(blogId)` keeps the blog viewer deep-link-safe while still
+  rendering quickly from local cache when possible
+- `getBlogListSlice`, `getChatListSlice`, `getChatCandidateListSlice`, and
+  `getChatMessageListSlice` are one-shot cursor reads
+- `subscribeToChatList` and `subscribeToChatMessageList` are server-pushed SSE
+  streams
 - image loading can use file-backed local cache before falling back to network
 - startup-only feedback such as the offline snackbar remains an app concern,
   not a feature concern
-
----
 
 ## 6. Error Handling
 
 Errors are handled according to their level:
 
 - infrastructure code may throw technical exceptions
-- repositories map those exceptions into safe `Failure` objects
+- repositories map those exceptions into safe `Failure` objects. Only unexpected failures are logged in production code.
 - use cases and presentation consume `Either<Failure, T>`
 - UI receives intentional, user-safe messages
 - logs may keep richer technical details than UI state
@@ -280,31 +287,7 @@ Practical rules:
 
 ---
 
-## 7. Shared Code and Cross-Cutting Concerns
-
-Shared concerns in this project include:
-
-- logging
-- configuration and environment access
-- connectivity checking
-- local persistence and disk caching
-- image picking abstraction
-- formatting and technical utilities
-- theme and small UI primitives
-
-Placement rules:
-
-- passive, feature-agnostic technical code belongs in `core/`
-- app-wide coordination belongs in `app/`
-- feature logic must stay in features, even if duplication exists
-- `core/` must not become a dumping ground
-
-An external dependency belongs in `core/` only when it supports an
-architectural convention rather than app-specific behavior.
-
----
-
-## 8. Testing Strategy
+## 7. Testing Strategy
 
 Testing should prioritize behavior over surface area.
 
@@ -324,17 +307,15 @@ Practical rules:
   priority as behavior-owning code
 
 The goal is not mechanical coverage. The goal is to test code that owns
-decisions and behavior. The current project baseline is high, but the lasting
-expectation is to preserve disciplined behavior-focused coverage and maintain at
-least a 70% overall baseline over time.
+decisions and behavior.
 
 ---
 
-## 9. Practical Conventions
+## 8. Practical Conventions
 
 Default placement rules:
 
-- DTOs and transport models live in `data/models`
+- transport and persistence models live in `data/models`
 - external system access lives in `data/data_sources`
 - repository implementations live in `data/repositories`
 - use cases live in `domain/usecases`
@@ -352,28 +333,5 @@ Additional conventions:
 
 Sharing rules:
 
-- domain entities may be shared only with clear ownership
-- feature UI, feature BLoCs, and DTOs should not be shared arbitrarily
-
----
-
-## 10. Trade-offs
-
-This architecture is intentionally pragmatic.
-
-Guiding rules:
-
-- `core/` stays passive
-- `app/` orchestrates globally
-- `features/` own business behavior
-
-Practical trade-offs:
-
-- not every operation needs its own abstraction
-- use cases are kept when they improve clarity, consistency, or ownership
-- `app/` must not become a hidden business layer
-- some cross-feature sharing is acceptable when the concept is genuinely shared
-  and ownership is explicit
-- clarity is preferred over unnecessary indirection
-
-Consistency matters, but pragmatism is allowed when justified.
+- domain layer may be shared only with clear ownership
+- presentation and data layers should not be shared arbitrarely

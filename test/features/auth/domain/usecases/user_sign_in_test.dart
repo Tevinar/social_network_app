@@ -4,13 +4,13 @@ import 'package:mocktail/mocktail.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/features/auth/domain/entities/user.dart';
 import 'package:social_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:social_app/features/auth/domain/usecases/user_sign_in.dart';
+import 'package:social_app/features/auth/domain/usecases/user_sign_in_use_case.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late MockAuthRepository authRepository;
-  late UserSignIn userSignIn;
+  late UserSignInUseCase userSignIn;
 
   const testUser = User(
     id: '123',
@@ -20,7 +20,7 @@ void main() {
 
   setUp(() {
     authRepository = MockAuthRepository();
-    userSignIn = UserSignIn(authRepositoy: authRepository);
+    userSignIn = UserSignInUseCase(authRepositoy: authRepository);
   });
 
   group('UserSignIn', () {
@@ -84,6 +84,76 @@ void main() {
         result.fold(
           (failure) => expect(failure, isA<NetworkFailure>()),
           (_) => fail('Expected a failure'),
+        );
+      },
+    );
+
+    test(
+      'given invalid email when UserSignIn is called then returns '
+      'ValidationFailure and does not call repository',
+      () async {
+        // Arrange
+        final params = UserSignInParams(
+          email: 'invalid-email',
+          password: 'password',
+        );
+
+        // Act
+        final result = await userSignIn(params);
+
+        // Assert
+        expect(result, isA<Left<Failure, User>>());
+        result.fold(
+          (failure) => expect(
+            failure,
+            isA<ValidationFailure>().having(
+              (failure) => failure.message,
+              'message',
+              'Please enter a valid email address.',
+            ),
+          ),
+          (_) => fail('Expected a failure'),
+        );
+        verifyNever(
+          () => authRepository.signInWithEmailPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'given short password when UserSignIn is called then returns '
+      'ValidationFailure and does not call repository',
+      () async {
+        // Arrange
+        final params = UserSignInParams(
+          email: 'test@test.com',
+          password: '12345',
+        );
+
+        // Act
+        final result = await userSignIn(params);
+
+        // Assert
+        expect(result, isA<Left<Failure, User>>());
+        result.fold(
+          (failure) => expect(
+            failure,
+            isA<ValidationFailure>().having(
+              (failure) => failure.message,
+              'message',
+              'Password must be at least 6 characters long.',
+            ),
+          ),
+          (_) => fail('Expected a failure'),
+        );
+        verifyNever(
+          () => authRepository.signInWithEmailPassword(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
         );
       },
     );

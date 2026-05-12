@@ -135,7 +135,7 @@ void main() {
 
     test(
       'given the backend returns an empty body when refresh succeeds then '
-      'throws ServerException',
+      'throws InvalidResponseException',
       () async {
         // Arrange
         when(
@@ -156,7 +156,7 @@ void main() {
         final result = refresher.refreshSession();
 
         // Assert
-        await expectLater(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<InvalidResponseException>()));
       },
     );
   });

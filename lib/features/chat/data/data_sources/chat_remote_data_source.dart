@@ -90,7 +90,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Chat candidates slice response body is null',
         );
       }
@@ -115,7 +115,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Create chat response body is null',
         );
       }
@@ -140,7 +140,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Chat list slice response body is null',
         );
       }
@@ -194,7 +194,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Chat message list slice response body is null',
         );
       }
@@ -218,7 +218,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Create chat message response body is null',
         );
       }

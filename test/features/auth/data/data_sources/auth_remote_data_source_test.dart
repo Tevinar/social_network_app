@@ -133,7 +133,7 @@ void main() {
 
     test(
       'given backend returns an empty body when signing in then throws '
-      'ServerException',
+      'InvalidResponseException',
       () async {
         // Arrange
         when(
@@ -154,7 +154,7 @@ void main() {
         );
 
         // Assert
-        await expectLater(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<InvalidResponseException>()));
       },
     );
 
@@ -239,7 +239,7 @@ void main() {
 
     test(
       'given backend returns an invalid user shape when signing up then '
-      'throws ServerException',
+      'throws InvalidResponseException',
       () async {
         // Arrange
         when(
@@ -262,7 +262,7 @@ void main() {
         );
 
         // Assert
-        await expectLater(result, throwsA(isA<ServerException>()));
+        await expectLater(result, throwsA(isA<InvalidResponseException>()));
       },
     );
   });

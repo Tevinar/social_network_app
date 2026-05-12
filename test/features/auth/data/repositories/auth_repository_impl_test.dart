@@ -26,6 +26,8 @@ class MockCurrentAuthUserStore extends Mock implements CurrentAuthUserStore {}
 class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
+  final serverErrorTimestamp = DateTime.parse('2026-05-12T10:00:00.000Z');
+
   late MockAuthRemoteDataSource remote;
   late MockAuthSessionStore sessionStore;
   late MockCurrentAuthUserStore currentAuthUserStore;
@@ -153,7 +155,15 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenThrow(const ServerException(message: 'unexpected sign-in error'));
+        ).thenThrow(
+          ServerException(
+            message: 'unexpected sign-in error',
+            code: 'internal_server_error',
+            statusCode: 500,
+            path: '/auth/sign-in',
+            timestamp: serverErrorTimestamp,
+          ),
+        );
 
         // Act
         final result = await repository.signInWithEmailPassword(
@@ -218,7 +228,9 @@ void main() {
             email: any(named: 'email'),
             password: any(named: 'password'),
           ),
-        ).thenThrow(const ServerException(message: 'error'));
+        ).thenThrow(
+          const InvalidResponseException(message: 'Malformed auth response'),
+        );
 
         // Act
         final result = await repository.signUpWithEmailPassword(
@@ -292,7 +304,7 @@ void main() {
         when(
           () => remote.signOut(),
         ).thenThrow(
-          const ServerException(message: 'unexpected sign-out error'),
+          const InvalidResponseException(message: 'Malformed sign-out state'),
         );
 
         // Act
@@ -384,7 +396,9 @@ void main() {
       () async {
         // Arrange
         when(() => currentAuthUserStore.watchCurrentUser()).thenAnswer(
-          (_) => Stream.error(const ServerException(message: 'stream error')),
+          (_) => Stream.error(
+            const InvalidResponseException(message: 'stream error'),
+          ),
         );
 
         // Act

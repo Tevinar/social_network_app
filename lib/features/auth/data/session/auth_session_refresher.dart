@@ -47,7 +47,7 @@ class BackendAuthSessionRefresher {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(
+        throw const InvalidResponseException(
           message: 'Refresh session response body is empty',
         );
       }

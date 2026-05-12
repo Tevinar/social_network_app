@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/blog/domain/entities/blog.dart';
@@ -20,17 +21,19 @@ class CreateBlogUseCase implements UseCase<Blog, CreateBlogParams> {
   /// Validates the request, then creates the blog if the data is valid.
   Future<Either<Failure, Blog>> call(CreateBlogParams params) async {
     if (params.image.path.isEmpty) {
-      return left(const ValidationFailure('Image cannot be empty'));
+      return left(const ValidationFailure(BlogFailureMessages.imageRequired));
     }
     if (params.title.isEmpty) {
-      return left(const ValidationFailure('Title cannot be empty'));
+      return left(const ValidationFailure(BlogFailureMessages.titleRequired));
     }
     if (params.content.isEmpty) {
-      return left(const ValidationFailure('Content cannot be empty'));
+      return left(
+        const ValidationFailure(BlogFailureMessages.contentRequired),
+      );
     }
     if (params.topics.isEmpty) {
       return left(
-        const ValidationFailure('At least one topic must be selected'),
+        const ValidationFailure(BlogFailureMessages.topicSelectionRequired),
       );
     }
 

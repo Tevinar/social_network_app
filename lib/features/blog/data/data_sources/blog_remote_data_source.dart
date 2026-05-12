@@ -57,7 +57,9 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(message: 'Create blog response is empty');
+        throw const InvalidResponseException(
+          message: 'Create blog response is empty',
+        );
       }
 
       return BlogModel.fromJson(body);
@@ -80,7 +82,9 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(message: 'List blogs response is empty');
+        throw const InvalidResponseException(
+          message: 'List blogs response is empty',
+        );
       }
 
       return BlogListSliceModel.fromJson(body);
@@ -94,7 +98,9 @@ class BlogRemoteDataSourceImpl implements BlogRemoteDataSource {
 
       final body = response.data;
       if (body == null) {
-        throw const ServerException(message: 'Get blog response is empty');
+        throw const InvalidResponseException(
+          message: 'Get blog response is empty',
+        );
       }
 
       return BlogModel.fromJson(body);

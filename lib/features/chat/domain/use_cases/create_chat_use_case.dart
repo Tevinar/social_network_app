@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/logging/app_logger.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
@@ -23,7 +24,7 @@ class CreateChatUseCase implements UseCase<ChatWriteResult, CreateChatParams> {
       );
       return Future.value(
         left(
-          const ValidationFailure('At least one chat member must be selected'),
+          const ValidationFailure(ChatFailureMessages.memberSelectionRequired),
         ),
       );
     }
@@ -33,7 +34,11 @@ class CreateChatUseCase implements UseCase<ChatWriteResult, CreateChatParams> {
         'empty',
       );
       return Future.value(
-        left(const ValidationFailure('First message content cannot be empty')),
+        left(
+          const ValidationFailure(
+            ChatFailureMessages.firstMessageContentRequired,
+          ),
+        ),
       );
     }
 

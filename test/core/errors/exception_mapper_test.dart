@@ -6,6 +6,8 @@ import 'package:social_app/core/errors/exceptions.dart';
 import 'package:social_app/core/errors/exceptions_mapper.dart';
 
 void main() {
+  final timestamp = DateTime.parse('2026-05-12T10:00:00.000Z');
+
   group('NetworkException', () {
     test(
       'given a NetworkException when toString is called then returns a '
@@ -56,8 +58,11 @@ void main() {
             requestOptions: RequestOptions(path: '/test'),
             statusCode: 409,
             data: {
+              'statusCode': 409,
               'message': 'Database error',
-              'code': '23505',
+              'code': 'conflict',
+              'path': '/test',
+              'timestamp': timestamp.toIso8601String(),
             },
           ),
         );
@@ -75,7 +80,10 @@ void main() {
           throwsA(
             isA<ServerException>()
                 .having((e) => e.message, 'message', 'Database error')
-                .having((e) => e.code, 'code', '23505'),
+                .having((e) => e.code, 'code', 'conflict')
+                .having((e) => e.statusCode, 'statusCode', 409)
+                .having((e) => e.path, 'path', '/test')
+                .having((e) => e.timestamp, 'timestamp', timestamp),
           ),
         );
       },
@@ -116,7 +124,7 @@ void main() {
 
     test(
       'given an unknown exception when guardRemoteDataSourceCall is invoked '
-      'then throws ServerException',
+      'then throws UnexpectedException',
       () async {
         // Arrange
         final exception = Exception('Something weird');
@@ -132,7 +140,7 @@ void main() {
         await expectLater(
           act,
           throwsA(
-            isA<ServerException>().having(
+            isA<UnexpectedException>().having(
               (e) => e.message,
               'message',
               exception.toString(),

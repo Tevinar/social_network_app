@@ -7,6 +7,7 @@
     "**/lib/app/router/**",
     "**/lib/app/media/**",
     "**/lib/core/config/**",
+    "**/lib/core/errors/**",
     "**/lib/core/local_database/**",
     "**/lib/core/network/**",
     "**/lib/core/services/**",

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:social_app/core/errors/exceptions.dart';
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/errors/failures_mapper.dart';
 
@@ -17,17 +18,25 @@ void main() {
 
         // Assert
         expect(failure, isA<NetworkFailure>());
-        expect(failure.message, 'No internet connection.');
+        expect(
+          failure.message,
+          'Unable to reach the server. Check your connection and try again.',
+        );
         expect(failure.debugMessage, 'debug message');
       },
     );
 
     test(
-      'given a ServerException with 401 when mapExceptionToFailure is called '
+      'given a ServerException with unauthorized code when '
+      'mapExceptionToFailure is called '
       'then returns UnauthorizedFailure',
       () {
         // Arrange
-        const error = ServerException(message: 'Token expired', code: '401');
+        final error = _serverException(
+          message: 'Token expired',
+          code: 'unauthorized',
+          statusCode: 401,
+        );
 
         // Act
         final failure = mapExceptionToFailure(error);
@@ -43,25 +52,31 @@ void main() {
     );
 
     test(
-      'given a ServerException with 403 when mapExceptionToFailure is called '
-      'then returns UnauthorizedFailure',
+      'given a ServerException with forbidden code when '
+      'mapExceptionToFailure is called then returns ForbiddenFailure',
       () {
-        const error = ServerException(message: 'Forbidden', code: '403');
+        final error = _serverException(
+          message: 'Forbidden',
+          code: 'forbidden',
+          statusCode: 403,
+        );
 
         final failure = mapExceptionToFailure(error);
 
-        expect(failure, isA<UnauthorizedFailure>());
+        expect(failure, isA<ForbiddenFailure>());
       },
     );
 
     test(
-      'given a ServerException with 404 when mapExceptionToFailure is called '
+      'given a ServerException with not_found code when '
+      'mapExceptionToFailure is called '
       'then returns NotFoundFailure',
       () {
         // Arrange
-        const error = ServerException(
+        final error = _serverException(
           message: 'Resource not found',
-          code: '404',
+          code: 'not_found',
+          statusCode: 404,
         );
 
         // Act
@@ -75,45 +90,45 @@ void main() {
     );
 
     test(
-      'given a ServerException with 23505 when mapExceptionToFailure is '
-      'called then returns UnexpectedFailure',
+      'given a ServerException with email_already_in_use when '
+      'mapExceptionToFailure is called then returns ValidationFailure',
       () {
         // Arrange
-        const error = ServerException(
-          message: 'duplicate key value violates unique constraint',
-          code: '23505',
+        final error = _serverException(
+          message: 'Email already exists in persistence',
+          code: 'email_already_in_use',
+          statusCode: 409,
         );
 
         // Act
         final failure = mapExceptionToFailure(error);
 
         // Assert
-        expect(failure, isA<UnexpectedFailure>());
-        expect(failure.message, 'Something went wrong. Please try again.');
-        expect(
-          failure.debugMessage,
-          'duplicate key value violates unique constraint',
-        );
+        expect(failure, isA<ValidationFailure>());
+        expect(failure.message, AuthFailureMessages.emailAlreadyInUse);
+        expect(failure.debugMessage, 'Email already exists in persistence');
       },
     );
 
     test(
-      'given a ServerException with 23502 when mapExceptionToFailure is '
-      'called then returns UnexpectedFailure',
+      'given a ServerException with an unknown code and 400 status when '
+      'mapExceptionToFailure is called then returns ValidationFailure from '
+      'status fallback',
       () {
         // Arrange
-        const error = ServerException(
-          message: 'null value in column',
-          code: '23502',
+        final error = _serverException(
+          message: 'Unrecognized validation payload',
+          code: 'unknown_validation_code',
+          statusCode: 400,
         );
 
         // Act
         final failure = mapExceptionToFailure(error);
 
         // Assert
-        expect(failure, isA<UnexpectedFailure>());
-        expect(failure.message, 'Something went wrong. Please try again.');
-        expect(failure.debugMessage, 'null value in column');
+        expect(failure, isA<ValidationFailure>());
+        expect(failure.message, CommonFailureMessages.invalidRequest);
+        expect(failure.debugMessage, 'Unrecognized validation payload');
       },
     );
 
@@ -122,9 +137,10 @@ void main() {
       'mapExceptionToFailure is called then returns UnexpectedFailure',
       () {
         // Arrange
-        const error = ServerException(
+        final error = _serverException(
           message: 'Weird backend error',
           code: '99999',
+          statusCode: 500,
         );
 
         // Act
@@ -134,6 +150,21 @@ void main() {
         expect(failure, isA<UnexpectedFailure>());
         expect(failure.message, 'Something went wrong. Please try again.');
         expect(failure.debugMessage, 'Weird backend error');
+      },
+    );
+
+    test(
+      'given an InvalidResponseException when mapExceptionToFailure is called '
+      'then returns UnexpectedFailure',
+      () {
+        const error = InvalidResponseException(
+          message: 'Response body is missing',
+        );
+
+        final failure = mapExceptionToFailure(error);
+
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.debugMessage, 'Response body is missing');
       },
     );
 
@@ -154,4 +185,18 @@ void main() {
       },
     );
   });
+}
+
+ServerException _serverException({
+  required String message,
+  required String code,
+  required int statusCode,
+}) {
+  return ServerException(
+    message: message,
+    code: code,
+    statusCode: statusCode,
+    path: '/test',
+    timestamp: DateTime.parse('2026-05-12T10:00:00.000Z'),
+  );
 }

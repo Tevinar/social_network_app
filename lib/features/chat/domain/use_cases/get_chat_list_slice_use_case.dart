@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:social_app/core/errors/failure_messages.dart';
 import 'package:social_app/core/errors/failures.dart';
 import 'package:social_app/core/use_case_interfaces/use_case.dart';
 import 'package:social_app/features/chat/domain/pagination/chat_list_slice.dart';
@@ -21,7 +22,7 @@ class GetChatListSliceUseCase
   ) {
     if (params.limit <= 0) {
       return Future.value(
-        left(const ValidationFailure('Limit must be greater than zero')),
+        left(const ValidationFailure(CommonFailureMessages.invalidLimit)),
       );
     }
 

@@ -3,7 +3,7 @@ name: Release Validation
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 concurrency:
   group: release-validation-${{ github.ref }}
@@ -23,7 +23,7 @@ jobs:
 
       # Install the Flutter SDK on the runner.
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.41.6
@@ -46,7 +46,7 @@ jobs:
 
       # Install the Flutter SDK on the runner.
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.41.6

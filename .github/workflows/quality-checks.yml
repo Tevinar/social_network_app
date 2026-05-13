@@ -4,7 +4,7 @@ name: Quality Checks
 concurrency:
   group: quality-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-  
+
 # Grant the workflow read-only access to repository contents.
 permissions:
   # Allow the workflow to read the source code and metadata from the repository.
@@ -29,7 +29,11 @@ jobs:
     steps:
       # Download the repository code into the runner
       - name: Checkout repository
+        # Use the official GitHub checkout action to clone the repository into the runner.
         uses: actions/checkout@v5
+        with:
+          # Fetch the full Git history to improve SonarQube analysis relevance and PR comparison accuracy.
+          fetch-depth: 0
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
@@ -62,9 +66,18 @@ jobs:
       - name: Run static analysis
         run: flutter analyze
 
-      # Run unit and widget tests
-      - name: Run tests
-        run: flutter test
+      # Run unit and widget tests with coverage enabled to generate the LCOV report used by SonarQube.
+      - name: Run tests with coverage
+        # Generate the coverage/lcov.info report expected by SonarQube Cloud.
+        run: flutter test --coverage
+
+      # Launch the SonarQube Cloud scan for this repository and this commit/PR.
+      - name: Run SonarQube scan
+        # Use the official SonarQube scan action to send analysis data to SonarQube Cloud.
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          # Provide the authentication token stored in GitHub Actions secrets to authorize the scan.
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # Verify that the project can successfully compile into an Android app
   android-build:

@@ -37,7 +37,7 @@ jobs:
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.41.6
@@ -74,7 +74,7 @@ jobs:
       # Launch the SonarQube Cloud scan for this repository and this commit/PR.
       - name: Run SonarQube scan
         # Use the official SonarQube scan action to send analysis data to SonarQube Cloud.
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432 # v8.0.0
         env:
           # Provide the authentication token stored in GitHub Actions secrets to authorize the scan.
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.41.6
@@ -116,7 +116,7 @@ jobs:
 
       # Install Flutter and make Flutter commands available in the next steps
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.41.6

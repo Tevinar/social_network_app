@@ -129,7 +129,7 @@ class BlogViewerPage extends StatelessWidget {
       return Container(
         height: 220,
         alignment: Alignment.center,
-        child: const Text('Image unavailable offline'),
+        child: const Text('Image unavailable'),
       );
     } else {
       return Image(
